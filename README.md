@@ -18,11 +18,11 @@ Ambrose is built using the following front-end technologies:
 * [Bootstrap](http://twitter.github.com/bootstrap/) - For layout and CSS support
 
 Ambrose is designed to support any Hadoop workflow runtime, but current support is limited to
-[Apache Pig](http://pig.apache.com/).
+[Apache Pig](http://pig.apache.org/).
 
 ## Supported runtimes
 
-* [Pig](http://pig.apache.com/) - See [pig/README.md](ambrose/blob/master/pig/README.md)
+* [Pig](http://pig.apache.org/) - See [pig/README.md](ambrose/blob/master/pig/README.md)
 * [Cascading](http://www.cascading.org/) - future work
 * [Scalding](https://github.com/twitter/scalding) - future work
 
