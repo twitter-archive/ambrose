@@ -25,7 +25,8 @@ Ambrose is designed to support any Hadoop workflow runtime, but current support 
 * [Pig](http://pig.apache.org/) - See [pig/README.md](ambrose/blob/master/pig/README.md)
 * [Cascading](http://www.cascading.org/) - future work
 * [Scalding](https://github.com/twitter/scalding) - future work
-
+* [Cascalog](https://github.com/nathanmarz/cascalog) - future work
+                                                  - 
 ## Examples
 
 Below is a screenshot of the Ambrose UI. Each arc segment on the circle represents a map-reduce job.
