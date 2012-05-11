@@ -53,8 +53,8 @@ cd ambrose
 
 Next, you can try running the Ambrose demo on your local machine. The `ambrose-demo` script starts a
 local instance of the Ambrose app server with sample data. Start the demo Abrose server with the
-following command and then brose to
-[http://localhost:8080/web/?localdata=small](http://localhost:8080/web/?localdata=small):
+following command and then browse to
+[http://localhost:8080/web/index.html?localdata=small](http://localhost:8080/web/index.html?localdata=small):
 
 ```
 ./bin/ambrose-demo

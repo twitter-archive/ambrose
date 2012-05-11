@@ -218,6 +218,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
     // then for each running job, we report the job progress
     for (DAGNode node : dagNodeNameMap.values()) {
+      // don't send progress events for unstarted jobs
+      if (node.getJobId() == null) { continue; }
+
       Map<String, String> progressMap = buildJobStatusMap(node.getJobId());
 
       //only push job progress events for a completed job once
