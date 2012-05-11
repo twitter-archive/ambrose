@@ -54,7 +54,7 @@ cd ambrose
 Next, you can try running the Ambrose demo on your local machine. The `ambrose-demo` script starts a
 local instance of the Ambrose app server with sample data. Start the demo Abrose server with the
 following command and then brose to
-[http://localhost:8080/index.html?localdata=small](http://localhost:8080/index.html?localdata=small):
+[http://localhost:8080/web/?localdata=small](http://localhost:8080/web/?localdata=small):
 
 ```
 ./bin/ambrose-demo
@@ -76,7 +76,7 @@ cd ambrose-0.1-SNAPSHOT
 ./bin/pig-ambrose -f path/to/my/script.pig
 ```
 
-Now, browse to [http://localhost:8080/](http://localhost:8080/) to see the progress of you script
+Now, browse to [http://localhost:8080/web/](http://localhost:8080/web/) to see the progress of you script
 using the Ambrose UI. To override the default port, export `AMBROSE_PORT` before invoking `pig-ambrose`:
 
 ```
