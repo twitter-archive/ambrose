@@ -85,7 +85,7 @@ export AMBROSE_PORT=4567
 
 ## Maven repository
 
-An initial release will be pushed to Maven shortly.
+An initial release will be pushed to the Maven repository shortly.
 
 ## How to contribute
 
