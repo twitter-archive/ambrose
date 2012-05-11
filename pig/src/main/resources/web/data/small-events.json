@@ -1,7 +1,7 @@
 [ {
   "timestamp" : 1334796068907,
   "eventId" : 1,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "0"
   }
@@ -34,7 +34,7 @@
 }, {
   "timestamp" : 1334796086412,
   "eventId" : 4,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "16"
   }
@@ -56,7 +56,7 @@
 }, {
   "timestamp" : 1334796109947,
   "eventId" : 6,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "33"
   }
@@ -333,7 +333,7 @@
 }, {
   "timestamp" : 1334796139113,
   "eventId" : 11,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "50"
   }
@@ -370,7 +370,7 @@
 }, {
   "timestamp" : 1334796159554,
   "eventId" : 14,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "66"
   }
@@ -633,7 +633,7 @@
 }, {
   "timestamp" : 1334796193096,
   "eventId" : 20,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "83"
   }
@@ -893,7 +893,7 @@
 }, {
   "timestamp" : 1334796221429,
   "eventId" : 25,
-  "eventType" : "SCRIPT_PROGRESS",
+  "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
     "scriptProgress" : "100"
   }
