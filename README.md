@@ -1,6 +1,6 @@
 # Ambrose [![Build Status](https://secure.travis-ci.org/twitter/ambrose.png)](http://travis-ci.org/twitter/ambrose)
 
-Twitter Ambrose is a platform for visualization and real-time monitoring of Map Reduce data workflows.
+Twitter Ambrose is a platform for visualization and real-time monitoring of MapReduce data workflows.
 It presents a global view of all the map-reduce jobs derived from your workflow after planning and
 optimization. As jobs are submitted for execution on your Hadoop cluster, Ambrose updates its
 visualization to reflect the latest job status, polled from your process.
