@@ -1,0 +1,19 @@
+[ {
+  "name" : "scope-44",
+  "aliases" : [ "JOINED", "L", "R" ],
+  "jobId" : "job_201204041958_199287",
+  "features" : [ "HASH_JOIN" ],
+  "successorNames" : [ "scope-48" ]
+}, {
+  "name" : "scope-48",
+  "aliases" : [ "ORDERED" ],
+  "jobId" : "job_201204041958_199293",
+  "features" : [ "SAMPLER" ],
+  "successorNames" : [ "scope-63" ]
+}, {
+  "name" : "scope-63",
+  "aliases" : [ "ORDERED" ],
+  "jobId" : "job_201204041958_199296",
+  "features" : [ "ORDER_BY" ],
+  "successorNames" : [ ]
+} ]

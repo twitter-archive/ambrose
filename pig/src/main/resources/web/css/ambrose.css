@@ -1,0 +1,25 @@
+#chart {
+  text-align: center;
+}
+
+path.arc {
+}
+
+path.chord {
+  fill-opacity: .67;
+}
+
+#job-props {
+}
+
+#job-summary {
+    width: 100%;
+}
+
+.row-job-mappers {
+    white-space: nowrap;
+}
+
+.row-job-reducers {
+    white-space: nowrap;
+}
