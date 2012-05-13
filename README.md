@@ -26,7 +26,7 @@ Ambrose is designed to support any Hadoop workflow runtime, but current support 
 * [Cascading](http://www.cascading.org/) - future work
 * [Scalding](https://github.com/twitter/scalding) - future work
 * [Cascalog](https://github.com/nathanmarz/cascalog) - future work
-                                                  - 
+
 ## Examples
 
 Below is a screenshot of the Ambrose UI. Each arc segment on the circle represents a map-reduce job.
@@ -66,14 +66,15 @@ Ambrose distribution and untar it:
 
 ```
 ./bin/ambrose-package
-tar zxvf ambrose-0.1-SNAPSHOT.tar.gz
+VERSION=0.1.0-SNAPSHOT
+tar zxvf ambrose-$VERSION.tar.gz
 ```
 
 You can then run the following commands to execute `path/to/my/script.pig` with an Ambrose app server
 embedded in the Pig client:
 
 ```
-cd ambrose-0.1-SNAPSHOT
+cd ambrose-$VERSION
 ./bin/pig-ambrose -f path/to/my/script.pig
 ```
 
