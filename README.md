@@ -26,6 +26,7 @@ Ambrose is designed to support any Hadoop workflow runtime, but current support 
 * [Cascading](http://www.cascading.org/) - future work
 * [Scalding](https://github.com/twitter/scalding) - future work
 * [Cascalog](https://github.com/nathanmarz/cascalog) - future work
+* [Hive](http://hive.apache.org/) - future work
 
 ## Examples
 
