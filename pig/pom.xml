@@ -27,6 +27,12 @@
   </repositories>
 
   <dependencies>
+    <!-- ambrose -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ambrose-client</artifactId>
+    </dependency>
+
     <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
@@ -43,10 +49,20 @@
       <artifactId>slf4j-simple</artifactId>
     </dependency>
 
-    <!-- pig runtime -->
+    <!-- pig -->
     <dependency>
       <groupId>org.apache.pig</groupId>
       <artifactId>pig</artifactId>
+    </dependency>
+
+    <!-- web -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.aggregate</groupId>
+      <artifactId>jetty-webapp</artifactId>
     </dependency>
 
     <!-- hadoop -->
@@ -61,4 +77,27 @@
       <version>1.0</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
