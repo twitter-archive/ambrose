@@ -1,0 +1,64 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  <id>bin</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+
+  <fileSets>
+    <!-- scripts -->
+    <fileSet>
+      <directory>src/main/scripts</directory>
+      <outputDirectory>bin</outputDirectory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>*</include>
+      </includes>
+    </fileSet>
+
+    <!-- demo -->
+    <fileSet>
+      <directory>src/main/demo</directory>
+      <outputDirectory>demo</outputDirectory>
+      <includes>
+        <include>*</include>
+      </includes>
+    </fileSet>
+
+    <!-- documentation from parent -->
+    <fileSet>
+      <directory>${project.basedir}/..</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>README*</include>
+        <include>LICENSE*</include>
+        <include>NOTICE*</include>
+        <include>docs/**/*</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
+  <files>
+    <!-- documentation -->
+    <file>
+      <source>README.md</source>
+      <outputDirectory>/</outputDirectory>
+      <destName>README-PIG.md</destName>
+    </file>
+  </files>
+
+  <!-- jars -->
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <includes>
+        <include>*:ambrose-client</include>
+        <include>*:ambrose-pig</include>
+        <include>org.apache.pig:pig</include>
+        <include>org.eclipse.jetty.aggregate:jetty-webapp</include>
+      </includes>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+    </dependencySet>
+  </dependencySets>
+</assembly>

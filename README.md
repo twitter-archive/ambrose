@@ -63,19 +63,18 @@ following command and then browse to
 ```
 
 Finally, you can run Ambrose with an actual Pig script. To do so, you'll need to build the
-Ambrose distribution and untar it:
+Ambrose Pig distribution and untar it:
 
 ```
-./bin/ambrose-package
-VERSION=0.1.0-SNAPSHOT
-tar zxvf ambrose-$VERSION.tar.gz
+mvn package
+tar zxvf pig/target/ambrose-pig-$VERSION-bin.tar.gz
 ```
 
 You can then run the following commands to execute `path/to/my/script.pig` with an Ambrose app server
 embedded in the Pig client:
 
 ```
-cd ambrose-$VERSION
+cd ambrose-pig-$VERSION
 ./bin/pig-ambrose -f path/to/my/script.pig
 ```
 
