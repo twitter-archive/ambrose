@@ -67,18 +67,18 @@ public class EmbeddedAmbrosePigProgressNotificationListener
     String sleepTime = System.getProperty(POST_SCRIPT_SLEEP_SECS_PARAM, "10");
 
     try {
-      int sleepTimeInt = Integer.parseInt(sleepTime) * 1000;
+      int sleepTimeSeconds = Integer.parseInt(sleepTime);
       // if sleep time is long, display stats so users watching std out can tell things are done.
       // if sleep time is short though, don't bother, since they'll get displayed by Pig after the
       // sleep.
-      if (sleepTimeInt > 10) {
+      if (sleepTimeSeconds > 10) {
         PigStatsUtil.displayStatistics();
       }
 
-      log.info("Job complete but sleeping for " + sleepTimeInt
+      log.info("Job complete but sleeping for " + sleepTimeSeconds
         + " seconds to keep the PigStats REST server running. Hit ctrl-c to exit.");
       service.writeJsonToDisk();
-      Thread.sleep(sleepTimeInt);
+      Thread.sleep(sleepTimeSeconds * 1000);
       server.stop();
 
     } catch (NumberFormatException e) {

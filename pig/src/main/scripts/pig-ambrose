@@ -29,10 +29,10 @@ AMBROSE_HOME="${AMBROSE_HOME:-$(dirname "$0")/..}"
 AMBROSE_PORT="${AMBROSE_PORT:-8080}"
 
 # configure paths
-PIG_CLASSPATH=\
+export PIG_CLASSPATH=\
 $(find "$AMBROSE_HOME/lib" -name '*.jar' -exec printf '%s:' '{}' '+')\
 "$PIG_CLASSPATH"
-export PIG_CLASSPATH="${PIG_CLASSPATH%%:}"
+export HADOOP_USER_CLASSPATH_FIRST="true"
 
 # configure the ambrose pig notification listener and port
 export PIG_OPTS="\

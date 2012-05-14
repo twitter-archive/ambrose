@@ -6,6 +6,32 @@
     <format>tar.gz</format>
   </formats>
 
+  <!-- ambrose-core jar and runtime dependencies -->
+  <moduleSets>
+    <moduleSet>
+      <useAllReactorProjects>true</useAllReactorProjects>
+      <includes>
+        <include>com.twitter.ambrose:ambrose-core</include>
+      </includes>
+      <binaries>
+        <outputDirectory>lib</outputDirectory>
+        <unpack>false</unpack>
+        <dependencySets>
+          <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+              <include>org.slf4j:slf4j-api</include>
+              <include>org.slf4j:slf4j-simple</include>
+              <include>org.eclipse.jetty.orbit:javax.servlet</include>
+              <include>org.eclipse.jetty.aggregate:jetty-webapp</include>
+            </includes>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+          </dependencySet>
+        </dependencySets>
+      </binaries>
+    </moduleSet>
+  </moduleSets>
+
   <fileSets>
     <!-- scripts -->
     <fileSet>
@@ -48,15 +74,12 @@
     </file>
   </files>
 
-  <!-- jars -->
+  <!-- ambrose-pig jar -->
   <dependencySets>
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
       <includes>
-        <include>*:ambrose-client</include>
-        <include>*:ambrose-pig</include>
-        <include>org.apache.pig:pig</include>
-        <include>org.eclipse.jetty.aggregate:jetty-webapp</include>
+        <include>com.twitter.ambrose:ambrose-pig</include>
       </includes>
       <useTransitiveDependencies>false</useTransitiveDependencies>
     </dependencySet>

@@ -54,6 +54,7 @@ import java.util.TreeMap;
  * embedded Abrose web server from Pig client process.
  *
  */
+@SuppressWarnings("deprecation")
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
   protected Log log = LogFactory.getLog(getClass());
 

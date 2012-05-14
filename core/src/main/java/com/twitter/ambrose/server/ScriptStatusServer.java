@@ -55,10 +55,10 @@ import java.util.List;
  * @author billg
  */
 public class ScriptStatusServer implements Runnable {
-  protected Log LOG = LogFactory.getLog(getClass());
+  private static final Logger LOG = LoggerFactory.getLogger(ScriptStatusServer.class);
 
   private static final String SLASH = "/";
-  private static final String ROOT_PATH = "web";
+  private static final String WEB_RESOURCES_PATH = "web";
   private static final String QUERY_PARAM_WORKFLOW_ID = "workflowId";
   private static final String QUERY_PARAM_SINCE = "sinceId";
 
@@ -93,7 +93,7 @@ public class ScriptStatusServer implements Runnable {
   public void start() {
     try {
       LOG.info(String.format("Starting ambrose web server on port %s. "
-        + "Browse to http://localhost:%s/web to see job progress.", port, port));
+        + "Browse to http://localhost:%s/ to see job progress.", port, port));
       serverThread = new Thread(this);
       serverThread.setDaemon(true);
       serverThread.start();
@@ -110,10 +110,11 @@ public class ScriptStatusServer implements Runnable {
 
     server = new Server(port);
 
-    //this needs to be loaded via the jared resources, not the relative dir
-    URL resourcesUrl = this.getClass().getClassLoader().getResource(ROOT_PATH);
-    server.addHandler(new APIHandler());
-    server.addHandler(new WebAppContext(resourcesUrl.toExternalForm(), SLASH));
+    // this needs to be loaded via the jar'ed resources, not the relative dir
+    URL resourcesUrl = this.getClass().getClassLoader().getResource(WEB_RESOURCES_PATH);
+    HandlerList handler = new HandlerList();
+    handler.setHandlers(new Handler[]{new APIHandler(), new WebAppContext(resourcesUrl.toExternalForm(), SLASH)});
+    server.setHandler(handler);
     server.setStopAtShutdown(false);
 
     try {
@@ -138,16 +139,9 @@ public class ScriptStatusServer implements Runnable {
   }
 
   public class APIHandler extends AbstractHandler {
-
     @Override
-    public void handle(String target, HttpServletRequest request,
-                       HttpServletResponse response, int distpatch) throws IOException, ServletException {
-      if (target.equals(SLASH)) {
-        response.sendRedirect(SLASH + ROOT_PATH);
-        setHandled(request);
-        return;
-      }
-
+    public void handle(String target, Request baseRequest, HttpServletRequest request,
+        HttpServletResponse response) throws IOException, ServletException {
       if (target.endsWith("/dag")) {
         response.setContentType(MIME_TYPE_JSON);
         response.setStatus(HttpServletResponse.SC_OK);
@@ -188,7 +182,7 @@ public class ScriptStatusServer implements Runnable {
 
   private static void setHandled(HttpServletRequest request) {
     Request base_request = (request instanceof Request) ?
-        (Request)request : HttpConnection.getCurrentConnection().getRequest();
+        (Request)request : AbstractHttpConnection.getCurrentConnection().getRequest();
     base_request.setHandled(true);
   }
 }

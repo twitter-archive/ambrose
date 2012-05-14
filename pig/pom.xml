@@ -11,9 +11,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose-pig</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
   <name>Ambrose Pig</name>
 
   <repositories>
@@ -30,7 +28,7 @@
     <!-- ambrose -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>ambrose-client</artifactId>
+      <artifactId>ambrose-core</artifactId>
     </dependency>
 
     <!-- testing -->
@@ -47,6 +45,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+    </dependency>
+
+    <!-- utils -->
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
     </dependency>
 
     <!-- pig -->
@@ -69,12 +73,6 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapred</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-      <version>1.0</version>
     </dependency>
   </dependencies>
 
