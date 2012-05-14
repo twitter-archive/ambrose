@@ -14,7 +14,7 @@ Ambrose provides the following in a web UI:
 
 Ambrose is built using the following front-end technologies:
 
-* [d3.js](http://d3js.org) - For chord diagram visualization
+* [D3.js](http://d3js.org) - For chord diagram visualization
 * [Bootstrap](http://twitter.github.com/bootstrap/) - For layout and CSS support
 
 Ambrose is designed to support any Hadoop workflow runtime, but current support is limited to
@@ -62,7 +62,7 @@ cd ambrose
 Next, you can try running the Ambrose demo on your local machine. The `ambrose-demo` script starts a
 local instance of the Ambrose app server with sample data. Start the demo Abrose server with the
 following command and then browse to
-[http://localhost:8080/web/index.html?localdata=small](http://localhost:8080/web/index.html?localdata=small):
+[http://localhost:8080/index.html?localdata=small](http://localhost:8080/index.html?localdata=small):
 
 ```
 ./bin/ambrose-demo
