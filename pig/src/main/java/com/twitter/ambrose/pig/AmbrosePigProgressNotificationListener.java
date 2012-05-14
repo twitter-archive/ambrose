@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  * PigProgressNotificationListener that collects plan and job information from within a Pig runtime,
@@ -60,7 +61,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
   private String workflowVersion;
   private List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
-  private Map<String, DAGNode> dagNodeNameMap = new HashMap<String, DAGNode>();
+  private Map<String, DAGNode> dagNodeNameMap = new TreeMap<String, DAGNode>();
 
   private HashSet<String> completedJobIds = new HashSet<String>();
 
