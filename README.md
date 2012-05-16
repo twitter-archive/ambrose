@@ -35,10 +35,14 @@ Follow [@Ambrose](https://twitter.com/ambrose) on Twitter to stay in touch!
 Below is a screenshot of the Ambrose UI. Each arc segment on the circle represents a map-reduce job.
 Dependencies between jobs are represented by chords which connect job arc segments.
 Grey jobs have not yet run, bright green jobs are running and light green jobs are completed.
+When the mouse hovers over a job, its arc and input dependencies are highlighted blue. Clicking on
+the job will select it, updating the contents of the table to the right of the diagram with
+information about the selected job.
 
 Note that Each job arc is bisected; Chords on one half of the arc connect to predecessor jobs while
-chords on the other half connect to successor jobs. For example, in the diagram below Jobs 10 and 13
-have no predecessors and Jobs 8 and 18 are the final jobs in the Pig workflow.
+chords on the other half connect to successor jobs. For example, in the diagram below jobs 1 and 3
+have no predecessors while jobs 16, 20, 21, and 22 have no successors (their outputs represent the
+final result of this workflow).
 
 Note that the chord diagram shown is our first pass at visualizing the workflow, and there's room
 for improvement. We'd like to support other visualizations as well, like a graph of the workflow DAG.
