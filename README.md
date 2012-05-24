@@ -85,7 +85,7 @@ cd ambrose-$VERSION
 ./bin/pig-ambrose -f path/to/my/script.pig
 ```
 
-Now, browse to [http://localhost:8080/web/](http://localhost:8080/web/) to see the progress of you script
+Now, browse to [http://localhost:8080/web/](http://localhost:8080/web/) to see the progress of your script
 using the Ambrose UI. To override the default port, export `AMBROSE_PORT` before invoking `pig-ambrose`:
 
 ```
