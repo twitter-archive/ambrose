@@ -116,8 +116,20 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/d3-2.9.1.min.js"></script>
     <script src="js/colorbrewer.js"></script>
-    <!--<script src="js/ambrose.js"></script>-->
     <script src="js/ambrose-ui.js"></script>
+    <script src="js/ambrose-chord.js"></script>
+    <script src="js/ambrose-table.js"></script>
+    <script src="js/ambrose-detail-pane.js"></script>
+    <script type="text/javascript">
+        var ui = new AMBROSE.ui();
+        new AMBROSE.chord(ui);
+        new AMBROSE.detailView(ui);
+        new AMBROSE.tableView(ui);
+
+        $(document).ready(function() {
+          $(ui).initialize();
+        });
+    </script>
 
   </body>
 </html>
