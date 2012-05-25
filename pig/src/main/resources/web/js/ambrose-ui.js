@@ -45,6 +45,8 @@ AMBROSE.ui = function(name, age) {
   var url = window.location.href;
 
   var jobs = [];
+  var selectedJob;
+  var jobsByName = {}, jobsByJobId = {}, indexByName = {}, nameByIndex = {};
   var scriptProgress = 0;
 
   var loadDagIntervalId, pollIntervalId;
@@ -65,16 +67,11 @@ AMBROSE.ui = function(name, age) {
   }
 
   $.fn.initialize = function() {
-    hideJobDialog();
     loadDagTimeoutId = setTimeout('$(ui).loadDag()', 500);
   }
 
-  function hideJobDialog() {
-    $('.InnerRight').hide();
-  }
-
   /**
-   * Retrieves snapshot of current DAG of scopes from back end.
+   * Retrieves snapshot of current DAG of scopes from the server
    */
   $.fn.loadDag = function() {
     // load dag data and initialize
@@ -84,6 +81,9 @@ AMBROSE.ui = function(name, age) {
         return;
       }
       jobs = data;
+
+      buildJobIndex(jobs);
+
       $(ui).trigger( "dagLoaded", {"jobs": jobs} );
       $(ui).trigger( "jobSelected", {"job": jobs[0], "jobs": jobs} );
       clearTimeout(loadDagIntervalId);
@@ -103,23 +103,31 @@ AMBROSE.ui = function(name, age) {
 
   // select a job
   $.fn.selectJob = function(job) {
-    this.selectedJob = job;
-    $( ui ).trigger( "jobSelected", {"job": job, "jobs": jobs} );
+    selectedJob = job;
+    $(ui).trigger( "jobSelected", {"job": job} );
   }
 
   // get the selected job
-  $.fn.selectedJob = function(job) {
-    return this.selectedJob;
+  $.fn.selectedJob = function() {
+    return selectedJob;
+  }
+
+  // get the selected job
+  $.fn.totalJobs = function() {
+    return jobs.length;
   }
 
   // is job selected?
   $.fn.isSelected = function(job) {
-    return job === this.jobSelected;
+    return job === selectedJob;
   }
 
+  // display an error
   $.fn.error = function(msg) {
     d3.select('#scriptStatusDialog').text(msg);
   }
+
+  // display info
   $.fn.info = function(msg) {
     d3.select('#scriptStatusDialog').text(msg);
   }
@@ -143,7 +151,7 @@ AMBROSE.ui = function(name, age) {
 
     // stop polling for events if all jobs are done
     if (scriptDone) {
-      info("script finished");
+      $(ui).info("script finished");
       $(ui).stopEventPolling();
       return;
     }
@@ -168,12 +176,66 @@ AMBROSE.ui = function(name, age) {
           if (eventId <= lastProcessedEventId || eventsHandledCount > 0) {
               return;
           }
-          var eventType = event.eventType;
-          $(ui).trigger( eventType, {"event": event} );
+
+          if (!event.eventData || !event.eventType) {
+            $(ui).error("Invalid event data returned from the server: " + event);
+            return;
+          }
+
+          var data = {"event": event};
+          if (event.eventType.indexOf('JOB_') == 0) {
+            // job complete and job failed return a jobData object
+            if (event.eventData.jobId == null && event.eventData.jobData.jobId != null) {
+              event.eventData.jobId = event.eventData.jobData.jobId;
+            }
+            data["job"] = updateJobData(event.eventData);
+          }
+
+          $(ui).trigger( event.eventType, data);
           lastProcessedEventId = eventId;
           eventsHandledCount++;
       });
     });
+  }
+
+  function buildJobIndex(jobs) {
+    // Compute a unique index for each job name
+    n = 0;
+    jobs.forEach(function(job) {
+      jobsByName[job.name] = job;
+      if (!(job.name in indexByName)) {
+        nameByIndex[n] = job.name;
+        indexByName[job.name] = job.index = n++;
+      }
+    });
+  }
+
+  /**
+   * Looks up job with data.name or data.jobId and updates contents of job with
+   * fields from data.
+   */
+  function updateJobData(data) {
+    // get job associated with data
+    var job, id;
+    if (data.name != null) {
+      id = data.name;
+      job = jobsByName[id];
+    } else {
+      id = data.jobId;
+      job = jobsByJobId[id];
+    }
+
+    // check for job retrieval failure
+    if (job == null) {
+      alert("Job with id '" + id + "' not found");
+      return;
+    }
+
+    // copy data into job
+    $.each(data, function(key, value) {
+      job[key] = value;
+    });
+    return job
   }
 
   // these are the events the ui supports that can be bound to as follows
@@ -183,11 +245,55 @@ AMBROSE.ui = function(name, age) {
 
   // these are the events that are returned from the server that can be bounded to as follows
   // data: { "event": event}
-  $(this).bind( "JOB_STARTED", function(event, data) { });
-  $(this).bind( "JOB_PROGRESS", function(event, data) { });
-  $(this).bind( "JOB_FINISHED", function(event, data) { });
-  $(this).bind( "JOB_FAILED", function(event, data) { });
-  $(this).bind( "WORKFLOW_PROGRESS", function(event, data) { });
+  $(this).bind( "WORKFLOW_PROGRESS", function(event, data) {
+    scriptProgress = data.event.eventData.scriptProgress;
+    $(ui).info('script progress: ' + scriptProgress + '%');
+    $('#progressbar div').width(scriptProgress + '%')
+  });
+
+  // data: { "event": event, "job": job}
+  $(this).bind( "JOB_STARTED", function(event, data) {
+    var job = data.job;
+    if (job == null) return;
+    $(ui).info(job.jobId + ' started');
+    job.jobId = data.event.eventData.jobId;
+    job.status = "RUNNING";
+    jobsByJobId[job.jobId] = job;
+    $(ui).selectJob(job);
+  });
+
+  $(this).bind( "JOB_PROGRESS", function(event, data) {
+    var job = data.job;
+    if (job == null) return;
+    if (job.isComplete == "true") {
+      if (job.isSuccessful == "true") {
+        job.status = "COMPLETE";
+      } else {
+        job.status = "FAILED";
+      }
+    }
+    jobsByJobId[job.jobId] = job;
+  });
+
+  $(this).bind( "JOB_FINISHED", function(event, data) {
+    var job = data.job;
+    if (job == null) return;
+    $(ui).info(job.jobId + ' complete');
+    job.status = "COMPLETE";
+
+//    TODO: Andy, what's this for?
+//    var i = job.index + 1;
+//    if (i < jobs.length) {
+//      $(ui).selectJob(jobs[i]);
+//    }
+  });
+
+  $(this).bind( "JOB_FAILED", function(event, data) {
+    var job = data.job;
+    if (job == null) return;
+    $(ui).info(job.jobId + ' failed');
+    job.status = "FAILED";
+  });
 }
 
 AMBROSE.chord = function(ui) {
@@ -205,6 +311,7 @@ AMBROSE.chord = function(ui) {
 
   // color palette
   var fill, successFill, errorFill;
+  var jobSelectedColor = d3.rgb(98, 196, 98);
 
   // job dependencies are visualized by chords
   var chord, groups, chords;
@@ -482,7 +589,7 @@ AMBROSE.chord = function(ui) {
   /**
    * Select the given job and update global state.
    */
-  $( this.ui ).bind( "jobSelected", function(event, data) {
+  $( this.ui ).bind( "jobSelected,JOB_STARTED", function(event, data) {
     refreshDisplay();
   })
 }
@@ -512,8 +619,10 @@ AMBROSE.detailView = function (ui) {
   /**
    * Select the given job and update global state.
    */
-  $( this.ui ).bind( "jobSelected", function(event, data) {
-    updateJobDialog(data.job, data.jobs.length);
+  $( this.ui ).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
+    if ($(this.ui).isSelected(data.job)) {
+      updateJobDialog(data.job, $(this.ui).totalJobs());
+    }
   })
 }
 
@@ -558,17 +667,17 @@ AMBROSE.tableView = function (ui) {
     loadTable(data.jobs);
   })
 
-  $( this.ui ).bind( "jobSelected", function(event, data) {
+  $( this.ui ).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
     updateTableRow(data.job);
   })
 }
 
 
 // TODO: the code below would be in-line in the HTML
-var ui = new AMBROSE.ui( "Bob", 32 );
-var chordUI = new AMBROSE.chord( ui );
-var detailView = new AMBROSE.detailView( ui );
-var tableView = new AMBROSE.tableView( ui );
+var ui = new AMBROSE.ui();
+new AMBROSE.chord(ui);
+new AMBROSE.detailView(ui);
+new AMBROSE.tableView(ui);
 
 $(document).ready(function() {
   $(ui).initialize();
