@@ -15,11 +15,18 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.type.TypeReference;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Class that represents a Job node in the DAG. The job name must not be null. At DAG creation time
@@ -49,6 +56,19 @@ public class DAGNode {
     this.features = features;
   }
 
+  @JsonCreator
+  public DAGNode(@JsonProperty("name") String name,
+                 @JsonProperty("aliases") String[] aliases,
+                 @JsonProperty("features") String[] features,
+                 @JsonProperty("jobId") String jobId,
+                 @JsonProperty("successorNames") Collection<String> successorNames) {
+    this.name = name;
+    this.aliases = aliases;
+    this.features = features;
+    this.jobId = jobId;
+    this.successorNames = successorNames;
+  }
+
   public String getName() { return name; }
   public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
   public String[] getFeatures() { return features == null ? new String[0] : features; }
@@ -70,4 +90,20 @@ public class DAGNode {
   }
 
   public synchronized Collection<String> getSuccessorNames() { return successorNames; }
+
+  /**
+   * Derializes a JSON List of DAG object into a List&lt;DAGNode>. Unrecognized properties will
+   * be ignored.
+   *
+   * @param dagListJson the string to convert into a JSON object.
+   * @return a List of DAGNode objects.
+   * @throws java.io.IOException
+   */
+  public static List<DAGNode> fromJSONList(String dagListJson) throws IOException {
+    ObjectMapper om = new ObjectMapper();
+    om.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    // not currently setting successors, only successorNames
+    return om.readValue(dagListJson, new TypeReference<List<DAGNode>>() { });
+  }
 }
