@@ -20,6 +20,24 @@ AMBROSE.detailView = function (ui) {
   this.ui = ui;
 
   /**
+   * Initialize an empty table with the expected structure
+   */
+  function initTable() {
+    $('#job-props > thead').empty();
+    $('#job-props > tbody').empty();
+    $('#job-props > thead:last').append(
+      '<tr><th>Property</th><th>Value</th></tr>');
+    $('#job-props > tbody:last').append(
+      '<tr><td>Number</td><td id="job-n-of-n"></td></tr>' +
+      '<tr><td>Job ID</td><td><a id="job-jt-url" target="_blank"></a></td></tr>' +
+      '<tr><td>Status</td><td id="job-status"></td></tr>' +
+      '<tr><td>Aliases</td><td id="job-aliases"></td></tr>' +
+      '<tr><td>Features</td><td id="job-features"></td></tr>' +
+      '<tr><td>Mappers</td><td id="job-mapper-status"></td></tr>' +
+      '<tr><td>Reducers</td><td id="job-reducer-status"></td></tr>');
+  }
+
+  /**
    * Updates table with job data.
    */
   function updateJobDialog(job, totalJobCount) {
@@ -36,6 +54,8 @@ AMBROSE.detailView = function (ui) {
     $('#job-mapper-status').text(AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress));
     $('#job-reducer-status').text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
   }
+
+  initTable();
 
   /**
    * Select the given job and update global state.

@@ -19,6 +19,23 @@ var AMBROSE = window.AMBROSE || {};
 AMBROSE.tableView = function (ui) {
   this.ui = ui;
 
+  /**
+   * Initialize an empty table with the expected structure
+   */
+  function initTable() {
+    $('#job-summary > thead').empty();
+    $('#job-summary > thead:last').append(
+      '<tr>' +
+       '<th></th>' +
+       '<th>Job ID</th>' +
+       '<th>Status</th>' +
+       '<th>Aliases</th>' +
+       '<th>Features</th>' +
+       '<th>Mappers</th>' +
+       '<th>Reducers</th>' +
+      '</tr>');
+  }
+
   function loadTable(jobs) {
     jobs.forEach(function(job) {
       var rowClass = ''
@@ -34,7 +51,7 @@ AMBROSE.tableView = function (ui) {
           '<td class="row-job-feature"/>' +
           '<td class="row-job-mappers"/>' +
           '<td class="row-job-reducers"/>' +
-          '</tr>'
+        '</tr>'
       );
       $('#row-num-' + job.index).bind('click', function() {
         $(this.ui).selectJob(job);
@@ -52,6 +69,8 @@ AMBROSE.tableView = function (ui) {
     $('.row-job-mappers', row).text(AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress));
     $('.row-job-reducers', row).text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
   }
+
+  initTable();
 
   $( this.ui ).bind( "dagLoaded", function(event, data) {
     loadTable(data.jobs);
