@@ -97,39 +97,43 @@
     <script src="js/ambrose-detail-pane.js"></script>
     <script type="text/javascript">
         var ui = new AMBROSE.ui();
-        new AMBROSE.chord(ui);
-        var defaultDetailView = new AMBROSE.detailView(ui);
-        new AMBROSE.tableView(ui);
+        var chordView = new AMBROSE.chord();
+        var defaultDetailView = new AMBROSE.detailView();
+        var defaultTableView = new AMBROSE.tableView();
 
-//        AMBROSE.cascadingDetailView = function () {
-//
-//          /**
-//           * Updates table with job data.
-//           */
-//          $.fn.updateJobDialog = function(job, totalJobCount) {
-//              if (job.index >= 0) {
-//                $('#job-n-of-n').text((job.index + 1) + ' of ' + totalJobCount);
-//              } else {
-//                $('#job-n-of-n').text('');
-//              }
-//              $('#job-jt-url').text('Cascading');
-//              $('#job-aliases').text('Cascading');
-//              $('#job-features').text('Cascading');
-//              $('#job-status').text('Cascading');
-//              $('#job-mapper-status').text('Cascading');
-//              $('#job-reducer-status').text('Cascading');
-//          }
-//
-//          $.fn.supportsJob = function(data) {
-//            return (data.event && data.event.runtimeName == 'cascading') ||
-//                   (data.job && data.job.runtimeName == 'cascading');
-//          }
-//        }
-//        var customDetailView = $.extend({}, AMBROSE.detailView, new AMBROSE.cascadingDetailView(ui))
+        AMBROSE.cascadingDetailView = function () {
+
+          return {
+            /**
+             * Updates table with job data.
+             */
+            updateJobDialog: function(job, totalJobCount) {
+              if (job.index >= 0) {
+                $('#job-n-of-n').text((job.index + 1) + ' of ' + totalJobCount);
+              } else {
+                $('#job-n-of-n').text('');
+              }
+              $('#job-jt-url').text('Cascading');
+              $('#job-aliases').text('Cascading');
+              $('#job-features').text('Cascading');
+              $('#job-status').text('Cascading');
+              $('#job-mapper-status').text('Cascading');
+              $('#job-reducer-status').text('Cascading');
+            },
+
+            supportsJob: function(data) {
+              return (data.event && data.event.runtimeName == 'cascading') ||
+                     (data.job && data.job.runtimeName == 'cascading');
+            }
+          };
+        }
+        var customDetailView = $.extend({}, new AMBROSE.detailView(), new AMBROSE.cascadingDetailView())
 
         $(document).ready(function() {
-          $(defaultDetailView).initializeme(); //TODO: our method names are globally scoped!
-//          $(customDetailView).initializeme();
+          defaultDetailView.init(ui);
+          //customDetailView.init(ui);
+          defaultTableView.init(ui);
+          chordView.init(ui);
           $(ui).initialize();
         });
     </script>

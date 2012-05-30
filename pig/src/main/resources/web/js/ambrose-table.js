@@ -16,78 +16,86 @@ limitations under the License.
 var AMBROSE = window.AMBROSE || {};
 
 // controls the table view of the list of jobs
-AMBROSE.tableView = function (ui) {
-  this.ui = ui;
+AMBROSE.tableView = function () {
+  var ui, view;
 
-  /**
-   * Initialize an empty table with the expected structure
-   */
-  function initTable() {
-    $('#job-summary > thead').empty();
-    $('#job-summary > thead:last').append(
-      '<tr>' +
-       '<th></th>' +
-       '<th>Job ID</th>' +
-       '<th>Status</th>' +
-       '<th>Aliases</th>' +
-       '<th>Features</th>' +
-       '<th>Mappers</th>' +
-       '<th>Reducers</th>' +
-      '</tr>');
-  }
+  // private members and methods above, public below
+  return {
 
-  function loadTable(jobs) {
-    jobs.forEach(function(job) {
-      var rowClass = ''
-      if (job.index % 2 != 0) {
-        rowClass = 'odd'
-      }
-      $('#job-summary tr:last').after(
-        '<tr id="row-num-' + job.index + '">'+
-          '<td class="row-job-num">' + (job.index + 1) + '</td>' +
-          '<td class="row-job-id"><a class="job-jt-url" target="_blank"></a></td>' +
-          '<td class="row-job-status"/>' +
-          '<td class="row-job-alias"/>' +
-          '<td class="row-job-feature"/>' +
-          '<td class="row-job-mappers"/>' +
-          '<td class="row-job-reducers"/>' +
-        '</tr>'
-      );
-      $('#row-num-' + job.index).bind('click', function() {
-        $(this.ui).selectJob(job);
+    /**
+     * Initialize an empty table with the expected structure
+     */
+    initTable: function() {
+      $('#job-summary > thead').empty();
+      $('#job-summary > thead:last').append(
+        '<tr>' +
+         '<th></th>' +
+         '<th>Job ID</th>' +
+         '<th>Status</th>' +
+         '<th>Aliases</th>' +
+         '<th>Features</th>' +
+         '<th>Mappers</th>' +
+         '<th>Reducers</th>' +
+        '</tr>');
+    },
+
+    loadTable: function(jobs) {
+      jobs.forEach(function(job) {
+        var rowClass = ''
+        if (job.index % 2 != 0) {
+          rowClass = 'odd'
+        }
+        $('#job-summary tr:last').after(
+          '<tr id="row-num-' + job.index + '">'+
+            '<td class="row-job-num">' + (job.index + 1) + '</td>' +
+            '<td class="row-job-id"><a class="job-jt-url" target="_blank"></a></td>' +
+            '<td class="row-job-status"/>' +
+            '<td class="row-job-alias"/>' +
+            '<td class="row-job-feature"/>' +
+            '<td class="row-job-mappers"/>' +
+            '<td class="row-job-reducers"/>' +
+          '</tr>'
+        );
+        $('#row-num-' + job.index).bind('click', function() {
+          $(this.ui).selectJob(job);
+        });
+        view.updateTableRow(job);
       });
-      updateTableRow(job);
-    });
-  }
+    },
 
-  function updateTableRow(job) {
-    var row = $('#row-num-' + job.index);
-    $('.job-jt-url', row).text(job.jobId).attr('href', job.trackingUrl);
-    $('.row-job-status', row).text(AMBROSE.util.value(job.status));
-    $('.row-job-alias', row).text(AMBROSE.util.comma_join(job.aliases));
-    $('.row-job-feature', row).text(AMBROSE.util.comma_join(job.features));
-    $('.row-job-mappers', row).text(AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress));
-    $('.row-job-reducers', row).text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
-  }
+    updateTableRow: function(job) {
+      var row = $('#row-num-' + job.index);
+      $('.job-jt-url', row).text(job.jobId).attr('href', job.trackingUrl);
+      $('.row-job-status', row).text(AMBROSE.util.value(job.status));
+      $('.row-job-alias', row).text(AMBROSE.util.comma_join(job.aliases));
+      $('.row-job-feature', row).text(AMBROSE.util.comma_join(job.features));
+      $('.row-job-mappers', row).text(AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress));
+      $('.row-job-reducers', row).text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
+    },
 
-  function supportsJob(data) {
-    return (data.event && data.event.runtimeName == 'pig') ||
-           (data.job && data.job.runtimeName == 'pig') ||
-           (data.jobs && data.jobs[0] && data.jobs[0].runtimeName == 'pig');
-  }
+    supportsJob: function(data) {
+      return (data.event && data.event.runtimeName == 'pig') ||
+             (data.job && data.job.runtimeName == 'pig') ||
+             (data.jobs && data.jobs[0] && data.jobs[0].runtimeName == 'pig');
+    },
 
-  initTable();
+    init: function(ui) {
+      this.ui = ui;
+      view = this;
+      view.initTable();
 
-  $( this.ui ).bind( "dagLoaded", function(event, data) {
-    if (supportsJob(data)) {
-      initTable();
-      loadTable(data.jobs);
+      $(ui).bind( "dagLoaded", function(event, data) {
+        if (view.supportsJob(data)) {
+          view.initTable();
+          view.loadTable(data.jobs);
+        }
+      })
+
+      $(ui).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
+        if (view.supportsJob(data)) {
+          view.updateTableRow(data.job);
+        }
+      })
     }
-  })
-
-  $( this.ui ).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
-    if (supportsJob(data)) {
-      updateTableRow(data.job);
-    }
-  })
+  }
 }

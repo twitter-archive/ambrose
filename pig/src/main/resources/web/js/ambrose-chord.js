@@ -17,7 +17,7 @@ var AMBROSE = window.AMBROSE || {};
 
 // implementation of a chord diagram view of the job graph
 AMBROSE.chord = function(ui) {
-  this.ui = ui;
+  var ui, view;
 
   var jobsByName = {}, indexByName = {}, nameByIndex = {};
   var matrix = [];
@@ -136,180 +136,189 @@ AMBROSE.chord = function(ui) {
     return svg.attr("transform").match(/rotate\(([^\)]+)\)/i)[0];
   }
 
-  function initialize(jobs) {
-    // jobs themselves are arc segments around the edge of the chord diagram
-    var arcMouse = d3.svg.arc()
-      .innerRadius(50)
-      .outerRadius(r0 + 300)
-      .startAngle(groupStartAngle)
-      .endAngle(groupEndAngle);
-    var arc = d3.svg.arc()
-      .innerRadius(r0)
-      .outerRadius(r0 + 10)
-      .startAngle(groupStartAngle)
-      .endAngle(groupEndAngle);
+  // private members and methods above, public below
+  return {
 
-    // set up canvas
-    svg = d3.select("#chart")
-      .append("svg:svg")
-      .attr("width", r1 * 3)
-      .attr("height", r1 * 2)
-      .on('mouseout', handleChartMouseOut)
-      .append("svg:g")
-      .attr("transform", "translate(" + (r1 * 1.5) + "," + r1 + ")rotate(90)")
-      .append("svg:g")
-      .attr("transform", "rotate(0)");
+    initGraph: function(jobs) {
+      // jobs themselves are arc segments around the edge of the chord diagram
+      var arcMouse = d3.svg.arc()
+        .innerRadius(50)
+        .outerRadius(r0 + 300)
+        .startAngle(groupStartAngle)
+        .endAngle(groupEndAngle);
+      var arc = d3.svg.arc()
+        .innerRadius(r0)
+        .outerRadius(r0 + 10)
+        .startAngle(groupStartAngle)
+        .endAngle(groupEndAngle);
 
-    var chord = d3.layout.chord();
+      // set up canvas
+      svg = d3.select("#chart")
+        .append("svg:svg")
+        .attr("width", r1 * 3)
+        .attr("height", r1 * 2)
+        .on('mouseout', handleChartMouseOut)
+        .append("svg:g")
+        .attr("transform", "translate(" + (r1 * 1.5) + "," + r1 + ")rotate(90)")
+        .append("svg:g")
+        .attr("transform", "rotate(0)");
 
-    // initialize color palette
-    var n = jobs.length;
-    if (n > 7) n = 7;
-    fill = d3.scale.ordinal().range(colorbrewer.Greys[n]);
-    successFill = d3.scale.ordinal().range(colorbrewer.Greens[n]);
-    errorFill = d3.scale.ordinal().range(colorbrewer.Reds[n]);
+      var chord = d3.layout.chord();
 
-    // initialize group angle
-    ga = 2 * Math.PI / jobs.length;
-    gap = ga * 0.1;
-    ga2 = (ga - gap) / 2;
+      // initialize color palette
+      var n = jobs.length;
+      if (n > 7) n = 7;
+      fill = d3.scale.ordinal().range(colorbrewer.Greys[n]);
+      successFill = d3.scale.ordinal().range(colorbrewer.Greens[n]);
+      errorFill = d3.scale.ordinal().range(colorbrewer.Reds[n]);
 
-    // update state
-    $(this.ui).selectJob(jobs[0]);
+      // initialize group angle
+      ga = 2 * Math.PI / jobs.length;
+      gap = ga * 0.1;
+      ga2 = (ga - gap) / 2;
 
-    // Compute a unique index for each job name
-    n = 0;
-    jobs.forEach(function(j) {
-      jobsByName[j.name] = j;
-      if (!(j.name in indexByName)) {
-        nameByIndex[n] = j.name;
-        indexByName[j.name] = j.index = n++;
-      }
-    });
+      // update state
+      $(this.ui).selectJob(jobs[0]);
 
-    // Add predecessor and successor index maps to all jobs
-    jobs.forEach(function (j) {
-      j.predecessorIndices = {};
-      j.successorIndices = {};
-    });
-
-    // Construct a square matrix counting dependencies
-    for (var i = -1; ++i < n;) {
-      var row = matrix[i] = [];
-      for (var j = -1; ++j < n;) {
-        row[j] = 0;
-      }
-    }
-    jobs.forEach(function(j) {
-      var p = indexByName[j.name];
-      j.successorNames.forEach(function(n) {
-        var s = indexByName[n];
-        matrix[s][p]++;
-
-        // initialize predecessor and successor indices
-        j.successorIndices[s] = d3.keys(j.successorIndices).length;
-        var sj = jobsByName[n];
-        sj.predecessorIndices[p] = d3.keys(sj.predecessorIndices).length;
+      // Compute a unique index for each job name
+      n = 0;
+      jobs.forEach(function(j) {
+        jobsByName[j.name] = j;
+        if (!(j.name in indexByName)) {
+          nameByIndex[n] = j.name;
+          indexByName[j.name] = j.index = n++;
+        }
       });
-    });
 
-    chord.matrix(matrix);
+      // Add predecessor and successor index maps to all jobs
+      jobs.forEach(function (j) {
+        j.predecessorIndices = {};
+        j.successorIndices = {};
+      });
 
-    // override start and end angles for groups and chords
-    groups = chord.groups();
-    chords = chord.chords();
+      // Construct a square matrix counting dependencies
+      for (var i = -1; ++i < n;) {
+        var row = matrix[i] = [];
+        for (var j = -1; ++j < n;) {
+          row[j] = 0;
+        }
+      }
+      jobs.forEach(function(j) {
+        var p = indexByName[j.name];
+        j.successorNames.forEach(function(n) {
+          var s = indexByName[n];
+          matrix[s][p]++;
 
-    // initialize groups
-    for (var i = 0; i < groups.length; i++) {
-      var d = groups[i];
+          // initialize predecessor and successor indices
+          j.successorIndices[s] = d3.keys(j.successorIndices).length;
+          var sj = jobsByName[n];
+          sj.predecessorIndices[p] = d3.keys(sj.predecessorIndices).length;
+        });
+      });
 
-      // associate group with job
-      d.job = jobs[i];
+      chord.matrix(matrix);
 
-      // angles
-      d.startAngle = groupStartAngle(d);
-      d.endAngle = groupEndAngle(d);
-    }
+      // override start and end angles for groups and chords
+      groups = chord.groups();
+      chords = chord.chords();
 
-    // initialize begin / end angles for chord source / target
-    for (var i = 0; i < chords.length; i++) {
-      var d = chords[i];
-      var s = d.source;
-      var t = d.target;
+      // initialize groups
+      for (var i = 0; i < groups.length; i++) {
+        var d = groups[i];
 
-      // associate jobs with chord source and target objects
-      var sj = jobsByName[nameByIndex[s.index]];
-      var tj = jobsByName[nameByIndex[t.index]];
-      s.job = sj;
-      t.job = tj;
+        // associate group with job
+        d.job = jobs[i];
 
-      // determine chord source and target indices
-      var si = sj.predecessorIndices[t.index];
-      var ti = tj.successorIndices[s.index];
+        // angles
+        d.startAngle = groupStartAngle(d);
+        d.endAngle = groupEndAngle(d);
+      }
 
-      // determine chord source out-degree and target in-degree
-      var sn = d3.keys(sj.predecessorIndices).length;
-      var tn = d3.keys(tj.successorIndices).length;
-      s.startAngle = chordAngle(s, true, si, sn);
-      s.endAngle = chordAngle(s, true, si + 1, sn);
-      t.startAngle = chordAngle(t, false, ti, tn);
-      t.endAngle = chordAngle(t, false, ti + 1, tn);
-    }
+      // initialize begin / end angles for chord source / target
+      for (var i = 0; i < chords.length; i++) {
+        var d = chords[i];
+        var s = d.source;
+        var t = d.target;
 
-    // select an svg g element for each group
-    var g = svg.selectAll("g.group")
-      .data(groups)
-      .enter()
-      .append("svg:g")
-      .attr("class", "group");
+        // associate jobs with chord source and target objects
+        var sj = jobsByName[nameByIndex[s.index]];
+        var tj = jobsByName[nameByIndex[t.index]];
+        s.job = sj;
+        t.job = tj;
 
-    // add background arc to each g.group to support mouse interaction
-    g.append("svg:path")
-      .attr("class", "arc-mouse")
-      .style("fill", "white")
-      .style("stroke", "white")
-      .attr("d", arcMouse)
-      .on('mouseover', handleArcMouseOver)
-      .on('click', handleArcClick);
+        // determine chord source and target indices
+        var si = sj.predecessorIndices[t.index];
+        var ti = tj.successorIndices[s.index];
 
-    // add visual arc to each g.group
-    g.append("svg:path")
-      .attr("class", "arc")
-      .style("fill", jobColor)
-      .style("stroke", jobColor)
-      .attr("d", arc);
+        // determine chord source out-degree and target in-degree
+        var sn = d3.keys(sj.predecessorIndices).length;
+        var tn = d3.keys(tj.successorIndices).length;
+        s.startAngle = chordAngle(s, true, si, sn);
+        s.endAngle = chordAngle(s, true, si + 1, sn);
+        t.startAngle = chordAngle(t, false, ti, tn);
+        t.endAngle = chordAngle(t, false, ti + 1, tn);
+      }
 
-    // add a label to each g.group
-    g.append("svg:text")
-      .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-      .attr("dy", ".35em")
-      .attr("text-anchor", null)
-      .attr("transform", function(d) {
-        return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-          + "translate(" + (r0 + 26) + ")";
+      // select an svg g element for each group
+      var g = svg.selectAll("g.group")
+        .data(groups)
+        .enter()
+        .append("svg:g")
+        .attr("class", "group");
+
+      // add background arc to each g.group to support mouse interaction
+      g.append("svg:path")
+        .attr("class", "arc-mouse")
+        .style("fill", "white")
+        .style("stroke", "white")
+        .attr("d", arcMouse)
+        .on('mouseover', handleArcMouseOver)
+        .on('click', handleArcClick);
+
+      // add visual arc to each g.group
+      g.append("svg:path")
+        .attr("class", "arc")
+        .style("fill", jobColor)
+        .style("stroke", jobColor)
+        .attr("d", arc);
+
+      // add a label to each g.group
+      g.append("svg:text")
+        .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", null)
+        .attr("transform", function(d) {
+          return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+            + "translate(" + (r0 + 26) + ")";
+        })
+        .text(function(d) { return d.index + 1; });
+
+      // add chords
+      svg.selectAll("path.chord")
+        .data(chords)
+        .enter()
+        .append("svg:path")
+        .attr("class", "chord")
+        .style("stroke", chordStroke)
+        .style("fill", chordFill)
+        .attr("d", d3.svg.chord().radius(r0));
+    },
+
+    init: function(ui) {
+      this.ui = ui;
+      view = this;
+
+      // once the dag is loaded we can initialize
+      $(ui).bind( "dagLoaded", function(event, data) {
+        view.initGraph(data.jobs);
       })
-      .text(function(d) { return d.index + 1; });
 
-    // add chords
-    svg.selectAll("path.chord")
-      .data(chords)
-      .enter()
-      .append("svg:path")
-      .attr("class", "chord")
-      .style("stroke", chordStroke)
-      .style("fill", chordFill)
-      .attr("d", d3.svg.chord().radius(r0));
+      /**
+       * Select the given job and update global state.
+       */
+      $(ui).bind( "jobSelected,JOB_STARTED", function(event, data) {
+        view.refreshDisplay();
+      })
+    }
   }
-
-  // once the dag is loaded we can initialize
-  $( this.ui ).bind( "dagLoaded", function(event, data) {
-    initialize(data.jobs);
-  })
-
-  /**
-   * Select the given job and update global state.
-   */
-  $( this.ui ).bind( "jobSelected,JOB_STARTED", function(event, data) {
-    refreshDisplay();
-  })
 }
