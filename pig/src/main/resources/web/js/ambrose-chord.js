@@ -68,7 +68,7 @@ AMBROSE.chord = function(ui) {
   function jobColor(d) {
     if (isMouseOver(d.job)) {
       return d3.rgb(jobMouseOverColor);
-    } if ($(this.ui).isSelected(d.job)) {
+    } if (ui.isSelected(d.job)) {
       return d3.rgb(jobSelectedColor).brighter();
     } if (d.job.status == "RUNNING") {
       return d3.rgb(jobSelectedColor);
@@ -178,7 +178,7 @@ AMBROSE.chord = function(ui) {
       ga2 = (ga - gap) / 2;
 
       // update state
-      $(this.ui).selectJob(jobs[0]);
+      ui.selectJob(jobs[0]);
 
       // Compute a unique index for each job name
       n = 0;
@@ -304,8 +304,8 @@ AMBROSE.chord = function(ui) {
         .attr("d", d3.svg.chord().radius(r0));
     },
 
-    init: function(ui) {
-      this.ui = ui;
+    init: function(thatUi) {
+      ui = thatUi;
       view = this;
 
       // once the dag is loaded we can initialize

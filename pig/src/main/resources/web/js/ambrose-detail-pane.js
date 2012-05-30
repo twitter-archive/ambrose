@@ -70,10 +70,10 @@ AMBROSE.detailView = function() {
       view = this;
       view.initTable();
       $(ui).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
-        if ($(ui).isSelected(data.job) && view.supportsJob(data)) {
+        if (ui.isSelected(data.job) && view.supportsJob(data)) {
           //TODO: clear table if view doesn't support it.
           view.initTable();
-          view.updateJobDialog(data.job, $(ui).totalJobs());
+          view.updateJobDialog(data.job, ui.totalJobs());
         }
       })
     }
