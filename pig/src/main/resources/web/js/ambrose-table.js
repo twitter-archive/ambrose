@@ -70,13 +70,24 @@ AMBROSE.tableView = function (ui) {
     $('.row-job-reducers', row).text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
   }
 
+  function supportsJob(data) {
+    return (data.event && data.event.runtimeName == 'pig') ||
+           (data.job && data.job.runtimeName == 'pig') ||
+           (data.jobs && data.jobs[0] && data.jobs[0].runtimeName == 'pig');
+  }
+
   initTable();
 
   $( this.ui ).bind( "dagLoaded", function(event, data) {
-    loadTable(data.jobs);
+    if (supportsJob(data)) {
+      initTable();
+      loadTable(data.jobs);
+    }
   })
 
   $( this.ui ).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
-    updateTableRow(data.job);
+    if (supportsJob(data)) {
+      updateTableRow(data.job);
+    }
   })
 }

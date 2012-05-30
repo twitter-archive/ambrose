@@ -98,10 +98,38 @@
     <script type="text/javascript">
         var ui = new AMBROSE.ui();
         new AMBROSE.chord(ui);
-        new AMBROSE.detailView(ui);
+        var defaultDetailView = new AMBROSE.detailView(ui);
         new AMBROSE.tableView(ui);
 
+//        AMBROSE.cascadingDetailView = function () {
+//
+//          /**
+//           * Updates table with job data.
+//           */
+//          $.fn.updateJobDialog = function(job, totalJobCount) {
+//              if (job.index >= 0) {
+//                $('#job-n-of-n').text((job.index + 1) + ' of ' + totalJobCount);
+//              } else {
+//                $('#job-n-of-n').text('');
+//              }
+//              $('#job-jt-url').text('Cascading');
+//              $('#job-aliases').text('Cascading');
+//              $('#job-features').text('Cascading');
+//              $('#job-status').text('Cascading');
+//              $('#job-mapper-status').text('Cascading');
+//              $('#job-reducer-status').text('Cascading');
+//          }
+//
+//          $.fn.supportsJob = function(data) {
+//            return (data.event && data.event.runtimeName == 'cascading') ||
+//                   (data.job && data.job.runtimeName == 'cascading');
+//          }
+//        }
+//        var customDetailView = $.extend({}, AMBROSE.detailView, new AMBROSE.cascadingDetailView(ui))
+
         $(document).ready(function() {
+          $(defaultDetailView).initializeme(); //TODO: our method names are globally scoped!
+//          $(customDetailView).initializeme();
           $(ui).initialize();
         });
     </script>

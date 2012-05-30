@@ -18,11 +18,12 @@ var AMBROSE = window.AMBROSE || {};
 // controls the detail view for the currently selected job
 AMBROSE.detailView = function (ui) {
   this.ui = ui;
+  this.view = this;
 
   /**
    * Initialize an empty table with the expected structure
    */
-  function initTable() {
+  $.fn.initTable = function() {
     $('#job-props > thead').empty();
     $('#job-props > tbody').empty();
     $('#job-props > thead:last').append(
@@ -40,7 +41,7 @@ AMBROSE.detailView = function (ui) {
   /**
    * Updates table with job data.
    */
-  function updateJobDialog(job, totalJobCount) {
+  $.fn.updateJobDialog = function(job, totalJobCount) {
     if (job.index >= 0) {
       $('#job-n-of-n').text((job.index + 1) + ' of ' + totalJobCount);
     } else {
@@ -55,14 +56,21 @@ AMBROSE.detailView = function (ui) {
     $('#job-reducer-status').text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
   }
 
-  initTable();
+  $.fn.supportsJob = function(data) {
+    return (data.event && data.event.runtimeName == 'pig') ||
+           (data.job && data.job.runtimeName == 'pig');
+  }
 
   /**
-   * Select the given job and update global state.
+   * Initialized this object to listen for certain events.
    */
-  $( this.ui ).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
-    if ($(this.ui).isSelected(data.job)) {
-      updateJobDialog(data.job, $(this.ui).totalJobs());
-    }
-  })
+  $.fn.initializeme = function() {
+    $(this.view).initTable();
+    $(ui).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
+      if ($(this.ui).isSelected(data.job) && $(this.view).supportsJob(data)) {
+        $(this.view).initTable();
+        $(this.view).updateJobDialog(data.job, $(this.ui).totalJobs());
+      }
+    })
+  }
 }
