@@ -58,7 +58,10 @@
       </div>
 
       <div class="row">
-        <div class="span6" id="chart"></div>
+        <div class="span6">
+          <ul class="nav nav-tabs" id="vizTabs" style="display:none"></ul>
+          <div class="tab-content" id="vizGroup"></div>
+        </div>
         <div class="span6">
           <table id="job-props" class="table">
             <thead></thead>
@@ -93,11 +96,12 @@
     <script src="js/colorbrewer.js"></script>
     <script src="js/ambrose-ui.js"></script>
     <script src="js/ambrose-chord.js"></script>
+    <script src="js/ambrose-dag.js"></script>
     <script src="js/ambrose-table.js"></script>
     <script src="js/ambrose-detail-pane.js"></script>
     <script type="text/javascript">
         var ui = new AMBROSE.ui();
-        var chordView = new AMBROSE.chord();
+        var chordView = new AMBROSE.chordView();
         var defaultDetailView = new AMBROSE.detailView();
         var defaultTableView = new AMBROSE.tableView();
 
@@ -134,6 +138,7 @@
           defaultDetailView.init(ui);
           //customDetailView.init(ui);
           defaultTableView.init(ui);
+          dagView.init(ui); // TODO: comment this out to disable DAG view
           chordView.init(ui);
           ui.init();
         });

@@ -288,6 +288,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
   }
 
+  @SuppressWarnings("deprecation")
   private Map<String, String> buildJobStatusMap(String jobId)  {
     JobClient jobClient = PigStats.get().getJobClient();
 

@@ -20,4 +20,8 @@ Twitter Bootstrap
 Apache Public License 2.0
 http://twitter.github.com/bootstrap/
 
+Azkaban
+Apache Public License 2.0
+http://twitter.github.com/azkaban/
+
 For a full list of dependencies, please consult the Maven pom.xml file.

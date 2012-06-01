@@ -24,6 +24,15 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.m2/repository/com/google/collections/google-collections/1.0-rc2/google-collections-1.0-rc2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.m2/repository/org/apache/hadoop/hadoop-common/0.23.0-SNAPSHOT/hadoop-common-0.23.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -331,6 +340,44 @@
       <library>
         <CLASSES>
           <root url="jar://$USER_HOME$/.m2/repository/org/slf4j/slf4j-simple/1.6.1/slf4j-simple-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../azkaban/dist/azkaban/jars/azkaban-snapshot-0.10.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../azkaban/azkaban/src/java" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../azkaban/dist/azkaban-common/jars/azkaban-common-snapshot-0.10.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../azkaban/lib/log4j-1.2.15.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../azkaban/lib/json_simple-1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

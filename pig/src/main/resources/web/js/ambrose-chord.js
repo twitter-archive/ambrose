@@ -16,7 +16,7 @@ limitations under the License.
 var AMBROSE = window.AMBROSE || {};
 
 // implementation of a chord diagram view of the job graph
-AMBROSE.chord = function(ui) {
+AMBROSE.chordView = function(ui) {
   var ui, view;
 
   var jobsByName = {}, indexByName = {}, nameByIndex = {};
@@ -138,6 +138,25 @@ AMBROSE.chord = function(ui) {
 
   // private members and methods above, public below
   return {
+    divName: "chordView",
+    tabName: "Chord",
+
+    addDiv: function() {
+      // add the div that the graph will render in
+      $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"></div>');
+
+      // add the tab div
+      $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
+
+      // if there is more than one graph, add unhide the nav tab and select the first tab
+      if ($('.viz-pane').length > 1) {
+        $('#vizTabs').show();
+        $('#vizTabs a:first').tab('show');
+      } else {
+        $('#vizTabs').hide();
+        $('#' + this.divName).show();
+      }
+    },
 
     initGraph: function(jobs) {
       // jobs themselves are arc segments around the edge of the chord diagram
@@ -152,8 +171,9 @@ AMBROSE.chord = function(ui) {
         .startAngle(groupStartAngle)
         .endAngle(groupEndAngle);
 
+      this.addDiv();
       // set up canvas
-      svg = d3.select("#chart")
+      svg = d3.select("#chordView")
         .append("svg:svg")
         .attr("width", r1 * 3)
         .attr("height", r1 * 2)

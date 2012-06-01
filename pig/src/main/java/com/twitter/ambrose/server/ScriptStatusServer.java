@@ -16,8 +16,10 @@ limitations under the License.
 package com.twitter.ambrose.server;
 
 import com.twitter.ambrose.service.DAGNode;
+import com.twitter.ambrose.service.DAGTransformer;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.WorkflowEvent;
+import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
 import com.twitter.ambrose.util.JSONUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Lite weight app server that serves both the JSON API and the Ambrose web pages powered from the
@@ -151,6 +154,10 @@ public class ScriptStatusServer implements Runnable {
 
         Collection<DAGNode> nodes =
           statsReadService.getDagNodeNameMap(request.getParameter(QUERY_PARAM_WORKFLOW_ID)).values();
+
+        // add the x, y coordinates
+        DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
+        dagTransformer.transform(nodes);
 
         sendJson(request, response, nodes.toArray(new DAGNode[nodes.size()]));
       } else if (target.endsWith("/events")) {

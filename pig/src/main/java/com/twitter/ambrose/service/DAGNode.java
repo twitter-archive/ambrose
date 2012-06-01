@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
 import com.twitter.ambrose.util.JSONUtil;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -49,7 +50,8 @@ public class DAGNode {
   private Collection<DAGNode> successors;
   private Collection<String> successorNames;
   private String runtimeName;
-  private Integer dagLevel, x, y;
+  private Integer dagLevel;
+  private Double x, y;
 
   public DAGNode(String name, String[] aliases, String[] features, String runtimeName) {
     this.name = name;
@@ -84,11 +86,11 @@ public class DAGNode {
   public Integer getDagLevel() { return dagLevel; }
   public void setDagLevel(Integer dagLevel) { this.dagLevel = dagLevel; }
 
-  public Integer getX() { return x; }
-  public void setX(Integer x) { this.x = x; }
+  public Double getX() { return x; }
+  public void setX(Double x) { this.x = x; }
 
-  public Integer getY() { return y; }
-  public void setY(Integer y) { this.y = y; }
+  public Double getY() { return y; }
+  public void setY(Double y) { this.y = y; }
 
   @JsonIgnore
   public synchronized Collection<DAGNode> getSuccessors() { return successors;}
@@ -111,13 +113,10 @@ public class DAGNode {
     String json = JSONUtil.readFile(sourceFile);
     List<DAGNode> nodes =
       (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
-    for (DAGNode node : nodes) {
-      // useful if we need to read a file, add a field, output and re-generate
-      node.setRuntimeName("pig");
-    }
+
+    DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
+    dagTransformer.transform(nodes);
 
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
-
-  private void setRuntimeName(String runtimeName) { this.runtimeName = runtimeName; }
 }
