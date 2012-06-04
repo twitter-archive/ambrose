@@ -6,10 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Pig pipeline visualization and monitoring">
     <meta name="author" content="Twitter">
-
-    <!-- ensure js libs are loaded -->
-
-    <!-- Le styles -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/ambrose.css" rel="stylesheet">
     <style type="text/css">
@@ -20,20 +16,20 @@
     </style>
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <!-- Le fav and touch icons -->
+    <!-- fav and touch icons -->
     <link rel="shortcut icon" href="ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
   </head>
-
   <body>
 
+    <!-- navbar -->
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -49,16 +45,20 @@
     </div>
 
     <div class="container">
-
+      <!-- status line -->
       <div class="row">
         <div class="span12"><p>Status: <span  id="scriptStatusDialog"></span></p></div>
       </div>
+
+      <!-- workflow progress bar -->
       <div class="row">
         <div class="span12"><div id="progressbar" class="progress"><div class="bar"></div></div></div>
       </div>
 
       <div class="row">
+        <!-- chart -->
         <div class="span6" id="chart"></div>
+        <!-- details pane -->
         <div class="span6">
           <table id="job-props" class="table">
             <thead></thead>
@@ -67,6 +67,7 @@
         </div>
       </div>
 
+      <!-- summary job table -->
       <div class="row">
         <div class="span12">
           <table id="job-summary" class="table table-striped">
@@ -77,66 +78,29 @@
       </div>
 
       <hr>
-
       <footer>
         <p>&copy; Twitter 2012</p>
       </footer>
-
     </div> <!-- /container -->
 
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
     <script src="js/jquery-1.7.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/d3-2.9.1.min.js"></script>
     <script src="js/colorbrewer.js"></script>
     <script src="js/ambrose-ui.js"></script>
-    <script src="js/ambrose-chord.js"></script>
+    <script src="js/ambrose-util.js"></script>
+    <script src="js/ambrose-detail.js"></script>
     <script src="js/ambrose-table.js"></script>
-    <script src="js/ambrose-detail-pane.js"></script>
+    <script src="js/ambrose-chord.js"></script>
     <script type="text/javascript">
-        var ui = new AMBROSE.ui();
-        var chordView = new AMBROSE.chord();
-        var defaultDetailView = new AMBROSE.detailView();
-        var defaultTableView = new AMBROSE.tableView();
+      var ui = AMBROSE.ui();
+      var detail = AMBROSE.detail(ui);
+      var table = AMBROSE.table(ui);
+      var chord = AMBROSE.chord(ui);
 
-        //TODO: remove this. Just for testing extensibility
-        AMBROSE.cascadingDetailView = function () {
-
-          return {
-            /**
-             * Updates table with job data.
-             */
-            updateJobDialog: function(job, totalJobCount) {
-              if (job.index >= 0) {
-                $('#job-n-of-n').text((job.index + 1) + ' of ' + totalJobCount);
-              } else {
-                $('#job-n-of-n').text('');
-              }
-              $('#job-jt-url').text('Cascading');
-              $('#job-aliases').text('Cascading');
-              $('#job-features').text('Cascading');
-              $('#job-status').text('Cascading');
-              $('#job-mapper-status').text('Cascading');
-              $('#job-reducer-status').text('Cascading');
-            },
-
-            supportsJob: function(data) {
-              return (data.event && data.event.runtimeName == 'cascading') ||
-                     (data.job && data.job.runtimeName == 'cascading');
-            }
-          };
-        }
-        var customDetailView = $.extend({}, new AMBROSE.detailView(), new AMBROSE.cascadingDetailView())
-
-        $(document).ready(function() {
-          defaultDetailView.init(ui);
-          //customDetailView.init(ui);
-          defaultTableView.init(ui);
-          chordView.init(ui);
-          ui.init();
-        });
+      $(document).ready(function() {
+        ui.load();
+      });
     </script>
 
   </body>

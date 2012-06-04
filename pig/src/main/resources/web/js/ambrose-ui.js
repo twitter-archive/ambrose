@@ -13,292 +13,316 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-var AMBROSE = window.AMBROSE || {};
 
 /**
- * The main Ambrose UI. Other view elements can bind to the events that this object triggers, which
- * are listed at the bottom of this module.
+ * Ambrose module "ui" containing core event handling. Other view elements can
+ * bind to the events this object triggers, which are listed at the bottom of
+ * this module.
  */
-AMBROSE.ui = function(options) {
-  // storage for job data and lookup
-  var ui;
-  var url = window.location.href;
+var AMBROSE = (function($, d3) {
+  var ambrose = {};
+  var ui = ambrose.ui = function() {
+    return new ambrose.ui.fn.init();
+  };
 
-  var jobs = [];
-  var selectedJob;
-  var jobsByName = {}, jobsByJobId = {}, indexByName = {}, nameByIndex = {};
-  var scriptProgress = 0;
-
-  var loadDagIntervalId, pollIntervalId;
+  var _dagUrl, _eventsUrl;
+  var _workflowProgress = 0;
+  var _jobs = [];
+  var _jobsByName = {}, _jobsByJobId = {}, _indexByName = {}, _nameByIndex = {};
+  var _selectedJob;
+  var _pollIntervalId;
+  var _lastProcessedEventId = -1;
+  var _consecutiveNullEvents = 0;
   var MAX_NULL_EVENTS = 10;
-  var consecutiveNullEvents = 0;
-  var lastProcessedEventId = -1;
 
-  // handle demo data
-  if (url.indexOf('?localdata=small') != -1) {
-    dagURL = "data/small-dag.json";
-    eventsURL = "data/small-events.json";
-  } else if (url.indexOf('?localdata=large') != -1) {
-    dagURL = "data/large-dag.json";
-    eventsURL = "data/large-events.json";
-  } else {
-    dagURL = "dag";
-    eventsURL = "events";
+  var _statusDialog = $('#scriptStatusDialog');
+  var _progressBar = $('#progressbar div');
+
+  /**
+   * Requests job graph from "dag" end-point. On success, job data is parsed,
+   * state is updated, the 'dagLoaded' event is triggered, the first job is
+   * selected, and event polling is initiated.
+   */
+  function _loadDag() {
+    var ui = this;
+    ui.info('loading job graph');
+    d3.json(_dagUrl, function(data) {
+      // handle failure
+      if (data == null) {
+        ui.fatal('Failed to load dag data');
+        return;
+      }
+
+      // save jobs data and build indices
+      _jobs = data;
+      _buildJobIndex.call(ui, _jobs);
+
+      // trigger event
+      ui.trigger('dagLoaded', {jobs: _jobs});
+
+      // select first job
+      if (_jobs.length > 0) {
+        ui.selectJob(_jobs[0]);
+      }
+
+      // begin polling server for events
+      _startEventPolling.call(ui);
+    });
+  };
+
+  /**
+   * Computes a unique index for each job name. Note that job names are
+   * independent of job ids. A map-reduce job receives an id only after it has
+   * been successfully submitted to a Job Tracker for processing.
+   */
+  function _buildJobIndex(jobs) {
+    var n = 0;
+    jobs.forEach(function(job) {
+      _jobsByName[job.name] = job;
+      if (!(job.name in _indexByName)) {
+        _nameByIndex[n] = job.name;
+        _indexByName[job.name] = job.index = n++;
+      }
+    });
   }
 
-  function buildJobIndex(jobs) {
-    // Compute a unique index for each job name
-    n = 0;
-    jobs.forEach(function(job) {
-      jobsByName[job.name] = job;
-      if (!(job.name in indexByName)) {
-        nameByIndex[n] = job.name;
-        indexByName[job.name] = job.index = n++;
+  function _startEventPolling () {
+    ui = this;
+    _pollIntervalId = setInterval(function() { _pollEvents.call(ui); }, 1000);
+    ui.info('event polling started');
+  };
+
+  function _stopEventPolling() {
+    ui = this;
+    clearInterval(_pollIntervalId);
+    ui.info('event polling stopped');
+  };
+
+  function _pollEvents() {
+    var ui = this;
+
+    // are we there yet?
+    var scriptDone = false;
+    if (_workflowProgress == 100) {
+      scriptDone = true;
+      for (var i = 0; i < _jobs.length; i++) {
+        var job = _jobs[i];
+        if(job.status != 'COMPLETE' && job.status != 'FAILED') {
+          scriptDone = false;
+          break;
+        }
       }
+    }
+
+    // stop polling for events if all jobs are done
+    if (scriptDone) {
+      ui.info('script finished');
+      _stopEventPolling.call(ui);
+      return;
+    }
+
+    // request new events from end-point
+    d3.json(_eventsUrl + '?lastEventId=' + _lastProcessedEventId, function(events) {
+      // test for error
+      if (events == null) {
+        _consecutiveNullEvents++;
+        if (_consecutiveNullEvents >= MAX_NULL_EVENTS) {
+          _stopEventPolling.call(ui);
+          ui.error(MAX_NULL_EVENTS + ' consecutive event requests have failed. Stopping event polling.');
+        } else {
+          ui.error('No events found');
+        }
+        return;
+      }
+
+      // reset state
+      _consecutiveNullEvents = 0;
+      var eventsHandledCount = 0;
+
+      // process next event
+      // TODO: Allow client to process multiple events here
+      events.forEach(function(event) {
+        // validate event data
+        var id = event.eventId;
+        var type = event.eventType;
+        var job = event.eventData;
+        if (!id || !type || !job) {
+          ui.error('Invalid event data returned from the server: ' + event);
+          return;
+        }
+
+        // skip events we've already processed
+        if (id <= _lastProcessedEventId || eventsHandledCount > 0) {
+          return;
+        }
+
+        // collect event data
+        if (type.indexOf('JOB_') == 0) {
+          // JOB_FINISHED and JOB_FAILED events contain job.jobData
+          if (job.jobId == null && job.jobData != null && job.jobData.jobId != null) {
+            var jobData = job.jobData;
+            delete job.jobData;
+            $.extend(true, job, jobData);
+          }
+          job = _updateJob(job);
+        }
+
+        // trigger event and update state
+        ui.trigger(type, {event: event, job: job});
+        _lastProcessedEventId = id;
+        eventsHandledCount++;
+      });
     });
   }
 
   /**
-   * Looks up job with data.name or data.jobId and updates contents of job with
-   * fields from data.
+   * Finds existing job whose id matches that included in data, then updates
+   * contents of job to include all of data's fields. Any existing job fields
+   * are overwritten.
    */
-  function updateJobData(data) {
-    // get job associated with data
-    var job, id;
-    if (data.name != null) {
-      id = data.name;
-      job = jobsByName[id];
-    } else {
-      id = data.jobId;
-      job = jobsByJobId[id];
-    }
-
-    // check for job retrieval failure
-    if (job == null) {
-      alert("Job with id '" + id + "' not found");
-      return;
-    }
-
-    // copy data into job
-    $.each(data, function(key, value) {
-      job[key] = value;
-    });
-    return job
+  function _updateJob(data) {
+    var job = _findJob(data);
+    return $.extend(job, data);
   }
 
-  // private members and methods above, public below
-  return {
+  /**
+   * Retrieves existing job object via data.name or data.jobId, throwing error
+   * if data contains no job reference, or no job object is associated with the
+   * given reference.
+   */
+  function _findJob(data) {
+    var field, ref, job;
+    if (data.name != null) {
+      field = 'name';
+      ref = data.name;
+      job = _jobsByName[ref];
+    } else if (data.jobId != null) {
+      field = 'id';
+      ref = data.jobId;
+      job = _jobsByJobId[ref];
+    } else {
+      throw new Error("Data contains no job name nor id");
+    }
+    if (job == null) throw new Error("Job with " + field + " '" + id + "' not found");
+    return job;
+  }
 
-    // Retrieves snapshot of current DAG of jobs from the server
-    loadDag: function() {
-      // load dag data and initialize
-      d3.json(dagURL, function(data) {
-        if (data == null) {
-          alert("Failed to load dag data");
-          return;
-        }
-        jobs = data;
+  /**
+   * Retrieves data.job, throwing error if it's undefined.
+   */
+  function _getJob(data) {
+    var job = data.job;
+    if (job == null) throw new Error("Data contains no job entry");
+    return job;
+  }
 
-        buildJobIndex(jobs);
+  function _handleWorkflowProgress(event, data) {
+    _workflowProgress = data.event.eventData.scriptProgress;
+    this.info('script progress: ' + _workflowProgress + '%');
+    _progressBar.width(_workflowProgress + '%');
+  }
 
-        $(ui).trigger( "dagLoaded", {"jobs": jobs} );
-        $(ui).trigger( "jobSelected", {"job": jobs[0], "jobs": jobs} );
-        clearTimeout(loadDagIntervalId);
-        ui.startEventPolling();
-      });
-    },
+  function _handleJobStarted(event, data) {
+    var job = _getJob(data);
+    this.info(job.jobId + ' started');
+    job.jobId = data.event.eventData.jobId;
+    job.status = 'RUNNING';
+    _jobsByJobId[job.jobId] = job;
+    this.selectJob(job);
+  }
 
-    startEventPolling: function() {
-      pollIntervalId = setInterval('ui.pollEvents()', 1000);
-      return pollIntervalId;
-    },
+  function _handleJobProgress(event, data) {
+    var job = _getJob(data);
+    if (job.isComplete == 'true') {
+      if (job.isSuccessful == 'true') {
+        job.status = 'COMPLETE';
+      } else {
+        job.status = 'FAILED';
+      }
+    }
+    _jobsByJobId[job.jobId] = job;
+  }
 
-    stopEventPolling: function() {
-      clearInterval(pollIntervalId);
-      return pollIntervalId;
-    },
+  function _handleJobFinished(event, data) {
+    var job = _getJob(data);
+    this.info(job.jobId + ' complete');
+    job.status = 'COMPLETE';
+  }
 
-    // select a job
-    selectJob: function(job) {
-      selectedJob = job;
-      $(ui).trigger( "jobSelected", {"job": job} );
-    },
+  function _handleJobFailed(event, data) {
+    var job = _getJob(data);
+    this.info(job.jobId + ' failed');
+    job.status = 'FAILED';
+  }
 
-    // get the selected job
-    selectedJob: function() {
-      return selectedJob;
-    },
+  /**
+   * Define AMBROSE.ui.prototype.
+   */
+  ui.fn = ui.prototype = {
+    /**
+     * Default constructor.
+     */
+    init: function() {
+      // initialize end-point urls
+      var url = window.location.href;
+      if (url.indexOf('?localdata=small') != -1) {
+        _dagUrl = 'data/small-dag.json';
+        _eventsUrl = 'data/small-events.json';
+      } else if (url.indexOf('?localdata=large') != -1) {
+        _dagUrl = 'data/large-dag.json';
+        _eventsUrl = 'data/large-events.json';
+      } else {
+        _dagUrl = 'dag';
+        _eventsUrl = 'events';
+      }
 
-    // get the selected job
-    totalJobs: function() {
-      return jobs.length;
-    },
+      // wrap "this" with jQuery for event handling
+      this.controller = $(this);
 
-    // is job selected?
-    isSelected: function(job) {
-      return job === selectedJob;
-    },
-
-    // display an error
-    error: function(msg) {
-      d3.select('#scriptStatusDialog').text(msg);
-    },
-
-    // display info
-    info: function(msg) {
-      d3.select('#scriptStatusDialog').text(msg);
+      // bind event handlers
+      this.bind('WORKFLOW_PROGRESS', _handleWorkflowProgress);
+      this.bind('JOB_STARTED', _handleJobStarted);
+      this.bind('JOB_PROGRESS', _handleJobProgress);
+      this.bind('JOB_FINISHED', _handleJobFinished);
+      this.bind('JOB_FAILED', _handleJobFailed);
     },
 
     /**
-     * Poll the server for new events
+     * Schedules retrieval of job graph from back-end.
      */
-    pollEvents: function() {
-      // are we there yet?
-      var scriptDone = false;
-      if (scriptProgress == 100) {
-        scriptDone = true;
-        for (var i = 0; i < jobs.length; i++) {
-          var job = jobs[i];
-          if(job.status != "COMPLETE" && job.status != "FAILED") {
-            scriptDone = false;
-            break;
-          }
-        }
-      }
-
-      // stop polling for events if all jobs are done
-      if (scriptDone) {
-        ui.info("script finished");
-        ui.stopEventPolling();
-        return;
-      }
-
-      d3.json(eventsURL + "?lastEventId=" + lastProcessedEventId, function(events) {
-        // test for error
-        if (events == null) {
-          consecutiveNullEvents = consecutiveNullEvents + 1;
-          if (consecutiveNullEvents >= MAX_NULL_EVENTS) {
-              ui.stopEventPolling();
-              ui.error(MAX_NULL_EVENTS + " consecutive requests for events have failed. Stopping event polling.");
-          }
-          else {
-              ui.error("No events found")
-          }
-          return
-        }
-        consecutiveNullEvents = 0;
-        var eventsHandledCount = 0;
-        events.forEach(function(event) {
-            var eventId = event.eventId;
-            if (eventId <= lastProcessedEventId || eventsHandledCount > 0) {
-                return;
-            }
-
-            if (!event.eventData || !event.eventType) {
-              ui.error("Invalid event data returned from the server: " + event);
-              return;
-            }
-
-            var data = {"event": event};
-            if (event.eventType.indexOf('JOB_') == 0) {
-              // job complete and job failed return a jobData object
-              if (event.eventData.jobId == null && event.eventData.jobData.jobId != null) {
-                event.eventData.jobId = event.eventData.jobData.jobId;
-              }
-              data["job"] = updateJobData(event.eventData);
-            }
-
-            $(ui).trigger( event.eventType, data);
-            lastProcessedEventId = eventId;
-            eventsHandledCount++;
-        });
+    load: function() {
+      var ui = this;
+      $(document).ready(function() {
+        setTimeout(function() {
+          _loadDag.call(ui);
+        }, 500);
       });
     },
 
-    // initilizes the UI by fetching and rendering the dag, then polling for new events.
-    init: function() {
-      ui = this;
-      // these are the events the ui supports that can be bound to as follows
-      $(this).bind( "dagLoaded", function(event, data) { });   // data: { "jobs": jobs }
-      $(this).bind( "jobUpdated", function(event, data) { });  // data: { "job": job, "jobs": jobs }
-      $(this).bind( "jobSelected", function(event, data) { }); // data: { "job": job }
+    bind: function(event, callback) { this.controller.bind(event, callback); },
+    trigger: function(event, data) { this.controller.trigger(event, data); },
 
-      // these are the events that are returned from the server that can be bounded to as follows
-      // data: { "event": event}
-      $(this).bind( "WORKFLOW_PROGRESS", function(event, data) {
-        scriptProgress = data.event.eventData.scriptProgress;
-        ui.info('script progress: ' + scriptProgress + '%');
-        $('#progressbar div').width(scriptProgress + '%')
-      });
+    info: function(msg) { _statusDialog.text(msg); },
+    error: function(msg) { _statusDialog.text(msg); },
+    fatal: function(msg) { alert(msg); },
 
-      // data: { "event": event, "job": job}
-      $(this).bind( "JOB_STARTED", function(event, data) {
-        var job = data.job;
-        if (job == null) return;
-        ui.info(job.jobId + ' started');
-        job.jobId = data.event.eventData.jobId;
-        job.status = "RUNNING";
-        jobsByJobId[job.jobId] = job;
-        ui.selectJob(job);
-      });
+    findJobByName: function(name) { return _jobsByName[name]; },
+    findJobById: function(jobId) { return _jobsByJobId[jobId]; },
+    findJobByIndex: function(index) { return _jobsByName[_nameByIndex[index]]; },
+    findJobNameByIndex: function(index) { return _nameByIndex[index]; },
+    findJobIndexByName: function(name) { return _indexByName[name]; },
+    totalJobs: function() { return _jobs.length; },
 
-      $(this).bind( "JOB_PROGRESS", function(event, data) {
-        var job = data.job;
-        if (job == null) return;
-        if (job.isComplete == "true") {
-          if (job.isSuccessful == "true") {
-            job.status = "COMPLETE";
-          } else {
-            job.status = "FAILED";
-          }
-        }
-        jobsByJobId[job.jobId] = job;
-      });
-
-      $(this).bind( "JOB_FINISHED", function(event, data) {
-        var job = data.job;
-        if (job == null) return;
-        ui.info(job.jobId + ' complete');
-        job.status = "COMPLETE";
-
-    //    TODO: Andy, what's this for?
-    //    var i = job.index + 1;
-    //    if (i < jobs.length) {
-    //      $(ui).selectJob(jobs[i]);
-    //    }
-      });
-
-      $(this).bind( "JOB_FAILED", function(event, data) {
-        var job = data.job;
-        if (job == null) return;
-        ui.info(job.jobId + ' failed');
-        job.status = "FAILED";
-      });
-      loadDagTimeoutId = setTimeout('ui.loadDag()', 500);
-    }
-  }
-}
-
-// "static" helper utilities
-AMBROSE.util = function() {
-  return {
-    comma_join: function(array) {
-      if  (array != null) {
-        return array.join(", ");
-      }
-      return '';
+    isSelected: function(job) { return job === _selectedJob; },
+    selectedJob: function() { return _selectedJob; },
+    selectJob: function(job) {
+      _selectedJob = job;
+      this.trigger('jobSelected', {job: job, jobs: _jobs});
     },
-    task_progress_string: function(totalTasks, taskProgress) {
-      if (totalTasks == null || taskProgress == null) {
-        return ''
-      }
-      return totalTasks + ' (' + d3.round(taskProgress * 100, 0) + '%)'
-    },
-    value: function(value) {
-      if (value == null) {
-        return '';
-      }
-      return value;
-    }
   };
-}();
+
+  // set the init function's prototype for later instantiation
+  ui.fn.init.prototype = ui.fn;
+
+  return ambrose;
+}(jQuery, d3));
