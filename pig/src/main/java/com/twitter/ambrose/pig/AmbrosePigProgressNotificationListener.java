@@ -57,6 +57,8 @@ import java.util.TreeMap;
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
   protected Log log = LogFactory.getLog(getClass());
 
+  private static final String RUNTIME = "pig";
+
   private StatsWriteService statsWriteService;
 
   private String workflowVersion;
@@ -89,7 +91,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     for (Map.Entry<OperatorKey, MapReduceOper> entry : planKeys.entrySet()) {
       DAGNode node = new DAGNode(entry.getKey().toString(),
         toArray(ScriptState.get().getAlias(entry.getValue())),
-        toArray(ScriptState.get().getPigFeature(entry.getValue())));
+        toArray(ScriptState.get().getPigFeature(entry.getValue())), RUNTIME);
 
       this.dagNodeNameMap.put(node.getName(), node);
 
@@ -280,7 +282,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
   private void pushEvent(String scriptId, WorkflowEvent.EVENT_TYPE eventType, Object eventData) {
     try {
-      statsWriteService.pushEvent(scriptId, new WorkflowEvent(eventType, eventData));
+      statsWriteService.pushEvent(scriptId, new WorkflowEvent(eventType, eventData, RUNTIME));
     } catch (IOException e) {
       log.error("Couldn't send event to StatsWriteService", e);
     }

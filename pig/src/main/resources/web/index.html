@@ -61,21 +61,8 @@
         <div class="span6" id="chart"></div>
         <div class="span6">
           <table id="job-props" class="table">
-            <thead>
-              <tr>
-                <th>Property</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Number</td><td id="job-n-of-n"></td></tr>
-              <tr><td>Job ID</td><td><a id="job-jt-url" target="_blank"></a></td></tr>
-              <tr><td>Aliases</td><td id="job-aliases"></td></tr>
-              <tr><td>Features</td><td id="job-features"></td></tr>
-              <tr><td>Status</td><td id="job-status"></td></tr>
-              <tr><td>Mappers</td><td id="job-mapper-status"></td></tr>
-              <tr><td>Reducers</td><td id="job-reducer-status"></td></tr>
-            </tbody>
+            <thead></thead>
+            <tbody></tbody>
           </table>
         </div>
       </div>
@@ -83,20 +70,8 @@
       <div class="row">
         <div class="span12">
           <table id="job-summary" class="table table-striped">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Job ID</th>
-                <th>Status</th>
-                <th>Aliases</th>
-                <th>Features</th>
-                <th>Mappers</th>
-                <th>Reducers</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr></tr>
-            </tbody>
+            <thead></thead>
+            <tbody></tbody>
           </table>
         </div>
       </div>
@@ -116,7 +91,53 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/d3-2.9.1.min.js"></script>
     <script src="js/colorbrewer.js"></script>
-    <script src="js/ambrose.js"></script>
+    <script src="js/ambrose-ui.js"></script>
+    <script src="js/ambrose-chord.js"></script>
+    <script src="js/ambrose-table.js"></script>
+    <script src="js/ambrose-detail-pane.js"></script>
+    <script type="text/javascript">
+        var ui = new AMBROSE.ui();
+        var chordView = new AMBROSE.chord();
+        var defaultDetailView = new AMBROSE.detailView();
+        var defaultTableView = new AMBROSE.tableView();
+
+        //TODO: remove this. Just for testing extensibility
+        AMBROSE.cascadingDetailView = function () {
+
+          return {
+            /**
+             * Updates table with job data.
+             */
+            updateJobDialog: function(job, totalJobCount) {
+              if (job.index >= 0) {
+                $('#job-n-of-n').text((job.index + 1) + ' of ' + totalJobCount);
+              } else {
+                $('#job-n-of-n').text('');
+              }
+              $('#job-jt-url').text('Cascading');
+              $('#job-aliases').text('Cascading');
+              $('#job-features').text('Cascading');
+              $('#job-status').text('Cascading');
+              $('#job-mapper-status').text('Cascading');
+              $('#job-reducer-status').text('Cascading');
+            },
+
+            supportsJob: function(data) {
+              return (data.event && data.event.runtime == 'cascading') ||
+                     (data.job && data.job.runtime == 'cascading');
+            }
+          };
+        }
+        var customDetailView = $.extend({}, new AMBROSE.detailView(), new AMBROSE.cascadingDetailView())
+
+        $(document).ready(function() {
+          defaultDetailView.init(ui);
+          //customDetailView.init(ui);
+          defaultTableView.init(ui);
+          chordView.init(ui);
+          ui.init();
+        });
+    </script>
 
   </body>
 </html>

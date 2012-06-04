@@ -1,19 +1,22 @@
 [ {
   "name" : "scope-44",
   "aliases" : [ "JOINED", "L", "R" ],
-  "jobId" : "job_201204041958_199287",
   "features" : [ "HASH_JOIN" ],
-  "successorNames" : [ "scope-48" ]
+  "jobId" : "job_201204041958_199287",
+  "successorNames" : [ "scope-48" ],
+  "runtime" : "pig"
 }, {
   "name" : "scope-48",
   "aliases" : [ "ORDERED" ],
-  "jobId" : "job_201204041958_199293",
   "features" : [ "SAMPLER" ],
-  "successorNames" : [ "scope-63" ]
+  "jobId" : "job_201204041958_199293",
+  "successorNames" : [ "scope-63" ],
+  "runtime" : "pig"
 }, {
   "name" : "scope-63",
   "aliases" : [ "ORDERED" ],
-  "jobId" : "job_201204041958_199296",
   "features" : [ "ORDER_BY" ],
-  "successorNames" : [ ]
+  "jobId" : "job_201204041958_199296",
+  "successorNames" : [ ],
+  "runtime" : "pig"
 } ]
