@@ -16,7 +16,7 @@ limitations under the License.
 var AMBROSE = window.AMBROSE || {};
 
 // implementation of a chord diagram view of the job graph
-AMBROSE.chordView = function(ui) {
+AMBROSE.chordView = function() {
   var ui, view;
 
   var jobsByName = {}, indexByName = {}, nameByIndex = {};

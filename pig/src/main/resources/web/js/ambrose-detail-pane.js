@@ -58,12 +58,12 @@ AMBROSE.detailView = function() {
     },
 
     supportsJob: function(data) {
-      return (data.event && data.event.runtimeName == 'pig') ||
-             (data.job && data.job.runtimeName == 'pig');
+      return (data.event && data.event.runtime == 'pig') ||
+             (data.job && data.job.runtime == 'pig');
     },
 
     /**
-     * Initialized this object to listen for certain events.
+     * Initializes this object to listen for certain events.
      */
     init: function(ui) {
       this.ui = ui;

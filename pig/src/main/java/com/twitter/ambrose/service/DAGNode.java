@@ -49,15 +49,15 @@ public class DAGNode {
   private String jobId;
   private Collection<DAGNode> successors;
   private Collection<String> successorNames;
-  private String runtimeName;
+  private String runtime;
   private Integer dagLevel;
   private Double x, y;
 
-  public DAGNode(String name, String[] aliases, String[] features, String runtimeName) {
+  public DAGNode(String name, String[] aliases, String[] features, String runtime) {
     this.name = name;
     this.aliases = aliases;
     this.features = features;
-    this.runtimeName = runtimeName;
+    this.runtime = runtime;
   }
 
   @JsonCreator
@@ -66,19 +66,19 @@ public class DAGNode {
                  @JsonProperty("features") String[] features,
                  @JsonProperty("jobId") String jobId,
                  @JsonProperty("successorNames") Collection<String> successorNames,
-                 @JsonProperty("runtimeName") String runtimeName) {
+                 @JsonProperty("runtime") String runtime) {
     this.name = name;
     this.aliases = aliases;
     this.features = features;
     this.jobId = jobId;
     this.successorNames = successorNames;
-    this.runtimeName = runtimeName;
+    this.runtime = runtime;
   }
 
   public String getName() { return name; }
   public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
   public String[] getFeatures() { return features == null ? new String[0] : features; }
-  public String getRuntimeName() { return runtimeName; }
+  public String getRuntime() { return runtime; }
 
   public String getJobId() { return jobId; }
   public void setJobId(String jobId) { this.jobId = jobId; }
@@ -113,7 +113,6 @@ public class DAGNode {
     String json = JSONUtil.readFile(sourceFile);
     List<DAGNode> nodes =
       (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
-
     DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
     dagTransformer.transform(nodes);
 

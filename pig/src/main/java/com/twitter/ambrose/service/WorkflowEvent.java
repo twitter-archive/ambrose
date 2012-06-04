@@ -37,23 +37,23 @@ public class WorkflowEvent {
 
   private long timestamp;
   private int eventId;
-  private String runtimeName;
+  private String runtime;
   private EVENT_TYPE eventType;
   private Object eventData;
 
-  public WorkflowEvent(EVENT_TYPE eventType, Object eventData, String runtimeName) {
+  public WorkflowEvent(EVENT_TYPE eventType, Object eventData, String runtime) {
     this.eventId = NEXT_ID.incrementAndGet();
     this.timestamp = System.currentTimeMillis();
     this.eventType = eventType;
     this.eventData = eventData;
-    this.runtimeName = runtimeName;
+    this.runtime = runtime;
   }
 
   public long getTimestamp() { return timestamp; }
   public int getEventId() { return eventId; }
   public EVENT_TYPE getEventType() { return eventType; }
   public Object getEventData() { return eventData; }
-  public String getRuntimeName() { return runtimeName; }
+  public String getRuntime() { return runtime; }
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {

@@ -74,9 +74,9 @@ AMBROSE.tableView = function () {
     },
 
     supportsJob: function(data) {
-      return (data.event && data.event.runtimeName == 'pig') ||
-             (data.job && data.job.runtimeName == 'pig') ||
-             (data.jobs && data.jobs[0] && data.jobs[0].runtimeName == 'pig');
+      return (data.event && data.event.runtime == 'pig') ||
+             (data.job && data.job.runtime == 'pig') ||
+             (data.jobs && data.jobs[0] && data.jobs[0].runtime == 'pig');
     },
 
     init: function(ui) {
