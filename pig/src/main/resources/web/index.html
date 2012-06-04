@@ -123,8 +123,8 @@
             },
 
             supportsJob: function(data) {
-              return (data.event && data.event.runtimeName == 'cascading') ||
-                     (data.job && data.job.runtimeName == 'cascading');
+              return (data.event && data.event.runtime == 'cascading') ||
+                     (data.job && data.job.runtime == 'cascading');
             }
           };
         }

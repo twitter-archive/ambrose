@@ -48,14 +48,15 @@ public class DAGNode {
   private String jobId;
   private Collection<DAGNode> successors;
   private Collection<String> successorNames;
-  private String runtimeName;
-  private Integer dagLevel, x, y;
+  private String runtime;
+  private Integer dagLevel;
+  private Double x, y;
 
-  public DAGNode(String name, String[] aliases, String[] features, String runtimeName) {
+  public DAGNode(String name, String[] aliases, String[] features, String runtime) {
     this.name = name;
     this.aliases = aliases;
     this.features = features;
-    this.runtimeName = runtimeName;
+    this.runtime = runtime;
   }
 
   @JsonCreator
@@ -64,19 +65,19 @@ public class DAGNode {
                  @JsonProperty("features") String[] features,
                  @JsonProperty("jobId") String jobId,
                  @JsonProperty("successorNames") Collection<String> successorNames,
-                 @JsonProperty("runtimeName") String runtimeName) {
+                 @JsonProperty("runtime") String runtime) {
     this.name = name;
     this.aliases = aliases;
     this.features = features;
     this.jobId = jobId;
     this.successorNames = successorNames;
-    this.runtimeName = runtimeName;
+    this.runtime = runtime;
   }
 
   public String getName() { return name; }
   public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
   public String[] getFeatures() { return features == null ? new String[0] : features; }
-  public String getRuntimeName() { return runtimeName; }
+  public String getRuntime() { return runtime; }
 
   public String getJobId() { return jobId; }
   public void setJobId(String jobId) { this.jobId = jobId; }
@@ -84,11 +85,11 @@ public class DAGNode {
   public Integer getDagLevel() { return dagLevel; }
   public void setDagLevel(Integer dagLevel) { this.dagLevel = dagLevel; }
 
-  public Integer getX() { return x; }
-  public void setX(Integer x) { this.x = x; }
+  public Double getX() { return x; }
+  public void setX(Double x) { this.x = x; }
 
-  public Integer getY() { return y; }
-  public void setY(Integer y) { this.y = y; }
+  public Double getY() { return y; }
+  public void setY(Double y) { this.y = y; }
 
   @JsonIgnore
   public synchronized Collection<DAGNode> getSuccessors() { return successors;}
@@ -113,11 +114,11 @@ public class DAGNode {
       (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
     for (DAGNode node : nodes) {
       // useful if we need to read a file, add a field, output and re-generate
-      node.setRuntimeName("pig");
+      node.setRuntime("pig");
     }
 
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
 
-  private void setRuntimeName(String runtimeName) { this.runtimeName = runtimeName; }
+  private void setRuntime(String runtime) { this.runtime = runtime; }
 }
