@@ -35,9 +35,9 @@ public class InMemoryStatsServiceTest {
 
   private final String workflowId = "id1";
   private final WorkflowEvent[] testEvents = new WorkflowEvent[] {
-    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_STARTED, "jobIdFoo"),
-    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, "50"),
-    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_FINISHED, "done")
+    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_STARTED, "jobIdFoo", "someRuntime"),
+    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, "50", "someRuntime"),
+    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_FINISHED, "done", "someRuntime")
   };
 
   @Before

@@ -12,14 +12,18 @@ path.chord {
 #job-props {
 }
 
+#job-n-of-n {
+  width: 80%;
+}
+
 #job-summary {
-    width: 100%;
+  width: 100%;
 }
 
 .row-job-mappers {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 .row-job-reducers {
-    white-space: nowrap;
+  white-space: nowrap;
 }
