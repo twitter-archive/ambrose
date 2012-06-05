@@ -15,11 +15,10 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.util.JSONUtil;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.type.TypeReference;
 
@@ -49,11 +48,14 @@ public class DAGNode {
   private String jobId;
   private Collection<DAGNode> successors;
   private Collection<String> successorNames;
+  private String runtimeName;
+  private Integer dagLevel, x, y;
 
-  public DAGNode(String name, String[] aliases, String[] features) {
+  public DAGNode(String name, String[] aliases, String[] features, String runtimeName) {
     this.name = name;
     this.aliases = aliases;
     this.features = features;
+    this.runtimeName = runtimeName;
   }
 
   @JsonCreator
@@ -61,20 +63,32 @@ public class DAGNode {
                  @JsonProperty("aliases") String[] aliases,
                  @JsonProperty("features") String[] features,
                  @JsonProperty("jobId") String jobId,
-                 @JsonProperty("successorNames") Collection<String> successorNames) {
+                 @JsonProperty("successorNames") Collection<String> successorNames,
+                 @JsonProperty("runtimeName") String runtimeName) {
     this.name = name;
     this.aliases = aliases;
     this.features = features;
     this.jobId = jobId;
     this.successorNames = successorNames;
+    this.runtimeName = runtimeName;
   }
 
   public String getName() { return name; }
   public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
   public String[] getFeatures() { return features == null ? new String[0] : features; }
+  public String getRuntimeName() { return runtimeName; }
 
   public String getJobId() { return jobId; }
   public void setJobId(String jobId) { this.jobId = jobId; }
+
+  public Integer getDagLevel() { return dagLevel; }
+  public void setDagLevel(Integer dagLevel) { this.dagLevel = dagLevel; }
+
+  public Integer getX() { return x; }
+  public void setX(Integer x) { this.x = x; }
+
+  public Integer getY() { return y; }
+  public void setY(Integer y) { this.y = y; }
 
   @JsonIgnore
   public synchronized Collection<DAGNode> getSuccessors() { return successors;}
@@ -91,19 +105,19 @@ public class DAGNode {
 
   public synchronized Collection<String> getSuccessorNames() { return successorNames; }
 
-  /**
-   * Derializes a JSON List of DAG object into a List&lt;DAGNode>. Unrecognized properties will
-   * be ignored.
-   *
-   * @param dagListJson the string to convert into a JSON object.
-   * @return a List of DAGNode objects.
-   * @throws java.io.IOException
-   */
-  public static List<DAGNode> fromJSONList(String dagListJson) throws IOException {
-    ObjectMapper om = new ObjectMapper();
-    om.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+  @SuppressWarnings("unchecked")
+  public static void main(String[] args) throws IOException {
+    String sourceFile = "pig/src/main/resources/web/data/large-dag.json";
+    String json = JSONUtil.readFile(sourceFile);
+    List<DAGNode> nodes =
+      (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
+    for (DAGNode node : nodes) {
+      // useful if we need to read a file, add a field, output and re-generate
+      node.setRuntimeName("pig");
+    }
 
-    // not currently setting successors, only successorNames
-    return om.readValue(dagListJson, new TypeReference<List<DAGNode>>() { });
+    JSONUtil.writeJson(sourceFile + "2", nodes);
   }
+
+  private void setRuntimeName(String runtimeName) { this.runtimeName = runtimeName; }
 }

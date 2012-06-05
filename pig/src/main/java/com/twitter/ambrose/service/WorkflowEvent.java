@@ -15,6 +15,11 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.util.JSONUtil;
+import org.codehaus.jackson.type.TypeReference;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -32,18 +37,33 @@ public class WorkflowEvent {
 
   private long timestamp;
   private int eventId;
+  private String runtimeName;
   private EVENT_TYPE eventType;
   private Object eventData;
 
-  public WorkflowEvent(EVENT_TYPE eventType, Object eventData) {
+  public WorkflowEvent(EVENT_TYPE eventType, Object eventData, String runtimeName) {
     this.eventId = NEXT_ID.incrementAndGet();
     this.timestamp = System.currentTimeMillis();
     this.eventType = eventType;
     this.eventData = eventData;
+    this.runtimeName = runtimeName;
   }
 
   public long getTimestamp() { return timestamp; }
   public int getEventId() { return eventId; }
   public EVENT_TYPE getEventType() { return eventType; }
   public Object getEventData() { return eventData; }
+  public String getRuntimeName() { return runtimeName; }
+
+  @SuppressWarnings("unchecked")
+  public static void main(String[] args) throws IOException {
+    String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
+    List<WorkflowEvent> events =
+      (List<WorkflowEvent>)JSONUtil.readJson(json, new TypeReference<List<WorkflowEvent>>() { });
+    for (WorkflowEvent event : events) {
+      // useful if we need to read a file, add a field, output and re-generate
+    }
+
+    JSONUtil.writeJson("pig/src/main/resources/web/data/small-events.json2", events);
+  }
 }
