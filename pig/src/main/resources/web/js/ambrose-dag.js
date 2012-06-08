@@ -15,15 +15,208 @@ limitations under the License.
 */
 AMBROSE.dagView = function () {
 
+  var viz;
+
   return {
     divName: "dagView",
     tabName: "Dag",
 
+    minX: Infinity,
+    maxX: -Infinity,
+    minY: Infinity,
+    maxY: -Infinity,
+
+    addDiv: function() {
+      // add the div that the graph will render in
+      $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"></div>');
+
+      // add the tab div
+      $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
+    },
+
     initGraph: function(jobs) {
         this.addDiv();
 
-        //TODO: implement DAG
+        var nodeWidth = 20;
+        var canvasWidth = 1100;
+        var canvasHeight = 400;
+
+        var minX = this.minX,
+            maxX = this.maxX,
+            minY = this.minY,
+            maxY = this.maxY,
+            json = jobs.map(function(n) {
+          var x = n.x,
+              y = n.y;
+
+          maxX = maxX < x ? x : maxX;
+          minX = minX > x ? x : minX;
+
+          maxY = maxY < y ? y : maxY;
+          minY = minY > y ? y : minY;
+
+          return {
+            id: n.name,
+            name: n.index,
+            data: n,
+            adjacencies: n.successorNames
+          };
+        });
+
+        viz = new $jit.ST({
+          injectInto: 'dagView',
+          width: canvasWidth,
+          height: canvasHeight,
+          Navigation: {
+            enable: true,
+            panning: 'avoid nodes',
+            zooming: 10 //zoom speed. higher is more sensible
+          },
+          Node: {
+            //overridable: true,
+            type: 'none',
+            width: nodeWidth,
+            height: 20,
+            align: 'left'
+          },
+          Edge: {
+            overridable: true,
+            type: 'arrow',
+            color: '#23A4FF',
+            lineWidth: 0.8
+          },
+          //Native canvas text styling
+          Label: {
+            type: 'HTML',
+            size: 12,
+            style: 'bold'
+          },
+          //Enable tips
+          Tips: {
+            enable: true,
+            //add positioning offsets
+            offsetX: 20,
+            offsetY: 20,
+            //implement the onShow method to
+            //add content to the tooltip when a node
+            //is hovered
+            onShow: function(tip, node, isLeaf, domElement) {
+              var whiteList = ['name', 'aliases', 'features', 'jobId', 'runtime'],
+                  data = node.data,
+                  html = "<div class=\"tip-title\">" + node.name
+                + "</div><div class=\"tip-text\"><ul>";
+
+              for (var k in data) {
+                if (~whiteList.indexOf(k)) {
+                  html += "<li><b>" + k + "</b>: " + data[k] + "</li>";
+                }
+              }
+
+              tip.innerHTML =  html + "</ul></div>";
+            }
+          },
+          // Add text to the labels. This method is only triggered
+          // on label creation and only for DOM labels (not native canvas ones).
+          onCreateLabel: function(domElement, node){
+            domElement.innerHTML = node.name;
+            var style = domElement.style;
+            style.fontSize = "0.8em";
+            style.color = "black";
+            style.width = nodeWidth + 'px';
+          },
+          // Change node styles when DOM labels are placed
+          // or moved.
+          onPlaceLabel: function(domElement, node){
+            var style = domElement.style;
+            var left = parseInt(style.left);
+            var top = parseInt(style.top);
+            var w = domElement.offsetWidth;
+            var h = node.getData('height');
+
+            domElement.style.width = (nodeWidth * Math.max(1, viz.canvas.scaleOffsetX)) + 'px';
+
+            style.left = left + 'px';
+            style.top = top + 'px';
+
+            var height = domElement.offsetHeight;
+
+            style.top = (top + (height ? -height/2 + 10 : 0)) + 'px';
+
+          }
+        });
+        // load JSON data.
+        viz.loadJSON(json);
+
+        var diffX = maxX - minX,
+            diffY = maxY - minY;
+
+        viz.graph.eachNode(function(n) {
+          n.pos.setc(diffX ? ((n.data.x - minX) / (maxX - minX) * canvasWidth - canvasWidth / 2 - 2) : (n.data.x - canvasWidth / 2),
+                     diffY ? ((n.data.y - minY) / (maxY - minY) * canvasHeight - canvasHeight / 2) : n.data.y);
+
+          n._depth = n.data.dagLevel;
+          n.exist = true;
+          n.drawn = true;
+
+          n.eachAdjacency(function(adj) {
+            var nodeFrom = adj.nodeFrom,
+                nodeTo = adj.nodeTo;
+            if (nodeFrom._depth < nodeTo._depth) {
+              adj.setData('direction', [nodeFrom.id, nodeTo.id]);
+            } else {
+              adj.setData('direction', [nodeTo.id, nodeFrom.id]);
+            }
+          });
+        });
+
+        //var diffX = maxX - minX,
+            //diffY = maxY - minY;
+
+        //var xScale = diffX > canvasWidth ? (diffX - canvasWidth) : 0,
+            //yScale = diffY > canvasHeight ? (diffY - canvasHeight) : 0;
+
+        //if (xScale || yScale) {
+          //if (xScale > yScale) {
+            //viz.canvas.scale(canvasWidth / diffX, canvasWidth / diffX);
+          //} else {
+            //viz.canvas.scale(canvasHeight / diffY, canvasHeight / diffY);
+          //}
+        //}
+
+        viz.plot();
+        // end
+
+    },
+    refreshDisplay: function(event, data) {
+      if (!viz) return;
+
+      var type = event.type,
+          id = data.job.name,
+          n = viz.graph.getNode(id);
+
+      if (n) {
+        var label = viz.fx.labels.getLabel(n.id),
+            update = false;
+        label.className = 'node ' + type;
+
+        if (type == 'JOB_FINISHED') {
+          n.eachAdjacency(function(a) {
+            a.setData('color', '#aaa');
+          });
+          update = true;
+        } else if (type == 'JOB_FAILED') {
+          n.eachAdjacency(function(a) {
+            a.setData('color', '#c00');
+          });
+          update = true;
+        }
+
+        if (update) {
+          viz.fx.plot();
+        }
+      }
+      console.log(data, n, type);
     }
-  }
-}
+  };
+};
 var dagView = $.extend({}, new AMBROSE.chordView(), new AMBROSE.dagView());

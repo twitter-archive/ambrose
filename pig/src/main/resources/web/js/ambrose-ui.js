@@ -208,6 +208,7 @@ AMBROSE.ui = function(options) {
               data["job"] = updateJobData(event.eventData);
             }
 
+            console.log('trigger', event.eventType);
             $(ui).trigger( event.eventType, data);
             lastProcessedEventId = eventId;
             eventsHandledCount++;

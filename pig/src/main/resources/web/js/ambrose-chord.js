@@ -143,13 +143,13 @@ AMBROSE.chordView = function() {
 
     addDiv: function() {
       // add the div that the graph will render in
-      $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"></div>');
+      $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"><div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div></div>');
 
       // add the tab div
       $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
 
       // if there is more than one graph, add unhide the nav tab and select the first tab
-      if ($('.viz-pane').length > 1) {
+      if ($('.viz-pane').length < 2) {
         $('#vizTabs').show();
         $('#vizTabs a:first').tab('show');
       } else {
@@ -173,7 +173,7 @@ AMBROSE.chordView = function() {
 
       this.addDiv();
       // set up canvas
-      svg = d3.select("#chordView")
+      svg = d3.select("#chordViewViz")
         .append("svg:svg")
         .attr("width", r1 * 3)
         .attr("height", r1 * 2)
@@ -336,9 +336,11 @@ AMBROSE.chordView = function() {
       /**
        * Select the given job and update global state.
        */
-      $(ui).bind( "jobSelected,JOB_STARTED", function(event, data) {
-        view.refreshDisplay();
+      $(ui).bind("jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED", function(event, data) {
+        view.refreshDisplay(event, data);
       })
-    }
+    },
+
+    refreshDisplay: refreshDisplay
   }
 }
