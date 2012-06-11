@@ -15,7 +15,7 @@ limitations under the License.
 */
 AMBROSE.dagView = function () {
 
-  var viz;
+  //var viz;
 
   return {
     divName: "dagView",
@@ -105,11 +105,16 @@ AMBROSE.dagView = function () {
               var whiteList = ['aliases', 'features', 'jobId'],
                   data = node.data,
                   html = "<div class=\"tip-title\">" + node.name
-                + "</div><div class=\"tip-text\"><ul>";
+                + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
 
               for (var k in data) {
                 if (~whiteList.indexOf(k)) {
-                  html += "<li><b>" + k + "</b>: " + data[k] + "</li>";
+                  if (k == 'jobId') {
+                    html += "<li><b>" + k + "</b>: <a href=\"http://hadoop-dw-jt.smf1.twitter.com:50030/jobdetails.jsp?jobid=" +
+                      data[k] + "\" target=\"__blank\">" + data[k] + "</a></li>";
+                  } else {
+                    html += "<li><b>" + k + "</b>: " + data[k] + "</li>";
+                  }
                 }
               }
 
@@ -124,6 +129,11 @@ AMBROSE.dagView = function () {
             style.fontSize = "0.8em";
             style.color = "black";
             style.width = nodeWidth + 'px';
+
+            domElement.addEventListener('click', function(e) {
+              viz.tooltipPinned = !viz.tooltipPinned;
+              viz.tips.tip.classList.toggle('pinned');
+            }, false);
           },
           // Change node styles when DOM labels are placed
           // or moved.
@@ -184,12 +194,51 @@ AMBROSE.dagView = function () {
           //}
         //}
 
+        this.extendViz(viz);
+
         viz.plot();
         // end
 
     },
+
+    extendViz: function(viz) {
+      //Add pinned tooltip behavior
+      var tips = viz.tips,
+          onMouseMove = tips.onMouseMove,
+          onMouseOut  = tips.onMouseOut,
+          onMouseOver = tips.onMouseOver,
+          wrapper = function (cond, fn) {
+            return function() {
+              if (cond.apply(this, arguments)) {
+                return fn.apply(this, arguments);
+              }
+            };
+          },
+          cond = function() {
+            return !viz.tooltipPinned;
+          },
+          hidetip = function(e) {
+            viz.tooltipPinned = false;
+            viz.tips.tip.classList.remove('pinned');
+            tips.onMouseOut.call(tips, e, window);
+          };
+
+      tips.onMouseMove = wrapper(cond, onMouseMove);
+      tips.onMouseOver = wrapper(cond, onMouseOver);
+      tips.onMouseOut  = wrapper(cond, onMouseOut);
+
+      tips.tip.addEventListener('click', function(e) {
+        if (~e.target.className.indexOf('closetip')) {
+          hidetip(e);
+        }
+      }, false);
+      viz.canvas.canvases[0].canvas.addEventListener('mousedown', hidetip, false);
+      viz.canvas.canvases[0].canvas.addEventListener('mousewheel', hidetip, false);
+      viz.canvas.canvases[0].canvas.addEventListener('DOMMouseScroll', hidetip, false);
+    },
+
     refreshDisplay: function(event, data) {
-      if (!viz) return;
+      if (!window.viz) return;
 
       var type = event.type,
           id = data.job.name,
