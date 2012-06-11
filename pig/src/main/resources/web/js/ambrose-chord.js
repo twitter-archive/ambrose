@@ -336,7 +336,7 @@ AMBROSE.chordView = function() {
       /**
        * Select the given job and update global state.
        */
-      $(ui).bind("jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED", function(event, data) {
+      $(ui).bind("jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED JOB_PROGRESS", function(event, data) {
         view.refreshDisplay(event, data);
       })
     },

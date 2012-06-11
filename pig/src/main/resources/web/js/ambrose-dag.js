@@ -120,7 +120,7 @@ AMBROSE.dagView = function () {
             //add content to the tooltip when a node
             //is hovered
             onShow: function(tip, node, isLeaf, domElement) {
-              var whiteList = ['aliases', 'features', 'jobId', 'status'],
+              var whiteList = ['aliases', 'features', 'jobId', 'status', 'map progress', 'reduce progress'],
                   data = node.data,
                   html = "<div class=\"tip-title\">" + node.name
                 + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
@@ -131,7 +131,7 @@ AMBROSE.dagView = function () {
                     html += "<li><b>" + k + "</b>: <a href=\"http://hadoop-dw-jt.smf1.twitter.com:50030/jobdetails.jsp?jobid=" +
                       data[k] + "\" target=\"__blank\">" + data[k] + "</a></li>";
                   } else {
-                    html += "<li><b>" + k + "</b>: " + data[k] + "</li>";
+                    html += "<li><b>" + k + "</b>: <span id=\"" + data['jobId'] + "_" + k + "\">" + data[k] + "</span></li>";
                   }
                 }
               }
@@ -149,8 +149,15 @@ AMBROSE.dagView = function () {
             style.width = nodeWidth + 'px';
 
             domElement.addEventListener('click', function(e) {
-              viz.tooltipPinned = !viz.tooltipPinned;
-              viz.tips.tip.classList.toggle('pinned');
+              var tips = viz.tips;
+              if (tips.tip.classList.contains('pinned')) {
+                viz.tooltipPinned = false;
+                tips.tip.classList.remove('pinned');
+                tips.onMouseOut.call(tips, e, window);
+              } else {
+                viz.tooltipPinned = !viz.tooltipPinned;
+                tips.tip.classList.toggle('pinned');
+              }
             }, false);
           },
           // Change node styles when DOM labels are placed
@@ -260,25 +267,47 @@ AMBROSE.dagView = function () {
 
       var type = event.type,
           id = data.job.name,
-          n = viz.graph.getNode(id);
+          job = data.job,
+          n = viz.graph.getNode(id),
+          $id = function(d) { return document.getElementById(d); },
+          entry;
 
       n.data.status = type;
+
+      if (job.mapProgress) {
+        n.data['map progress'] = (Math.round(job.mapProgress * 100)) + '%';
+        entry = $id(job.jobId + '_map progress');
+        if (entry) {
+          entry.innerHTML = n.data['map progress'];
+        }
+      }
+
+      if (job.reduceProgress) {
+        n.data['reduce progress'] = (Math.round(job.reduceProgress * 100)) + '%';
+        entry = $id(job.jobId + '_reduce progress');
+        if (entry) {
+          entry.innerHTML = n.data['reduce progress'];
+        }
+      }
 
       if (n) {
         var label = viz.fx.labels.getLabel(n.id),
             update = false;
-        label.className = 'node ' + type;
 
         if (type == 'JOB_FINISHED') {
+          label.className = 'node ' + type;
           n.eachAdjacency(function(a) {
             a.setData('color', '#aaa');
           });
           update = true;
         } else if (type == 'JOB_FAILED') {
+          label.className = 'node ' + type;
           n.eachAdjacency(function(a) {
             a.setData('color', '#c00');
           });
           update = true;
+        } else if (type == 'jobSelected') {
+          label.className = 'node ' + type;
         }
 
         if (update) {
