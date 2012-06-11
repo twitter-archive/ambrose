@@ -238,7 +238,7 @@ AMBROSE.dagView = function () {
     },
 
     refreshDisplay: function(event, data) {
-      if (!window.viz) return;
+      if (!viz) return;
 
       var type = event.type,
           id = data.job.name,
