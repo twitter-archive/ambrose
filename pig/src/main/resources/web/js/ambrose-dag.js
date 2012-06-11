@@ -92,6 +92,24 @@ AMBROSE.dagView = function () {
             size: 12,
             style: 'bold'
           },
+          Events: {
+            enable: true,
+            //Update node positions when dragged
+            onDragMove: function(node, eventInfo, e) {
+              viz.tooltipPinned = true;
+              viz.tips.tip.style.display = 'none';
+
+              var pos = eventInfo.getPos();
+              node.pos.setc(pos.x, pos.y);
+              viz.plot();
+            },
+            onDragEnd: function() {
+              viz.tooltipPinned = false;
+            },
+            onDragCancel: function() {
+              viz.tooltipPinned = false;
+            }
+          },
           //Enable tips
           Tips: {
             enable: true,
@@ -102,7 +120,7 @@ AMBROSE.dagView = function () {
             //add content to the tooltip when a node
             //is hovered
             onShow: function(tip, node, isLeaf, domElement) {
-              var whiteList = ['aliases', 'features', 'jobId'],
+              var whiteList = ['aliases', 'features', 'jobId', 'status'],
                   data = node.data,
                   html = "<div class=\"tip-title\">" + node.name
                 + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
@@ -244,6 +262,8 @@ AMBROSE.dagView = function () {
           id = data.job.name,
           n = viz.graph.getNode(id);
 
+      n.data.status = type;
+
       if (n) {
         var label = viz.fx.labels.getLabel(n.id),
             update = false;
@@ -265,7 +285,6 @@ AMBROSE.dagView = function () {
           viz.fx.plot();
         }
       }
-      console.log(data, n, type);
     }
   };
 };

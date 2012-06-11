@@ -111,11 +111,11 @@ div > canvas {
   -o-box-shadow:#999 2px 2px 8px;
   box-shadow:#999 2px 2px 8px;
 
-  transition: 500ms box-shadow,opacity;
-  -webkit-transition: 500ms -webkit-box-shadow,opacity;
-  -moz-transition: 500ms -moz-box-shadow,opacity;
-  -o-transition: 500ms -o-box-shadow,opacity;
-  -ms-transition: 500ms -ms-box-shadow,opacity;
+  transition: 400ms box-shadow,opacity;
+  -webkit-transition: 400ms -webkit-box-shadow,opacity;
+  -moz-transition: 400ms -moz-box-shadow,opacity;
+  -o-transition: 400ms -o-box-shadow,opacity;
+  -ms-transition: 400ms -ms-box-shadow,opacity;
 
   opacity:0.9;
   filter:alpha(opacity=90);
@@ -139,10 +139,10 @@ div > canvas {
 }
 
 .tip.pinned {
-  -moz-box-shadow:#0062A3 2px 2px 12px;
-  -webkit-box-shadow:#0062A3 2px 2px 12px;
-  -o-box-shadow:#0062A3 2px 2px 12px;
-  box-shadow:#0062A3 2px 2px 12px;
+  -moz-box-shadow:#111 0px 0px 10px;
+  -webkit-box-shadow:#111 0px 0px 10px;
+  -o-box-shadow:#111 0px 0px 10px;
+  box-shadow:#111 0px 0px 10px;
   opacity: 0.98;
 }
 
