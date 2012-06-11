@@ -15,7 +15,7 @@ limitations under the License.
 */
 AMBROSE.dagView = function () {
 
-  //var viz;
+  var viz;
 
   return {
     divName: "dagView",
