@@ -91,6 +91,7 @@ div > canvas {
 .tip {
 	 text-align: left;
 	 width:auto;
+   border-radius: 0.7em;
 }
 
 .tip-title {

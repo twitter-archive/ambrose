@@ -49,6 +49,7 @@ AMBROSE.dagView = function () {
           var x = n.x,
               y = n.y;
 
+          //get bounding box
           maxX = maxX < x ? x : maxX;
           minX = minX > x ? x : minX;
 
@@ -57,7 +58,7 @@ AMBROSE.dagView = function () {
 
           return {
             id: n.name,
-            name: n.index,
+            name: n.index + 1,
             data: n,
             adjacencies: n.successorNames
           };
@@ -101,7 +102,7 @@ AMBROSE.dagView = function () {
             //add content to the tooltip when a node
             //is hovered
             onShow: function(tip, node, isLeaf, domElement) {
-              var whiteList = ['name', 'aliases', 'features', 'jobId', 'runtime'],
+              var whiteList = ['aliases', 'features', 'jobId'],
                   data = node.data,
                   html = "<div class=\"tip-title\">" + node.name
                 + "</div><div class=\"tip-text\"><ul>";
