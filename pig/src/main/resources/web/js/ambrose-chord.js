@@ -131,39 +131,31 @@ limitations under the License.
     // TODO(Andy Schlaikjer): highlight the selected job
   }
 
-  divName = "chordView";
-  tabName = "Chord";
-
-  function _addDiv() {
-    // add the div that the graph will render in
-    $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"><div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div></div>');
-
-    // add the tab div
-    $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
-
-    // if there is more than one graph, add unhide the nav tab and select the first tab
-    if ($('.viz-pane').length > 2) {
-      $('#vizTabs').show();
-      $('#vizTabs a:first').tab('show');
-    } else {
-      $('#vizTabs').hide();
-      $('#' + this.divName).show();
-    }
-  }
-
   chord.fn = chord.prototype = {
     init: function(ui) {
       this.ui = _ui = ui;
+      this.divName = "chordView";
+      this.tabName = "Chord";
       var chord = this;
       ui.bind('dagLoaded', function(event, data) {
         chord.initGraph(data.jobs);
       });
       ui.bind('jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED', function(event, data) {
-        chord.refresh();
+        chord.refresh(event, data);
       });
     },
 
+    addDiv: function() {
+      // alert('Adding shit! ' + this.divName + ' ' + this.tabName);
+      // add the div that the graph will render in
+      $('#vizGroup').append('<div class="tab-pane viz-pane" id="' + this.divName + '"></div>');
+      // add the tab div
+      $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
+    },
+
     initGraph: function(jobs) {
+      this.addDiv();
+
       var chord = this;
 
       // jobs themselves are arc segments around the edge of the chord diagram
@@ -178,13 +170,11 @@ limitations under the License.
         .startAngle(_groupStartAngle)
         .endAngle(_groupEndAngle);
 
-      _addDiv();
-
       // set up canvas
       // TODO(Andy Schlaikjer): Is this safe in the presence of multiple view
       // impls which may want to add children to #chart element? Should this
       // instead reference the 'view' var?
-      _svg = d3.select("#chordViewViz")
+      _svg = d3.select("#" + this.divName)
         .append("svg:svg")
         .attr("width", _r1 * 3)
         .attr("height", _r1 * 2)
@@ -333,7 +323,7 @@ limitations under the License.
         .attr("d", d3.svg.chord().radius(_r0));
     },
 
-    refresh: function() {
+    refresh: function(event, data) {
       // update path.arc elements
       _svg.selectAll("path.arc")
         .transition()

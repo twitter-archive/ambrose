@@ -293,6 +293,10 @@ var AMBROSE = (function($, d3) {
     load: function() {
       var ui = this;
       $(document).ready(function() {
+        // select first chart tab
+        $('#vizGroup > div').addClass('active');
+
+        // schedule retrieval of job graph
         setTimeout(function() {
           _loadDag.call(ui);
         }, 500);
