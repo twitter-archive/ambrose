@@ -65,6 +65,9 @@ var AMBROSE = (function($, d3) {
         ui.selectJob(_jobs[0]);
       }
 
+      // select first chart tab
+      $('#vizGroup > div').addClass('active');
+
       // begin polling server for events
       _startEventPolling.call(ui);
     });
@@ -293,11 +296,8 @@ var AMBROSE = (function($, d3) {
     load: function() {
       var ui = this;
       $(document).ready(function() {
-        // select first chart tab
-        $('#vizGroup > div').addClass('active');
-
-        // schedule retrieval of job graph
         setTimeout(function() {
+          // retrieve job graph
           _loadDag.call(ui);
         }, 500);
       });
