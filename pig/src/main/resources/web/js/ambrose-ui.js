@@ -60,13 +60,20 @@ var AMBROSE = (function($, d3) {
       // trigger event
       ui.trigger('dagLoaded', {jobs: _jobs});
 
+      // select first chart tab
+      $('#vizGroup > div:first-child').addClass('active');
+
+      // display chart tabs if more than one
+      if ($('#vizTabs > li').length > 1) {
+        $('#vizTabs').show();
+      } else {
+        $('#vizTabs').hide();
+      }
+
       // select first job
       if (_jobs.length > 0) {
         ui.selectJob(_jobs[0]);
       }
-
-      // select first chart tab
-      $('#vizGroup > div').addClass('active');
 
       // begin polling server for events
       _startEventPolling.call(ui);
