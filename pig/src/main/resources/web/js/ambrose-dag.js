@@ -120,7 +120,7 @@ AMBROSE.dagView = function () {
             //add content to the tooltip when a node
             //is hovered
             onShow: function(tip, node, isLeaf, domElement) {
-              var whiteList = ['jobId', 'status', 'aliases', 'features', 'map progress', 'reduce progress'],
+              var whiteList = ['jobId', 'aliases', 'features', 'map progress', 'reduce progress'],
                   data = node.data,
                   html = "<div class=\"tip-title\">" + node.name
                 + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
