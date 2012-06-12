@@ -120,21 +120,21 @@ AMBROSE.dagView = function () {
             //add content to the tooltip when a node
             //is hovered
             onShow: function(tip, node, isLeaf, domElement) {
-              var whiteList = ['aliases', 'features', 'jobId', 'status', 'map progress', 'reduce progress'],
+              var whiteList = ['jobId', 'status', 'aliases', 'features', 'map progress', 'reduce progress'],
                   data = node.data,
                   html = "<div class=\"tip-title\">" + node.name
                 + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
 
-              for (var k in data) {
-                if (~whiteList.indexOf(k)) {
+              whiteList.forEach(function(k) {
+                if (k in data) {
                   if (k == 'jobId') {
                     html += "<li><b>" + k + "</b>: <a href=\"http://hadoop-dw-jt.smf1.twitter.com:50030/jobdetails.jsp?jobid=" +
                       data[k] + "\" target=\"__blank\">" + data[k] + "</a></li>";
                   } else {
-                    html += "<li><b>" + k + "</b>: <span id=\"" + data['jobId'] + "_" + k + "\">" + data[k] + "</span></li>";
+                    html += "<li><b>" + k + "</b>: <span id=\"" + data.jobId + "_" + k + "\">" + data[k] + "</span></li>";
                   }
                 }
-              }
+              });
 
               tip.innerHTML =  html + "</ul></div>";
             }
@@ -260,6 +260,8 @@ AMBROSE.dagView = function () {
       viz.canvas.canvases[0].canvas.addEventListener('mousedown', hidetip, false);
       viz.canvas.canvases[0].canvas.addEventListener('mousewheel', hidetip, false);
       viz.canvas.canvases[0].canvas.addEventListener('DOMMouseScroll', hidetip, false);
+
+      document.querySelector('a[href="#chordView"]').addEventListener('click', hidetip, false);
     },
 
     refreshDisplay: function(event, data) {
