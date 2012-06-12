@@ -277,7 +277,7 @@ AMBROSE.dagView = function () {
       n.data.status = type;
 
       if (job.mapProgress) {
-        n.data['map progress'] = (Math.round(job.mapProgress * 100)) + '%';
+        n.data['map progress'] = AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress);
         entry = $id(job.jobId + '_map progress');
         if (entry) {
           entry.innerHTML = n.data['map progress'];
@@ -285,7 +285,7 @@ AMBROSE.dagView = function () {
       }
 
       if (job.reduceProgress) {
-        n.data['reduce progress'] = (Math.round(job.reduceProgress * 100)) + '%';
+        n.data['reduce progress'] = AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress);
         entry = $id(job.jobId + '_reduce progress');
         if (entry) {
           entry.innerHTML = n.data['reduce progress'];
