@@ -49,7 +49,6 @@
     </div>
 
     <div class="container">
-
       <div class="row">
         <div class="span12"><p>Status: <span  id="scriptStatusDialog"></span></p></div>
       </div>
@@ -58,15 +57,9 @@
       </div>
 
       <div class="row">
-        <div class="span6">
+        <div class="span12">
           <ul class="nav nav-tabs" id="vizTabs" style="display:none"></ul>
           <div class="tab-content" id="vizGroup"></div>
-        </div>
-        <div class="span6">
-          <table id="job-props" class="table">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
         </div>
       </div>
 
@@ -93,6 +86,7 @@
     <script src="js/jquery-1.7.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/d3-2.9.1.min.js"></script>
+    <script src="js/jit-2.0.1.yc.js"></script>
     <script src="js/colorbrewer.js"></script>
     <script src="js/ambrose-ui.js"></script>
     <script src="js/ambrose-chord.js"></script>
@@ -138,8 +132,8 @@
           defaultDetailView.init(ui);
           //customDetailView.init(ui);
           defaultTableView.init(ui);
-          dagView.init(ui); // TODO: comment this out to disable DAG view
           chordView.init(ui);
+          dagView.init(ui); // TODO: comment this out to disable DAG view
           ui.init();
         });
     </script>

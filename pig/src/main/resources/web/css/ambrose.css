@@ -23,3 +23,146 @@ path.chord {
 .row-job-reducers {
     white-space: nowrap;
 }
+
+.node {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.7em;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+
+  transition: 700ms background, box-shadow;
+  -webkit-transition: 700ms background, -webkit-box-shadow;
+  -ms-transition: 700ms background, -ms-box-shadow;
+  -o-transition: 700ms background, -o-box-shadow;
+  -moz-transition: 700ms background, -moz-box-shadow;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.node.jobSelected {
+  background: yellow;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -ms-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+}
+
+.node.JOB_STARTED {
+  background: yellow;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -ms-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+}
+
+/*
+.node.JOB_PROGRESS {
+  background: green;
+}
+*/
+
+.node.JOB_FINISHED {
+  background: #aaa;
+  box-shadow: 0 0 0px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 0px rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: 0 0 0px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 0px rgba(0, 0, 0, 0.6);
+  -ms-box-shadow: 0 0 0px rgba(0, 0, 0, 0.6);
+}
+
+.node.JOB_FAILED {
+  background: red;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -o-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+  -ms-box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+}
+
+div > canvas {
+  cursor: move;
+}
+
+.tip {
+	 text-align: left;
+	 width:auto;
+   border-radius: 0.7em;
+}
+
+.tip-title {
+  font-size: 11px;
+  text-align:center;
+  margin-bottom:2px;
+}
+
+.tip {
+  position: relative;
+  color: #111;
+  max-width: 400px;
+  background-color: white;
+  border:1px solid #ccc;
+  -moz-box-shadow:#999 2px 2px 8px;
+  -webkit-box-shadow:#999 2px 2px 8px;
+  -o-box-shadow:#999 2px 2px 8px;
+  box-shadow:#999 2px 2px 8px;
+
+  transition: 400ms box-shadow,opacity;
+  -webkit-transition: 400ms -webkit-box-shadow,opacity;
+  -moz-transition: 400ms -moz-box-shadow,opacity;
+  -o-transition: 400ms -o-box-shadow,opacity;
+  -ms-transition: 400ms -ms-box-shadow,opacity;
+
+  opacity:0.9;
+  filter:alpha(opacity=90);
+  font-size:10px;
+  font-family:Verdana, Geneva, Arial, Helvetica, sans-serif;
+  padding:7px;
+}
+
+.tip ul {
+  margin: 0;
+  padding: 0;
+  margin-left: 3px;
+}
+
+.tip ul li {
+  list-style-type: none;
+}
+
+.tip.pinned .closetip {
+  visibility: visible;
+}
+
+.tip.pinned {
+  -moz-box-shadow:#111 0px 0px 10px;
+  -webkit-box-shadow:#111 0px 0px 10px;
+  -o-box-shadow:#111 0px 0px 10px;
+  box-shadow:#111 0px 0px 10px;
+  opacity: 0.98;
+}
+
+.tip .closetip {
+  font-family: Sans-serif;
+  visibility: hidden;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: black;
+  background-color: #D7E2E4;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1px 7px;
+  border-top-right-radius: 0.5em;
+  cursor: pointer;
+}
+
+.tip .closetip:hover {
+  background-color: #BAC5C7;
+}

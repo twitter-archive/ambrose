@@ -494,7 +494,7 @@ function initialize() {
   // initialize groups
   for (var i = 0; i < groups.length; i++) {
     var d = groups[i];
-    
+
     // associate group with job
     d.job = jobs[i];
 
