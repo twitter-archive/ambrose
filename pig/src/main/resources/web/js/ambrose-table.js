@@ -13,53 +13,81 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-var AMBROSE = window.AMBROSE || {};
 
-// controls the table view of the list of jobs
-AMBROSE.tableView = function () {
-  var ui, view;
+/**
+ * Ambrose module "table" which controls the table view of all jobs in workflow.
+ */
+(function($, d3, ambrose) {
+  var table = ambrose.table = function(ui) {
+    return new ambrose.table.fn.init(ui);
+  };
 
-  // private members and methods above, public below
-  return {
+  function _handleDagLoaded(event, data) {
+    if (this.supportsJob(data)) {
+      this.initTable();
+      this.loadTable(data.jobs);
+    }
+  }
 
-    /**
-     * Initialize an empty table with the expected structure
-     */
+  function _handleJobUpdated(event, data) {
+    if (this.supportsJob(data)) {
+      this.updateTableRow(data.job);
+    }
+  }
+
+  table.fn = table.prototype = {
+    init: function(ui) {
+      this.ui = ui;
+      this.initTable();
+      var table = this;
+      ui.bind('dagLoaded', function(event, data) {
+        _handleDagLoaded.call(table, event, data);
+      });
+      ui.bind('JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED jobSelected', function(event, data) {
+        _handleJobUpdated.call(table, event, data);
+      });
+    },
+
+    supportsJob: function(data) {
+      return (data.event && data.event.runtimeName == 'pig') ||
+        (data.job && data.job.runtimeName == 'pig') ||
+        (data.jobs && data.jobs[0] && data.jobs[0].runtimeName == 'pig');
+    },
+
     initTable: function() {
-      $('#job-summary > thead').empty();
-      $('#job-summary > thead:last').append(
-        '<tr>' +
-         '<th></th>' +
-         '<th>Job ID</th>' +
-         '<th>Status</th>' +
-         '<th>Aliases</th>' +
-         '<th>Features</th>' +
-         '<th>Mappers</th>' +
-         '<th>Reducers</th>' +
-        '</tr>');
+      $('#job-summary > thead').empty().append(
+        '<tr>'
+          + '<th></th>'
+          + '<th>Job ID</th>'
+          + '<th>Status</th>'
+          + '<th>Aliases</th>'
+          + '<th>Features</th>'
+          + '<th>Mappers</th>'
+          + '<th>Reducers</th>'
+          + '</tr>'
+      );
     },
 
     loadTable: function(jobs) {
+      var table = this;
       jobs.forEach(function(job) {
-        var rowClass = ''
-        if (job.index % 2 != 0) {
-          rowClass = 'odd'
-        }
+        var rowClass = '';
+        if (job.index % 2 != 0) rowClass = 'odd';
         $('#job-summary tr:last').after(
-          '<tr id="row-num-' + job.index + '">'+
-            '<td class="row-job-num">' + (job.index + 1) + '</td>' +
-            '<td class="row-job-id"><a class="job-jt-url" target="_blank"></a></td>' +
-            '<td class="row-job-status"/>' +
-            '<td class="row-job-alias"/>' +
-            '<td class="row-job-feature"/>' +
-            '<td class="row-job-mappers"/>' +
-            '<td class="row-job-reducers"/>' +
-          '</tr>'
+          '<tr id="row-num-' + job.index + '">'
+            + '<td class="row-job-num">' + (job.index + 1) + '</td>'
+            + '<td class="row-job-id"><a class="job-jt-url" target="_blank"></a></td>'
+            + '<td class="row-job-status"/>'
+            + '<td class="row-job-alias"/>'
+            + '<td class="row-job-feature"/>'
+            + '<td class="row-job-mappers"/>'
+            + '<td class="row-job-reducers"/>'
+            + '</tr>'
         );
         $('#row-num-' + job.index).bind('click', function() {
-          $(this.ui).selectJob(job);
+          table.ui.selectJob(job);
         });
-        view.updateTableRow(job);
+        table.updateTableRow(job);
       });
     },
 
@@ -77,25 +105,10 @@ AMBROSE.tableView = function () {
       return (data.event && data.event.runtime == 'pig') ||
              (data.job && data.job.runtime == 'pig') ||
              (data.jobs && data.jobs[0] && data.jobs[0].runtime == 'pig');
-    },
-
-    init: function(ui) {
-      this.ui = ui;
-      view = this;
-      view.initTable();
-
-      $(ui).bind( "dagLoaded", function(event, data) {
-        if (view.supportsJob(data)) {
-          view.initTable();
-          view.loadTable(data.jobs);
-        }
-      })
-
-      $(ui).bind( "jobSelected JOB_STARTED JOB_PROGRESS JOB_FAILED JOB_FINISHED", function(event, data) {
-        if (view.supportsJob(data)) {
-          view.updateTableRow(data.job);
-        }
-      })
     }
-  }
-}
+  };
+
+  // set the init function's prototype for later instantiation
+  table.fn.init.prototype = table.fn;
+
+}(jQuery, d3, AMBROSE));

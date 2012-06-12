@@ -13,40 +13,48 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-var AMBROSE = window.AMBROSE || {};
 
-// implementation of a chord diagram view of the job graph
-AMBROSE.chordView = function() {
-  var ui, view;
+/**
+ * Ambrose module "chord" provides a chord diagram of the job graph.
+ */
+(function($, d3, colorbrewer, ambrose) {
+  var chord = ambrose.chord = function(ui) {
+    return new ambrose.chord.fn.init(ui);
+  }
 
-  var jobsByName = {}, indexByName = {}, nameByIndex = {};
-  var matrix = [];
+  // private reference to parent ui
+  var _ui;
 
-  // group angle initialized once we know the number of jobs
-  var ga = 0, ga2 = 0, gap = 0;
-
-  // radii of svg figure
-  var r1 = 400 / 2;
-  var r0 = r1 - 60;
-
-  // color palette
-  var fill, successFill, errorFill;
-  var jobSelectedColor = d3.rgb(98, 196, 98);
+  // the svg graphic element, child of view
+  var _svg;
 
   // job dependencies are visualized by chords
-  var chord, groups, chords;
+  var _diagram, _groups, _chords;
 
-  // the actual svg graphic
-  var svg;
+  // matrix which encodes job dependencies
+  var _matrix = [];
+
+  // group angle initialized once we know the number of jobs
+  var _ga = 0, _ga2 = 0, _gap = 0;
+
+  // radii of svg figure
+  // TODO(Andy Schlaikjer): radius should be infered from parent element to
+  // allow resizing of the figure when parent is resized
+  var _r1 = 400 / 2;
+  var _r0 = _r1 - 60;
+
+  // color palette
+  var _fill, _successFill, _errorFill;
+  var _jobSelectedColor = d3.rgb(98, 196, 98);
 
   // returns start angle for a chord group
-  function groupStartAngle(d) {
-    return  ga * d.index - ga2;
+  function _groupStartAngle(d) {
+    return  _ga * d.index - _ga2;
   }
 
   // returns end angle for a chord group
-  function groupEndAngle(d) {
-    return groupStartAngle(d) + ga - gap;
+  function _groupEndAngle(d) {
+    return _groupStartAngle(d) + _ga - _gap;
   }
 
   /**
@@ -55,8 +63,8 @@ AMBROSE.chordView = function() {
    * @param i chord in- / out-link index within current group
    * @param n in- / out-degree of current group
    */
-  function chordAngle(d, f, i, n) {
-    var g = groups[d.index];
+  function _chordAngle(d, f, i, n) {
+    var g = _groups[d.index];
     var s = g.startAngle;
     var e = g.endAngle;
     var r = (e - s) / 2;
@@ -65,204 +73,201 @@ AMBROSE.chordView = function() {
   }
 
   // returns color for job arc and chord
-  function jobColor(d) {
-    if (isMouseOver(d.job)) {
-      return d3.rgb(jobMouseOverColor);
-    } if (ui.isSelected(d.job)) {
-      return d3.rgb(jobSelectedColor).brighter();
+  function _jobColor(d) {
+    if (_isMouseOver(d.job)) {
+      return d3.rgb(_jobMouseOverColor);
+    } if (_ui.isSelected(d.job)) {
+      return d3.rgb(_jobSelectedColor).brighter();
     } if (d.job.status == "RUNNING") {
-      return d3.rgb(jobSelectedColor);
+      return d3.rgb(_jobSelectedColor);
     } if (d.job.status == "COMPLETE") {
-      return successFill(d.index);
+      return _successFill(d.index);
     } if (d.job.status == "FAILED") {
-      return errorFill(d.index);
+      return _errorFill(d.index);
     }
-    return d3.hsl(fill(d.index)).darker(0.5);
+    return d3.hsl(_fill(d.index)).darker(0.5);
   }
 
   // more color funcs
-  function chordStroke(d) { return d3.rgb(jobColor(d.source)).darker(); }
-  function chordFill(d) { return jobColor(d.source); }
+  function _chordStroke(d) { return d3.rgb(_jobColor(d.source)).darker(); }
+  function _chordFill(d) { return _jobColor(d.source); }
 
   // mouse over job
-  var jobMouseOver;
-  var jobMouseOverColor = d3.rgb(20, 155, 223);
+  var _jobMouseOver;
+  var _jobMouseOverColor = d3.rgb(20, 155, 223);
 
-  function handleArcMouseOver(d, i) {
-    jobMouseOver = d.job;
-    refreshDisplay();
+  function _handleArcMouseOver(d, i) {
+    _jobMouseOver = d.job;
+    this.refresh();
   }
 
-  function handleChartMouseOut(d, i) {
-    jobMouseOver = null;
-    refreshDisplay();
+  function _handleChartMouseOut(d, i) {
+    _jobMouseOver = null;
+    this.refresh();
   }
 
-  function isMouseOver(job) {
-    return job === jobMouseOver;
+  function _isMouseOver(job) {
+    return job === _jobMouseOver;
   }
 
-  function handleArcClick(d, i) {
-    selectJob(d.job);
-    refreshDisplay();
+  function _handleArcClick(d, i) {
+    this.ui.selectJob(d.job);
+    this.refresh();
   }
 
-  /**
-   * Refreshes the visual elements based on current (updated) state.
-   */
-  function refreshDisplay() {
-    // update path.arc elements
-    svg.selectAll("path.arc")
-      .transition()
-      .style("fill", jobColor)
-      .style("stroke", jobColor);
-
-    // update path.chord elements
-    svg.selectAll("path.chord")
-      .transition()
-      .style("stroke", chordStroke)
-      .style("fill", chordFill);
-
-    /*
-    // spin svg to selected job
-    var a = (-ga * jobSelected.index) * 180 / Math.PI + 360;
-    svg.transition()
-      .duration(1000)
-      .attr("transform", "rotate(" + a + ")");
-    */
+  function _handleJobStarted(event, data) {
+    // TODO(Andy Schlaikjer): highlight the started job
   }
 
-  function currentRotation() {
-    return svg.attr("transform").match(/rotate\(([^\)]+)\)/i)[0];
+  function _handleJobFinished(event, data) {
+    // TODO(Andy Schlaikjer): highlight the finished job
   }
 
-  // private members and methods above, public below
-  return {
-    divName: "chordView",
-    tabName: "Chord",
+  function _handleJobFailed(event, data) {
+    // TODO(Andy Schlaikjer): highlight the failed job
+  }
 
-    addDiv: function() {
-      // add the div that the graph will render in
-      $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"><div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div></div>');
+  function _handleJobSelected(event, data) {
+    // TODO(Andy Schlaikjer): highlight the selected job
+  }
 
-      // add the tab div
-      $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
+  divName = "chordView";
+  tabName = "Chord";
 
-      // if there is more than one graph, add unhide the nav tab and select the first tab
-      if ($('.viz-pane').length < 2) {
-        $('#vizTabs').show();
-        $('#vizTabs a:first').tab('show');
-      } else {
-        $('#vizTabs').hide();
-        $('#' + this.divName).show();
-      }
+  function _addDiv() {
+    // add the div that the graph will render in
+    $('#vizGroup').append('<div class="viz-pane tab-pane" id="' + this.divName + '"><div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div></div>');
+
+    // add the tab div
+    $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
+
+    // if there is more than one graph, add unhide the nav tab and select the first tab
+    if ($('.viz-pane').length > 2) {
+      $('#vizTabs').show();
+      $('#vizTabs a:first').tab('show');
+    } else {
+      $('#vizTabs').hide();
+      $('#' + this.divName).show();
+    }
+  }
+
+  chord.fn = chord.prototype = {
+    init: function(ui) {
+      this.ui = _ui = ui;
+      var chord = this;
+      ui.bind('dagLoaded', function(event, data) {
+        chord.initGraph(data.jobs);
+      });
+      ui.bind('jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED', function(event, data) {
+        chord.refresh();
+      });
     },
 
     initGraph: function(jobs) {
+      var chord = this;
+
       // jobs themselves are arc segments around the edge of the chord diagram
       var arcMouse = d3.svg.arc()
         .innerRadius(50)
-        .outerRadius(r0 + 300)
-        .startAngle(groupStartAngle)
-        .endAngle(groupEndAngle);
+        .outerRadius(_r0 + 300)
+        .startAngle(_groupStartAngle)
+        .endAngle(_groupEndAngle);
       var arc = d3.svg.arc()
-        .innerRadius(r0)
-        .outerRadius(r0 + 10)
-        .startAngle(groupStartAngle)
-        .endAngle(groupEndAngle);
+        .innerRadius(_r0)
+        .outerRadius(_r0 + 10)
+        .startAngle(_groupStartAngle)
+        .endAngle(_groupEndAngle);
 
-      this.addDiv();
+      _addDiv();
+
       // set up canvas
-      svg = d3.select("#chordViewViz")
+      // TODO(Andy Schlaikjer): Is this safe in the presence of multiple view
+      // impls which may want to add children to #chart element? Should this
+      // instead reference the 'view' var?
+      _svg = d3.select("#chordViewViz")
         .append("svg:svg")
-        .attr("width", r1 * 3)
-        .attr("height", r1 * 2)
-        .on('mouseout', handleChartMouseOut)
+        .attr("width", _r1 * 3)
+        .attr("height", _r1 * 2)
+        .on('mouseout', function(d, i) {
+          _handleChartMouseOut.call(chord, d, i);
+        })
         .append("svg:g")
-        .attr("transform", "translate(" + (r1 * 1.5) + "," + r1 + ")rotate(90)")
+        .attr("transform", "translate(" + (_r1 * 1.5) + "," + _r1 + ")rotate(90)")
         .append("svg:g")
         .attr("transform", "rotate(0)");
 
-      var chord = d3.layout.chord();
-
-      // initialize color palette
+      // initialize color palettes
       var n = jobs.length;
       if (n > 7) n = 7;
-      fill = d3.scale.ordinal().range(colorbrewer.Greys[n]);
-      successFill = d3.scale.ordinal().range(colorbrewer.Greens[n]);
-      errorFill = d3.scale.ordinal().range(colorbrewer.Reds[n]);
+      _fill = d3.scale.ordinal().range(colorbrewer.Greys[n]);
+      _successFill = d3.scale.ordinal().range(colorbrewer.Greens[n]);
+      _errorFill = d3.scale.ordinal().range(colorbrewer.Reds[n]);
 
-      // initialize group angle
-      ga = 2 * Math.PI / jobs.length;
-      gap = ga * 0.1;
-      ga2 = (ga - gap) / 2;
+      // initialize group angles
+      _ga = 2 * Math.PI / jobs.length;
+      _gap = _ga * 0.1;
+      _ga2 = (_ga - _gap) / 2;
 
-      // update state
-      ui.selectJob(jobs[0]);
-
-      // Compute a unique index for each job name
-      n = 0;
-      jobs.forEach(function(j) {
-        jobsByName[j.name] = j;
-        if (!(j.name in indexByName)) {
-          nameByIndex[n] = j.name;
-          indexByName[j.name] = j.index = n++;
-        }
-      });
+      // localize some utility methods
+      var findJobIndexByName = this.ui.findJobIndexByName;
+      var findJobByName = this.ui.findJobByName;
+      var findJobByIndex = this.ui.findJobByIndex;
 
       // Add predecessor and successor index maps to all jobs
-      jobs.forEach(function (j) {
-        j.predecessorIndices = {};
-        j.successorIndices = {};
+      jobs.forEach(function (job) {
+        job.predecessorIndices = {};
+        job.successorIndices = {};
       });
 
       // Construct a square matrix counting dependencies
-      for (var i = -1; ++i < n;) {
-        var row = matrix[i] = [];
-        for (var j = -1; ++j < n;) {
+      for (var i = -1; ++i < jobs.length;) {
+        var row = _matrix[i] = [];
+        for (var j = -1; ++j < jobs.length;) {
           row[j] = 0;
         }
       }
       jobs.forEach(function(j) {
-        var p = indexByName[j.name];
+        var p = findJobIndexByName(j.name);
         j.successorNames.forEach(function(n) {
-          var s = indexByName[n];
-          matrix[s][p]++;
+          var s = findJobIndexByName(n);
+          _matrix[s][p]++;
 
           // initialize predecessor and successor indices
           j.successorIndices[s] = d3.keys(j.successorIndices).length;
-          var sj = jobsByName[n];
+          var sj = findJobByName(n);
           sj.predecessorIndices[p] = d3.keys(sj.predecessorIndices).length;
         });
       });
 
-      chord.matrix(matrix);
+      // initialize chord diagram with job dependency matrix
+      _diagram = d3.layout.chord();
+      _diagram.matrix(_matrix);
 
       // override start and end angles for groups and chords
-      groups = chord.groups();
-      chords = chord.chords();
+      _groups = _diagram.groups();
+      _chords = _diagram.chords();
 
       // initialize groups
-      for (var i = 0; i < groups.length; i++) {
-        var d = groups[i];
+      for (var i = 0; i < _groups.length; i++) {
+        var d = _groups[i];
 
         // associate group with job
         d.job = jobs[i];
 
         // angles
-        d.startAngle = groupStartAngle(d);
-        d.endAngle = groupEndAngle(d);
+        d.startAngle = _groupStartAngle(d);
+        d.endAngle = _groupEndAngle(d);
       }
 
       // initialize begin / end angles for chord source / target
-      for (var i = 0; i < chords.length; i++) {
-        var d = chords[i];
+      for (var i = 0; i < _chords.length; i++) {
+        var d = _chords[i];
         var s = d.source;
         var t = d.target;
 
         // associate jobs with chord source and target objects
-        var sj = jobsByName[nameByIndex[s.index]];
-        var tj = jobsByName[nameByIndex[t.index]];
+        var sj = findJobByIndex(s.index);
+        var tj = findJobByIndex(t.index);
         s.job = sj;
         t.job = tj;
 
@@ -273,15 +278,15 @@ AMBROSE.chordView = function() {
         // determine chord source out-degree and target in-degree
         var sn = d3.keys(sj.predecessorIndices).length;
         var tn = d3.keys(tj.successorIndices).length;
-        s.startAngle = chordAngle(s, true, si, sn);
-        s.endAngle = chordAngle(s, true, si + 1, sn);
-        t.startAngle = chordAngle(t, false, ti, tn);
-        t.endAngle = chordAngle(t, false, ti + 1, tn);
+        s.startAngle = _chordAngle(s, true, si, sn);
+        s.endAngle = _chordAngle(s, true, si + 1, sn);
+        t.startAngle = _chordAngle(t, false, ti, tn);
+        t.endAngle = _chordAngle(t, false, ti + 1, tn);
       }
 
       // select an svg g element for each group
-      var g = svg.selectAll("g.group")
-        .data(groups)
+      var g = _svg.selectAll("g.group")
+        .data(_groups)
         .enter()
         .append("svg:g")
         .attr("class", "group");
@@ -292,55 +297,58 @@ AMBROSE.chordView = function() {
         .style("fill", "white")
         .style("stroke", "white")
         .attr("d", arcMouse)
-        .on('mouseover', handleArcMouseOver)
-        .on('click', handleArcClick);
+        .on('mouseover', function(d, i) {
+          _handleArcMouseOver.call(chord, d, i);
+        })
+        .on('click', function(d, i) {
+          _handleArcClick.call(chord, d, i);
+        });
 
       // add visual arc to each g.group
       g.append("svg:path")
         .attr("class", "arc")
-        .style("fill", jobColor)
-        .style("stroke", jobColor)
+        .style("fill", _jobColor)
+        .style("stroke", _jobColor)
         .attr("d", arc);
 
       // add a label to each g.group
       g.append("svg:text")
         .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-        .attr("dy", ".35em")
+          .attr("dy", ".35em")
         .attr("text-anchor", null)
         .attr("transform", function(d) {
           return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-            + "translate(" + (r0 + 26) + ")";
+            + "translate(" + (_r0 + 26) + ")";
         })
         .text(function(d) { return d.index + 1; });
 
       // add chords
-      svg.selectAll("path.chord")
-        .data(chords)
+      _svg.selectAll("path.chord")
+        .data(_chords)
         .enter()
         .append("svg:path")
         .attr("class", "chord")
-        .style("stroke", chordStroke)
-        .style("fill", chordFill)
-        .attr("d", d3.svg.chord().radius(r0));
+        .style("stroke", _chordStroke)
+        .style("fill", _chordFill)
+        .attr("d", d3.svg.chord().radius(_r0));
     },
 
-    init: function(thatUi) {
-      ui = thatUi;
-      view = this;
+    refresh: function() {
+      // update path.arc elements
+      _svg.selectAll("path.arc")
+        .transition()
+        .style("fill", _jobColor)
+        .style("stroke", _jobColor);
 
-      // once the dag is loaded we can initialize
-      $(ui).bind( "dagLoaded", function(event, data) {
-        view.initGraph(data.jobs);
-      })
+      // update path.chord elements
+      _svg.selectAll("path.chord")
+        .transition()
+        .style("stroke", _chordStroke)
+        .style("fill", _chordFill);
+    }
+  };
 
-      /**
-       * Select the given job and update global state.
-       */
-      $(ui).bind("jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED JOB_PROGRESS", function(event, data) {
-        view.refreshDisplay(event, data);
-      })
-    },
+  // set the init function's prototype for later instantiation
+  chord.fn.init.prototype = chord.fn;
 
-    refreshDisplay: refreshDisplay
-  }
-}
+}(jQuery, d3, colorbrewer, AMBROSE));

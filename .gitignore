@@ -1,3 +1,8 @@
 **/target
 *.log
 *.iws
+**/.project
+**/.settings
+**/.classpath
+.project
+.settings
