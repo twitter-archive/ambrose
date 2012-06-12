@@ -61,7 +61,7 @@ limitations under the License.
     },
 
     supportsJob: function(data) {
-      return (data.job && data.job.runtimeName == 'pig');
+      return (data.job && data.job.runtime == 'pig');
     },
 
     clear: function() {
@@ -72,7 +72,7 @@ limitations under the License.
     reset: function() {
       this.clear();
       $('#job-props > thead').append('<tr><th>Property</th><th>Value</th></tr>');
-      $('#job-props > thead').append(
+      $('#job-props > tbody').append(
         '<tr><td>Number</td><td id="job-n-of-n"></td></tr>'
           + '<tr><td>Job ID</td><td><a id="job-jt-url" target="_blank"></a></td></tr>'
           + '<tr><td>Status</td><td id="job-status"></td></tr>'
@@ -97,7 +97,7 @@ limitations under the License.
       $('#job-features').text(ambrose.util.comma_join(job.features));
       $('#job-mapper-status').text(ambrose.util.task_progress_string(job.totalMappers, job.mapProgress));
       $('#job-reducer-status').text(ambrose.util.task_progress_string(job.totalReducers, job.reduceProgress));
-    },
+    }
   };
 
   // set the init function's prototype for later instantiation
