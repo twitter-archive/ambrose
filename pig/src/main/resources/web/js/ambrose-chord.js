@@ -132,21 +132,21 @@ limitations under the License.
   }
 
   chord.fn = chord.prototype = {
+    divName: "chordView",
+    tabName: "Chord",
     init: function(ui) {
       this.ui = _ui = ui;
-      this.divName = "chordView";
-      this.tabName = "Chord";
-      var chord = this;
+      var graph = this;
       ui.bind('dagLoaded', function(event, data) {
-        chord.initGraph(data.jobs);
+        graph.initGraph(data.jobs);
       });
       ui.bind('jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED', function(event, data) {
-        chord.refresh(event, data);
+        graph.refresh(event, data);
       });
     },
 
     addDiv: function() {
-      // alert('Adding shit! ' + this.divName + ' ' + this.tabName);
+      //alert('Adding div: ' + this.divName + ', table: ' + this.tabName);
       // add the div that the graph will render in
       $('#vizGroup').append('<div class="tab-pane viz-pane" id="' + this.divName + '"></div>');
       // add the tab div

@@ -24,14 +24,14 @@ limitations under the License.
   };
 
   dag.fn = dag.prototype = {
+    divName: "dagView",
+    tabName: "Dag",
     /**
      * Constructor initializes public fields and binds to ui events.
      */
     init: function(ui) {
       ambrose.chord.fn.init.call(this, ui);
       this.ui = ui;
-      this.divName = "dagView";
-      this.tabName = "Dag";
       this.minX = Infinity;
       this.maxX = -Infinity;
       this.minY = Infinity;
@@ -155,7 +155,7 @@ limitations under the License.
             });
 
             tip.innerHTML =  html + "</ul></div>";
-          },
+          }
         },
 
         /*
@@ -330,7 +330,7 @@ limitations under the License.
           viz.fx.plot();
         }
       }
-    },
+    }
   };
 
   // set the init function's prototype for later instantiation

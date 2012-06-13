@@ -38,6 +38,18 @@ var AMBROSE = (function($, d3) {
   var _statusDialog = $('#scriptStatusDialog');
   var _progressBar = $('#progressbar div');
 
+  function _info(msg) {
+    _statusDialog.text(msg);
+  };
+
+  function _error(msg) {
+    _statusDialog.text(msg);
+  };
+
+  function _fatal(msg) {
+    alert(msg);
+  };
+
   /**
    * Requests job graph from "dag" end-point. On success, job data is parsed,
    * state is updated, the 'dagLoaded' event is triggered, the first job is
@@ -45,7 +57,7 @@ var AMBROSE = (function($, d3) {
    */
   function _loadDag() {
     var ui = this;
-    ui.info('loading job graph');
+    _info('loading job graph');
     d3.json(_dagUrl, function(data) {
       // handle failure
       if (data == null) {
@@ -90,15 +102,15 @@ var AMBROSE = (function($, d3) {
   }
 
   function _startEventPolling () {
+    // TODO: this next line breaks things when restarting from firebug
     ui = this;
     _pollIntervalId = setInterval(function() { _pollEvents.call(ui); }, 1000);
-    ui.info('event polling started');
+    _info('event polling started');
   };
 
   function _stopEventPolling() {
-    ui = this;
     clearInterval(_pollIntervalId);
-    ui.info('event polling stopped');
+    _info('event polling stopped');
   };
 
   function _pollEvents() {
@@ -306,10 +318,12 @@ var AMBROSE = (function($, d3) {
     bind: function(event, callback) { this.controller.bind(event, callback); },
     trigger: function(event, data) { this.controller.trigger(event, data); },
 
-    info: function(msg) { _statusDialog.text(msg); },
-    error: function(msg) { _statusDialog.text(msg); },
-    fatal: function(msg) { alert(msg); },
+    info: function(msg) { _info(msg); },
+    error: function(msg) { _error(msg); },
+    fatal: function(msg) { _fatal(msg); },
 
+    startPolling: function() { _startEventPolling(); },
+    stopPolling: function() { _stopEventPolling(); },
     findJobByName: function(name) { return _jobsByName[name]; },
     findJobById: function(jobId) { return _jobsByJobId[jobId]; },
     findJobByIndex: function(index) { return _jobsByName[_nameByIndex[index]]; },
