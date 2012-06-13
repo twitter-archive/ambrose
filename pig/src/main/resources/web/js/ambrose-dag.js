@@ -18,29 +18,24 @@ limitations under the License.
  * Ambrose module "dag" controls the directed acyclic graph view of the
  * workflow.
  */
-(function($, d3, ambrose) {
+(function($, ambrose) {
   var dag = ambrose.dag = function(ui) {
     return new ambrose.dag.fn.init(ui);
   };
 
-  dag.fn = dag.prototype = {
-    divName: "dagView",
-    tabName: "Dag",
+  dag.fn = dag.prototype = $.extend(ambrose.chart(), {
     /**
      * Constructor initializes public fields and binds to ui events.
      */
     init: function(ui) {
-      ambrose.chord.fn.init.call(this, ui);
-      this.ui = ui;
+      ambrose.chart.fn.init.call(this, ui, "dagView", "Dag");
       this.minX = Infinity;
       this.maxX = -Infinity;
       this.minY = Infinity;
       this.maxY = -Infinity;
     },
 
-    initGraph: function(jobs) {
-      this.addDiv();
-
+    initChart: function(jobs) {
       var nodeWidth = 20;
       var canvasWidth = 1100;
       var canvasHeight = 400;
@@ -331,9 +326,9 @@ limitations under the License.
         }
       }
     }
-  };
+  });
 
   // set the init function's prototype for later instantiation
-  dag.fn.init.prototype = ambrose.chord.fn;
+  dag.fn.init.prototype = ambrose.dag.fn;
 
-}(jQuery, d3, AMBROSE));
+}(jQuery, AMBROSE));

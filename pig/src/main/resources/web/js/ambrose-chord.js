@@ -131,32 +131,14 @@ limitations under the License.
     // TODO(Andy Schlaikjer): highlight the selected job
   }
 
-  chord.fn = chord.prototype = {
-    divName: "chordView",
-    tabName: "Chord",
+  chord.fn = chord.prototype = $.extend(ambrose.chart(), {
     init: function(ui) {
-      this.ui = _ui = ui;
-      var graph = this;
-      ui.bind('dagLoaded', function(event, data) {
-        graph.initGraph(data.jobs);
-      });
-      ui.bind('jobSelected JOB_STARTED JOB_FINISHED JOB_FAILED', function(event, data) {
-        graph.refresh(event, data);
-      });
+      ambrose.chart.fn.init.call(this, ui, "chordView", "Chord");
+      _ui = ui;
     },
 
-    addDiv: function() {
-      //alert('Adding div: ' + this.divName + ', table: ' + this.tabName);
-      // add the div that the graph will render in
-      $('#vizGroup').append('<div class="tab-pane viz-pane" id="' + this.divName + '"></div>');
-      // add the tab div
-      $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
-    },
-
-    initGraph: function(jobs) {
-      this.addDiv();
-
-      var chord = this;
+    initChart: function(jobs) {
+      var self = this;
 
       // jobs themselves are arc segments around the edge of the chord diagram
       var arcMouse = d3.svg.arc()
@@ -179,7 +161,7 @@ limitations under the License.
         .attr("width", _r1 * 3)
         .attr("height", _r1 * 2)
         .on('mouseout', function(d, i) {
-          _handleChartMouseOut.call(chord, d, i);
+          _handleChartMouseOut.call(self, d, i);
         })
         .append("svg:g")
         .attr("transform", "translate(" + (_r1 * 1.5) + "," + _r1 + ")rotate(90)")
@@ -288,10 +270,10 @@ limitations under the License.
         .style("stroke", "white")
         .attr("d", arcMouse)
         .on('mouseover', function(d, i) {
-          _handleArcMouseOver.call(chord, d, i);
+          _handleArcMouseOver.call(self, d, i);
         })
         .on('click', function(d, i) {
-          _handleArcClick.call(chord, d, i);
+          _handleArcClick.call(self, d, i);
         });
 
       // add visual arc to each g.group
@@ -336,7 +318,7 @@ limitations under the License.
         .style("stroke", _chordStroke)
         .style("fill", _chordFill);
     }
-  };
+  });
 
   // set the init function's prototype for later instantiation
   chord.fn.init.prototype = chord.fn;
