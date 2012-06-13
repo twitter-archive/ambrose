@@ -39,7 +39,6 @@ limitations under the License.
     },
 
     addDiv: function() {
-      alert('Adding ' + this.divName + ' ' + this.tabName);
       $('#vizGroup').append('<div class="tab-pane viz-pane" id="' + this.divName + '"></div>');
       $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
     },
