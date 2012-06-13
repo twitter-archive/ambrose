@@ -37,8 +37,8 @@ limitations under the License.
 
     initChart: function(jobs) {
       var nodeWidth = 20;
-      var canvasWidth = 1100;
-      var canvasHeight = 400;
+      var canvasWidth = 900;
+      var canvasHeight = 380;
 
       var minX = this.minX;
       var maxX = this.maxX;

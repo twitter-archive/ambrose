@@ -41,7 +41,8 @@ limitations under the License.
     addDiv: function() {
       $('#vizGroup').append('<div class="tab-pane viz-pane" id="' + this.divName + '"></div>');
       $('#vizTabs').append('<li><a href="#' + this.divName + '" data-toggle="tab">' + this.tabName + '</a></li>');
-    },
+      $('#vizTabs a:first').tab('show');
+    }
   };
 
   chart.fn.init.prototype = chart.fn;

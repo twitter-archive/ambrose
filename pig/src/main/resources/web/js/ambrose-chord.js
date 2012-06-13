@@ -140,6 +140,8 @@ limitations under the License.
     initChart: function(jobs) {
       var self = this;
 
+      $('#chordView').append('<div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div>');
+
       // jobs themselves are arc segments around the edge of the chord diagram
       var arcMouse = d3.svg.arc()
         .innerRadius(50)
@@ -156,7 +158,7 @@ limitations under the License.
       // TODO(Andy Schlaikjer): Is this safe in the presence of multiple view
       // impls which may want to add children to #chart element? Should this
       // instead reference the 'view' var?
-      _svg = d3.select("#" + this.divName)
+      _svg = d3.select("#chordViewViz")
         .append("svg:svg")
         .attr("width", _r1 * 3)
         .attr("height", _r1 * 2)
