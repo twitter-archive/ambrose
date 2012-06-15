@@ -26,6 +26,6 @@ http://twitter.github.com/bootstrap/
 
 Azkaban
 Apache Public License 2.0
-http://twitter.github.com/azkaban/
+https://github.com/azkaban/azkaban
 
 For a full list of dependencies, please consult the Maven pom.xml file.
