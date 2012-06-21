@@ -18,7 +18,7 @@ limitations under the License.
  * Ambrose module "detail" controls the detail view for the currently selected
  * job.
  */
-(function($, d3, ambrose) {
+define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   var detail = ambrose.detail = function(ui) {
     return new ambrose.detail.fn.init(ui);
   };
@@ -103,4 +103,4 @@ limitations under the License.
   // set the init function's prototype for later instantiation
   detail.fn.init.prototype = detail.fn;
 
-}(jQuery, d3, AMBROSE));
+});
