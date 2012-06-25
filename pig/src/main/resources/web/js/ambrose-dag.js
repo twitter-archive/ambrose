@@ -133,18 +133,22 @@ limitations under the License.
            * node is hovered over.
            */
           onShow: function(tip, node, isLeaf, domElement) {
-            var whiteList = ['jobId', 'aliases', 'features', 'map progress', 'reduce progress'],
-            data = node.data,
-            html = "<div class=\"tip-title\">" + node.name
-              + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
+              var whiteList = [{ key: 'jobId', name: 'Job ID'},
+                               { key: 'aliases', name: 'Aliases'},
+                               { key: 'features', name: 'Features'},
+                               { key: 'map progress', name: 'Mappers'},
+                               { key: 'reduce progress', name: 'Reducers'}],
+                  data = node.data,
+                  html = "<div class=\"tip-title\">" + node.name
+                    + "</div><div class=\'closetip\'>&#10006;</div><div class=\"tip-text\"><ul>";
 
             whiteList.forEach(function(k) {
-              if (k in data) {
-                if (k == 'jobId') {
-                  html += "<li><b>" + k + "</b>: <a href=\"http://hadoop-dw-jt.smf1.twitter.com:50030/jobdetails.jsp?jobid=" +
-                    data[k] + "\" target=\"__blank\">" + data[k] + "</a></li>";
+              if (k.key in data) {
+                if (k.key == 'jobId') {
+                  html += "<li><b>" + k.name + "</b>: <a href=\"http://hadoop-dw-jt.smf1.twitter.com:50030/jobdetails.jsp?jobid=" +
+                  data[k.key] + "\" target=\"__blank\">" + data[k.key] + "</a></li>";
                 } else {
-                  html += "<li><b>" + k + "</b>: <span id=\"" + data.jobId + "_" + k + "\">" + data[k] + "</span></li>";
+                  html += "<li><b>" + k.name + "</b>: <span id=\"" + data.jobId + "_" + k.key + "\">" + data[k.key] + "</span></li>";
                 }
               }
             });
