@@ -17,7 +17,8 @@ limitations under the License.
 /**
  * Ambrose module "chord" provides a chord diagram of the job graph.
  */
-(function($, d3, colorbrewer, ambrose) {
+define(['jquery', 'ambrose', 'd3', 'colorbrewer'], function($, ambrose) {
+
   var chord = ambrose.chord = function(ui) {
     return new ambrose.chord.fn.init(ui);
   }
@@ -325,4 +326,4 @@ limitations under the License.
   // set the init function's prototype for later instantiation
   chord.fn.init.prototype = chord.fn;
 
-}(jQuery, d3, colorbrewer, AMBROSE));
+});

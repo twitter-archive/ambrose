@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * Ambrose module "util" containing static helper functions.
  */
-(function($, d3, ambrose) {
+define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   var util = ambrose.util = {};
 
   $.extend(util, {
@@ -42,4 +42,6 @@ limitations under the License.
       return value;
     },
   });
-}(jQuery, d3, AMBROSE));
+
+  return util;
+});

@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * Ambrose module "chart" provides base class for charts.
  */
-(function($, ambrose) {
+define(['jquery', 'ambrose'], function($, ambrose) {
   var chart = ambrose.chart = function(ui, divName, tabName) {
     return new ambrose.chart.fn.init(ui, divName, tabName);
   }
@@ -47,4 +47,4 @@ limitations under the License.
 
   chart.fn.init.prototype = chart.fn;
 
-}(jQuery, AMBROSE));
+});
