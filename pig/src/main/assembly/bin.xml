@@ -24,6 +24,7 @@
               <include>org.slf4j:slf4j-simple</include>
               <include>org.eclipse.jetty.orbit:javax.servlet</include>
               <include>org.eclipse.jetty.aggregate:jetty-webapp</include>
+              <include>org.apache.pig:pig</include>
             </includes>
             <useTransitiveDependencies>false</useTransitiveDependencies>
           </dependencySet>
