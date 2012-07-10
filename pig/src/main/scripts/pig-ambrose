@@ -27,6 +27,7 @@ function die() { log "$@"; exit 1; }
 # configure default args
 AMBROSE_HOME="${AMBROSE_HOME:-$(dirname "$0")/..}"
 AMBROSE_PORT="${AMBROSE_PORT:-8080}"
+AMBROSE_TIMEOUT="${AMBROSE_TIMEOUT:-600}" # 10 min
 
 # configure paths
 export PIG_CLASSPATH=\
@@ -38,6 +39,7 @@ export HADOOP_USER_CLASSPATH_FIRST="true"
 export PIG_OPTS="\
 -Dpig.notification.listener=com.twitter.ambrose.pig.EmbeddedAmbrosePigProgressNotificationListener \
 -Dambrose.port=$AMBROSE_PORT \
+-Dambrose.post.script.sleep.seconds=$AMBROSE_TIMEOUT \
 $PIG_OPTS"
 
 # construct pig command line, log and invoke
