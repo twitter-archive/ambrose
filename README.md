@@ -24,7 +24,7 @@ Follow [@Ambrose](https://twitter.com/ambrose) on Twitter to stay in touch!
 
 ## Supported runtimes
 
-* [Pig](http://pig.apache.org/) - See [pig/README.md](ambrose/blob/master/pig/README.md)
+* [Pig](http://pig.apache.org/) - See [pig/README.md](https://github.com/twitter/ambrose/blob/master/pig/README.md)
 * [Cascading](http://www.cascading.org/) - future work
 * [Scalding](https://github.com/twitter/scalding) - future work
 * [Cascalog](https://github.com/nathanmarz/cascalog) - future work
@@ -126,6 +126,7 @@ For more information on semantic versioning, please visit http://semver.org/.
 
 * Bill Graham ([@billgraham](https://twitter.com/billgraham))
 * Andy Schlaikjer ([@sagemintblue](https://twitter.com/sagemintblue))
+* Nicolas Belmonte ([@philogb](https://twitter.com/philogb))
 
 ## License
 
