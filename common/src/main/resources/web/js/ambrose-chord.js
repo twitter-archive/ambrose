@@ -45,7 +45,9 @@ limitations under the License.
 
   // color palette
   var _fill, _successFill, _errorFill;
-  var _jobSelectedColor = d3.rgb(98, 196, 98);
+  var _jobRunningColor = d3.rgb(98, 196, 98);
+  var _jobSelectedColor = d3.rgb(20, 155, 223);
+  var _jobMouseOverColor = _jobSelectedColor.brighter();
 
   // returns start angle for a chord group
   function _groupStartAngle(d) {
@@ -75,11 +77,11 @@ limitations under the License.
   // returns color for job arc and chord
   function _jobColor(d) {
     if (_isMouseOver(d.job)) {
-      return d3.rgb(_jobMouseOverColor);
+      return _jobMouseOverColor;
     } if (_ui.isSelected(d.job)) {
-      return d3.rgb(_jobSelectedColor).brighter();
+      return _jobSelectedColor;
     } if (d.job.status == "RUNNING") {
-      return d3.rgb(_jobSelectedColor);
+      return _jobRunningColor;
     } if (d.job.status == "COMPLETE") {
       return _successFill(d.index);
     } if (d.job.status == "FAILED") {
@@ -94,7 +96,6 @@ limitations under the License.
 
   // mouse over job
   var _jobMouseOver;
-  var _jobMouseOverColor = d3.rgb(20, 155, 223);
 
   function _handleArcMouseOver(d, i) {
     _jobMouseOver = d.job;
