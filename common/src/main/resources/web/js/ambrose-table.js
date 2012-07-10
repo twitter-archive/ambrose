@@ -70,11 +70,12 @@ limitations under the License.
 
     loadTable: function(jobs) {
       var table = this;
+      var tbody = $('#job-summary > tbody').empty();
       jobs.forEach(function(job) {
         var rowClass = '';
         if (job.index % 2 != 0) rowClass = 'odd';
-        $('#job-summary tr:last').after(
-          '<tr id="row-num-' + job.index + '">'
+        tbody.append(
+          '<tr id="job-summary-row-num-' + job.index + '">'
             + '<td class="row-job-num">' + (job.index + 1) + '</td>'
             + '<td class="row-job-id"><a class="job-jt-url" target="_blank"></a></td>'
             + '<td class="row-job-status"/>'
@@ -84,7 +85,7 @@ limitations under the License.
             + '<td class="row-job-reducers"/>'
             + '</tr>'
         );
-        $('#row-num-' + job.index).bind('click', function() {
+        $('#job-summary-row-num-' + job.index).bind('click', function() {
           table.ui.selectJob(job);
         });
         table.updateTableRow(job);
@@ -92,7 +93,7 @@ limitations under the License.
     },
 
     updateTableRow: function(job) {
-      var row = $('#row-num-' + job.index);
+      var row = $('#job-summary-row-num-' + job.index);
       $('.job-jt-url', row).text(job.jobId).attr('href', job.trackingUrl);
       $('.row-job-status', row).text(AMBROSE.util.value(job.status));
       $('.row-job-alias', row).text(AMBROSE.util.comma_join(job.aliases));
