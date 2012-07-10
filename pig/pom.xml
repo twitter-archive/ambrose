@@ -46,16 +46,16 @@
       <artifactId>slf4j-simple</artifactId>
     </dependency>
 
-    <!-- pig -->
-    <dependency>
-      <groupId>org.apache.pig</groupId>
-      <artifactId>pig</artifactId>
-    </dependency>
-
     <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapred</artifactId>
+    </dependency>
+
+    <!-- pig -->
+    <dependency>
+      <groupId>org.apache.pig</groupId>
+      <artifactId>pig</artifactId>
     </dependency>
   </dependencies>
 
