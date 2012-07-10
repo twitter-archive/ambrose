@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
   <version>0.1.0-SNAPSHOT</version>
@@ -52,7 +51,7 @@
       <!-- Ambrose modules -->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>ambrose-core</artifactId>
+        <artifactId>ambrose-common</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -107,18 +106,6 @@
         <version>1.3.1</version>
       </dependency>
 
-      <!-- web -->
-      <dependency>
-        <groupId>org.eclipse.jetty.orbit</groupId>
-        <artifactId>javax.servlet</artifactId>
-        <version>${eclipse.jetty.servlet.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty.aggregate</groupId>
-        <artifactId>jetty-webapp</artifactId>
-        <version>${eclipse.jetty.version}</version>
-      </dependency>
-
       <!-- pig runtime -->
       <dependency>
         <groupId>org.apache.pig</groupId>
@@ -135,10 +122,6 @@
           <exclusion>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>jetty</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -284,7 +267,7 @@
   </build>
 
   <modules>
-    <module>core</module>
+    <module>common</module>
     <module>pig</module>
   </modules>
 </project>

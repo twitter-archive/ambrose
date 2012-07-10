@@ -28,7 +28,7 @@
     <!-- ambrose -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>ambrose-core</artifactId>
+      <artifactId>ambrose-common</artifactId>
     </dependency>
 
     <!-- testing -->
@@ -47,26 +47,10 @@
       <artifactId>slf4j-simple</artifactId>
     </dependency>
 
-    <!-- utils -->
-    <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-    </dependency>
-
     <!-- pig -->
     <dependency>
       <groupId>org.apache.pig</groupId>
       <artifactId>pig</artifactId>
-    </dependency>
-
-    <!-- web -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.aggregate</groupId>
-      <artifactId>jetty-webapp</artifactId>
     </dependency>
 
     <!-- hadoop -->

@@ -15,27 +15,30 @@ limitations under the License.
 */
 package com.twitter.ambrose.server;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collection;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.jetty.handler.HandlerList;
+import org.mortbay.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.DAGTransformer;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.WorkflowEvent;
 import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
 import com.twitter.ambrose.util.JSONUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Lite weight app server that serves both the JSON API and the Ambrose web pages powered from the
@@ -140,8 +143,8 @@ public class ScriptStatusServer implements Runnable {
 
   public class APIHandler extends AbstractHandler {
     @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request,
-        HttpServletResponse response) throws IOException, ServletException {
+    public void handle(String target, HttpServletRequest request, HttpServletResponse response,
+        int dispatch) throws IOException, ServletException {
       if (target.endsWith("/dag")) {
         response.setContentType(MIME_TYPE_JSON);
         response.setStatus(HttpServletResponse.SC_OK);
@@ -182,7 +185,7 @@ public class ScriptStatusServer implements Runnable {
 
   private static void setHandled(HttpServletRequest request) {
     Request base_request = (request instanceof Request) ?
-        (Request)request : AbstractHttpConnection.getCurrentConnection().getRequest();
+        (Request)request : HttpConnection.getCurrentConnection().getRequest();
     base_request.setHandled(true);
   }
 }
