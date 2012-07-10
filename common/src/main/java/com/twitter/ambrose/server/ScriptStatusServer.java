@@ -34,8 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.twitter.ambrose.service.DAGNode;
+import com.twitter.ambrose.service.DAGTransformer;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.WorkflowEvent;
+import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
@@ -59,7 +61,7 @@ public class ScriptStatusServer implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(ScriptStatusServer.class);
 
   private static final String SLASH = "/";
-  private static final String WEB_RESOURCES_PATH = "web";
+  private static final String ROOT_PATH = "web";
   private static final String QUERY_PARAM_WORKFLOW_ID = "workflowId";
   private static final String QUERY_PARAM_SINCE = "sinceId";
 
@@ -112,7 +114,7 @@ public class ScriptStatusServer implements Runnable {
     server = new Server(port);
 
     // this needs to be loaded via the jar'ed resources, not the relative dir
-    URL resourcesUrl = this.getClass().getClassLoader().getResource(WEB_RESOURCES_PATH);
+    URL resourcesUrl = this.getClass().getClassLoader().getResource(ROOT_PATH);
     HandlerList handler = new HandlerList();
     handler.setHandlers(new Handler[]{new APIHandler(), new WebAppContext(resourcesUrl.toExternalForm(), SLASH)});
     server.setHandler(handler);
@@ -149,6 +151,10 @@ public class ScriptStatusServer implements Runnable {
 
         Collection<DAGNode> nodes =
           statsReadService.getDagNodeNameMap(request.getParameter(QUERY_PARAM_WORKFLOW_ID)).values();
+
+        // add the x, y coordinates
+        DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
+        dagTransformer.transform(nodes);
 
         sendJson(request, response, nodes.toArray(new DAGNode[nodes.size()]));
       } else if (target.endsWith("/events")) {
