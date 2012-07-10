@@ -43,7 +43,7 @@ limitations under the License.
   var _r1 = 400 / 2;
   var _r0 = _r1 - 60;
 
-  // color palette
+  // color palettes
   var _fill, _successFill, _errorFill;
   var _jobRunningColor = d3.rgb(98, 196, 98);
   var _jobSelectedColor = d3.rgb(20, 155, 223);
@@ -116,22 +116,6 @@ limitations under the License.
     this.refresh();
   }
 
-  function _handleJobStarted(event, data) {
-    // TODO(Andy Schlaikjer): highlight the started job
-  }
-
-  function _handleJobFinished(event, data) {
-    // TODO(Andy Schlaikjer): highlight the finished job
-  }
-
-  function _handleJobFailed(event, data) {
-    // TODO(Andy Schlaikjer): highlight the failed job
-  }
-
-  function _handleJobSelected(event, data) {
-    // TODO(Andy Schlaikjer): highlight the selected job
-  }
-
   chord.fn = chord.prototype = $.extend(ambrose.chart(), {
     init: function(ui) {
       ambrose.chart.fn.init.call(this, ui, "chordView", "Chord");
@@ -141,7 +125,12 @@ limitations under the License.
     initChart: function(jobs) {
       var self = this;
 
-      $('#chordView').append('<div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div>');
+      $('#chordView').append(
+        '<div class="row">'
+          + '<div class="span6" id="chordViewViz"></div>'
+          + '<div class="span6"><table id="job-props" class="table"><thead /><tbody /></table></div>'
+          + '</div>'
+      );
 
       // jobs themselves are arc segments around the edge of the chord diagram
       var arcMouse = d3.svg.arc()
