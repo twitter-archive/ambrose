@@ -59,17 +59,17 @@ git clone https://github.com/twitter/ambrose.git
 cd ambrose
 ```
 
-Next, you can try running the Ambrose demo on your local machine. The `ambrose-demo` script starts a
-local instance of the Ambrose app server with sample data. Start the demo Abrose server with the
-following command and then browse to
+Next, you can try running the Ambrose demo on your local machine. The demo
+starts a local web server which serves the front-end client resources and sample
+data. Start the demo with the following command and then browse to
 [http://localhost:8080/index.html?localdata=small](http://localhost:8080/index.html?localdata=small):
 
 ```
 ./bin/ambrose-demo
 ```
 
-Finally, you can run Ambrose with an actual Pig script. To do so, you'll need to build the
-Ambrose Pig distribution and untar it:
+To run Ambrose with an actual Pig script, you'll need to build the Ambrose Pig
+distribution and untar it:
 
 ```
 mvn package
@@ -77,15 +77,18 @@ tar zxvf pig/target/ambrose-pig-$VERSION-bin.tar.gz
 ```
 
 You can then run the following commands to execute `path/to/my/script.pig` with an Ambrose app server
-embedded in the Pig client:
+embedded within the Pig client:
 
 ```
 cd ambrose-pig-$VERSION
 ./bin/pig-ambrose -f path/to/my/script.pig
 ```
 
-Now, browse to [http://localhost:8080/](http://localhost:8080/) to see the progress of your script
-using the Ambrose UI. To override the default port, export `AMBROSE_PORT` before invoking `pig-ambrose`:
+Note that this command delegates to the `pig` script present in your local
+installation of Pig, so make sure `$PIG_HOME/bin` is in your path. Now, browse
+to [http://localhost:8080/](http://localhost:8080/) to see the progress of your
+script using the Ambrose UI. To override the default port, export `AMBROSE_PORT`
+before invoking `pig-ambrose`:
 
 ```
 export AMBROSE_PORT=4567
