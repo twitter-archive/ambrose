@@ -38,10 +38,7 @@ limitations under the License.
   var _ga = 0, _ga2 = 0, _gap = 0;
 
   // radii of svg figure
-  // TODO(Andy Schlaikjer): radius should be infered from parent element to
-  // allow resizing of the figure when parent is resized
-  var _r1 = 400 / 2;
-  var _r0 = _r1 - 60;
+  var _r1 = 0, _r1 = 0;
 
   // color palettes
   var _fill, _successFill, _errorFill;
@@ -132,10 +129,18 @@ limitations under the License.
           + '</div>'
       );
 
+      // determine dimensions
+      var padding = 20;
+      var width = $('#vizGroup').width() / 12 * 6;
+      var maxR = 250, minR = 40;
+      _r1 = Math.max(Math.min(width / 2 - padding, maxR), minR);
+      _r0 = Math.max(_r1 - 60, minR - 10);
+      var height = (_r1 + padding) * 2
+
       // jobs themselves are arc segments around the edge of the chord diagram
       var arcMouse = d3.svg.arc()
         .innerRadius(50)
-        .outerRadius(_r0 + 300)
+        .outerRadius(_r1 + 300)
         .startAngle(_groupStartAngle)
         .endAngle(_groupEndAngle);
       var arc = d3.svg.arc()
@@ -150,13 +155,13 @@ limitations under the License.
       // instead reference the 'view' var?
       _svg = d3.select("#chordViewViz")
         .append("svg:svg")
-        .attr("width", _r1 * 3)
-        .attr("height", _r1 * 2)
+        .attr("width", width)
+        .attr("height", height)
         .on('mouseout', function(d, i) {
           _handleChartMouseOut.call(self, d, i);
         })
         .append("svg:g")
-        .attr("transform", "translate(" + (_r1 * 1.5) + "," + _r1 + ")rotate(90)")
+        .attr("transform", "translate(" + (width/2) + "," + (height/2) + ")rotate(90)")
         .append("svg:g")
         .attr("transform", "rotate(0)");
 
