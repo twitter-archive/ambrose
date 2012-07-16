@@ -126,7 +126,7 @@ limitations under the License.
       var self = this;
 
       $('#chordView').append(
-        '<div class="row">'
+        '<div class="row-fluid">'
           + '<div class="span6" id="chordViewViz"></div>'
           + '<div class="span6"><table id="job-props" class="table"><thead /><tbody /></table></div>'
           + '</div>'

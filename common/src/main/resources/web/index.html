@@ -26,7 +26,7 @@
     <!-- navbar -->
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container-fluid">
           <a class="brand" href="#">Ambrose</a>
           <ul class="nav">
             <li class="active">
@@ -38,18 +38,18 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container-fluid">
       <!-- status line -->
-      <div class="row">
+      <div class="row-fluid">
         <div class="span12"><p>Status: <span  id="scriptStatusDialog"></span></p></div>
       </div>
 
       <!-- workflow progress bar -->
-      <div class="row">
+      <div class="row-fluid">
         <div class="span12"><div id="progressbar" class="progress"><div class="bar"></div></div></div>
       </div>
 
-      <div class="row">
+      <div class="row-fluid">
         <!-- chart tabs -->
         <div class="span12 tabbable">
           <ul class="nav nav-tabs" id="vizTabs"></ul>
@@ -58,7 +58,7 @@
       </div>
 
       <!-- summary job table -->
-      <div class="row">
+      <div class="row-fluid">
         <div class="span12">
           <table id="job-summary" class="table table-striped">
             <thead></thead>
@@ -71,7 +71,7 @@
       <footer>
         <p>&copy; Twitter 2012</p>
       </footer>
-    </div> <!-- /container -->
+    </div> <!-- /container-fluid -->
 
     <script src="js/jquery-1.7.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
