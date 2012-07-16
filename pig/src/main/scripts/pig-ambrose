@@ -24,6 +24,15 @@
 function log() { echo "$@" >&2; }
 function die() { log "$@"; exit 1; }
 
+# test for presence of pig command
+which pig >/dev/null 2>&1 || die $(cat <<'EOF'
+
+Command 'pig' not found. This script requires a local installation of Apache
+Pig. Please ensure $PIG_HOME/bin is in your $PATH.
+
+EOF
+)
+
 # configure default args
 AMBROSE_HOME="${AMBROSE_HOME:-$(dirname "$0")/..}"
 AMBROSE_PORT="${AMBROSE_PORT:-8080}"
