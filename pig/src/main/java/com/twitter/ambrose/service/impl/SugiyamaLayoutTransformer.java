@@ -23,6 +23,7 @@ import azkaban.workflow.flow.SugiyamaLayout;
 import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.DAGTransformer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -54,9 +55,13 @@ public class SugiyamaLayoutTransformer implements DAGTransformer {
   public Collection<DAGNode> transform(Collection<DAGNode> nodes) {
     Flow flow = new Flow("sample flow", new Props());
 
-    for(DAGNode node : nodes) {
-      for(String successor : node.getSuccessorNames()) {
-        flow.addDependencies(successor, Arrays.asList(node.getName()));
+    if(nodes.size() == 1) {
+      flow.addDependencies(nodes.iterator().next().getName(), new ArrayList<String>());
+    } else {
+      for(DAGNode node : nodes) {
+        for(String successor : node.getSuccessorNames()) {
+          flow.addDependencies(successor, Arrays.asList(node.getName()));
+        }
       }
     }
 
