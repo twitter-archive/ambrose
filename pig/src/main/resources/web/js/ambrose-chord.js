@@ -171,7 +171,7 @@ limitations under the License.
         .attr("transform", "rotate(0)");
 
       // initialize color palettes
-      var n = jobs.length;
+      var n = jobs.length + 2; // colorbrewer index starts at 3
       if (n > 7) n = 7;
       _fill = d3.scale.ordinal().range(colorbrewer.Greys[n]);
       _successFill = d3.scale.ordinal().range(colorbrewer.Greens[n]);
