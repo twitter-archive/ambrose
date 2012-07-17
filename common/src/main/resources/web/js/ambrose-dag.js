@@ -37,8 +37,13 @@ limitations under the License.
 
     initChart: function(jobs) {
       var nodeWidth = 20;
-      var canvasWidth = 900;
+      var canvasWidth = $('#vizGroup').width();
       var canvasHeight = 380;
+      var halfCanvasWidth = canvasWidth / 2;
+      var halfCanvasHeight = canvasHeight / 2;
+      var padding = 40;
+      var viewWidth = canvasWidth - (2 * padding);
+      var viewHeight = canvasHeight - (2 * padding);
 
       var minX = this.minX;
       var maxX = this.maxX;
@@ -46,8 +51,7 @@ limitations under the License.
       var maxY = this.maxY;
 
       var json = jobs.map(function(n) {
-        var x = n.x,
-        y = n.y;
+        var x = n.x, y = n.y;
 
         // get bounding box
         maxX = maxX < x ? x : maxX;
@@ -63,6 +67,9 @@ limitations under the License.
           adjacencies: n.successorNames
         };
       });
+
+      var diffX = maxX - minX;
+      var diffY = maxY - minY;
 
       // create and configure the dag view
       var viz = this.viz = new $jit.ST({
@@ -86,7 +93,7 @@ limitations under the License.
 
         Edge: {
           overridable: true,
-          type: 'arrow',
+          type: 'line',
           color: '#23A4FF',
           lineWidth: 0.8
         },
@@ -148,7 +155,9 @@ limitations under the License.
                   html += "<li><b>" + k.name + "</b>: <a href=\"http://hadoop-dw-jt.smf1.twitter.com:50030/jobdetails.jsp?jobid=" +
                   data[k.key] + "\" target=\"__blank\">" + data[k.key] + "</a></li>";
                 } else {
-                  html += "<li><b>" + k.name + "</b>: <span id=\"" + data.jobId + "_" + k.key + "\">" + data[k.key] + "</span></li>";
+                  html += '<li><b>' + k.name + '</b>: <span id="'
+                    + data.jobId + '_' + k.key.replace(/\s+/, '_') + '">'
+                    + data[k.key] + '</span></li>';
                 }
               }
             });
@@ -206,13 +215,14 @@ limitations under the License.
       // load JSON data
       viz.loadJSON(json);
 
-      var diffX = maxX - minX;
-      var diffY = maxY - minY;
-
       // reposition nodes
       viz.graph.eachNode(function(n) {
-        n.pos.setc(diffX ? ((n.data.x - minX) / (maxX - minX) * canvasWidth - canvasWidth / 2 - 2) : (n.data.x - canvasWidth / 2),
-                   diffY ? ((n.data.y - minY) / (maxY - minY) * canvasHeight - canvasHeight / 2) : n.data.y);
+        n.pos.setc(diffX
+                   ? ((n.data.x - minX) / diffX * viewWidth - halfCanvasWidth + padding)
+                   : (n.data.x - halfViewWidth),
+                   diffY
+                   ? ((n.data.y - minY) / diffY * viewHeight - halfCanvasHeight + padding)
+                   : n.data.y);
 
         n._depth = n.data.dagLevel;
         n.exist = true;

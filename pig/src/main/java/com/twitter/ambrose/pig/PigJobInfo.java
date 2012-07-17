@@ -103,7 +103,7 @@ public class PigJobInfo extends JobInfo {
         enumToString(inputStats.getInputType()));
     }
 
-    private static String enumToString(Enum someEnum) {
+    private static String enumToString(Enum<?> someEnum) {
       return someEnum != null ? someEnum.name() : "";
     }
   }

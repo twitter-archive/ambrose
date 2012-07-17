@@ -24,43 +24,31 @@
 function log() { echo "$@" >&2; }
 function die() { log "$@"; exit 1; }
 
+# test for presence of pig command
+which pig >/dev/null 2>&1 || die $(cat <<'EOF'
+
+Command 'pig' not found. This script requires a local installation of Apache
+Pig. Please ensure $PIG_HOME/bin is in your $PATH.
+
+EOF
+)
+
 # configure default args
 AMBROSE_HOME="${AMBROSE_HOME:-$(dirname "$0")/..}"
 AMBROSE_PORT="${AMBROSE_PORT:-8080}"
+AMBROSE_TIMEOUT="${AMBROSE_TIMEOUT:-600}" # 10 min
 
 # configure paths
-LIB_DIR="$AMBROSE_HOME/lib"
-
-# find pig and ambrose jars
-if [ ! -f "$PIG_JAR" ]; then
-    PIG_JAR=$(ls "$LIB_DIR"/pig-*.jar) \
-        || die "Failed to find pig jar in path '$LIB_DIR'"
-fi
-if [ ! -f "$AMBROSE_JAR" ]; then
-    AMBROSE_JAR=$(ls "$LIB_DIR"/ambrose-*.jar) \
-        || die "Failed to find ambrose jar in path '$LIB_DIR'"
-fi
-
-# find extra dependancies in Hadoop's lib
-if [ ! -d "$HADOOP_HOME" ]; then
-    HADOOP_HOME=$(ls -d /usr/lib/hadoop) \
-        || die "Failed to find HADOOP_HOME"
-fi
-
-# Insert some magic into the classpath that pig uses
-HADOOP_LIB_DIR="$HADOOP_HOME/lib"
-JETTY_JAR=$(ls "$HADOOP_LIB_DIR"/jetty-6*.jar) \
-    || die "Failed to find jetty 6 jar within '$HADOOP_LIB_DIR'"
-JETTY_UTIL_JAR=$(ls "$HADOOP_LIB_DIR"/jetty-util-6*.jar) \
-    || die "Failed to find jetty 6 util jar within '$HADOOP_LIB_DIR'"
-SERVLET_API_JAR=$(ls "$HADOOP_LIB_DIR"/servlet-api-*.jar) \
-    || die "Failed to find servlet api jar within '$HADOOP_LIB_DIR'"
-export PIG_CLASSPATH="$PIG_JAR:$AMBROSE_JAR:$JETTY_JAR:$JETTY_UTIL_JAR:$SERVLET_API_JAR"
+export PIG_CLASSPATH=\
+$(find "$AMBROSE_HOME/lib" -name '*.jar' -exec printf '%s:' '{}' '+')\
+"$PIG_CLASSPATH"
+export HADOOP_USER_CLASSPATH_FIRST="true"
 
 # configure the ambrose pig notification listener and port
 export PIG_OPTS="\
 -Dpig.notification.listener=com.twitter.ambrose.pig.EmbeddedAmbrosePigProgressNotificationListener \
 -Dambrose.port=$AMBROSE_PORT \
+-Dambrose.post.script.sleep.seconds=$AMBROSE_TIMEOUT \
 $PIG_OPTS"
 
 # construct pig command line, log and invoke

@@ -13,16 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-WEBROOT="$(dirname $0)/../pig/src/main/resources"
+function log { echo "$@" >&2; }
+function die { log "$@"; exit 1; }
+
+WEBROOT="$(dirname $0)/../common/src/main/resources/web"
 PORT="${1:-8080}"
 
-cd "$WEBROOT"
+cd "$WEBROOT" || die "Failed to cd to WEBROOT '$WEBROOT'"
 
-echo "Starting web server on port $PORT" >&2
+log "Starting web server on port '$PORT'"
+log "Browse to either of the following URLs to see Ambrose in action:"
+log "  http://localhost:$PORT/index.html?localdata=small"
+log "  http://localhost:$PORT/index.html?localdata=large"
+log "Hit ctrl-c to stop the web server"
 
-# To instead see a larger job, pass localdata=large below
-echo "Starting demo Ambrose server on port $PORT. Browse to either of the following URLs to see Ambrose in action:"
-echo "  http://localhost:$PORT/web/index.html?localdata=small"
-echo "  http://localhost:$PORT/web/index.html?localdata=large"
-echo "Hit ctrl-c to stop the demo Ambrose server"
 exec python -m SimpleHTTPServer "$PORT"
