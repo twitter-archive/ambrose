@@ -3,6 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
@@ -16,6 +21,7 @@
     Ambrose is a platform for visualization and real-time monitoring of data
     workflows, supporting various runtimes such as Apache Pig.
   </description>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -23,30 +29,57 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
   <organization>
     <name>Twitter</name>
     <url>http://twitter.com/</url>
   </organization>
+
+  <developers>
+    <developer>
+      <id>bill</id>
+      <name>Bill Graham</name>
+    </developer>
+    <developer>
+      <id>andy</id>
+      <name>Andy Schlaikjer</name>
+    </developer>
+    <developer>
+      <id>nico</id>
+      <name>Nicolas Belmonte</name>
+    </developer>
+  </developers>
+
   <issueManagement>
     <system>github</system>
     <url>https://github.com/twitter/ambrose/issues</url>
   </issueManagement>
+
   <scm>
     <connection>scm:git:https://github.com/twitter/ambrose.git</connection>
     <developerConnection>scm:git:git@github.com:twitter/ambrose.git</developerConnection>
     <url>https://github.com/twitter/ambrose</url>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <slf4j.version>1.6.4</slf4j.version>
     <apache.pig.version>0.11.0-SNAPSHOT</apache.pig.version>
     <apache.hadoop.version>0.22.0</apache.hadoop.version>
+    <eclipse.jetty.version>8.1.3.v20120416</eclipse.jetty.version>
+    <eclipse.jetty.servlet.version>3.0.0.v201112011016</eclipse.jetty.servlet.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
-    
+
       <!-- Ambrose modules -->
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ambrose-pig</artifactId>
@@ -65,21 +98,22 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.6.1</version>
+        <version>${slf4j.version}</version>
         <scope>runtime</scope>
+        <optional>true</optional>
       </dependency>
 
       <!-- utils -->
-      <!--<dependency>-->
-        <!--<groupId>com.google.guava</groupId>-->
-        <!--<artifactId>guava</artifactId>-->
-        <!--<version>r11</version>-->
-      <!--</dependency>-->
+      <dependency>
+        <groupId>com.google.collections</groupId>
+        <artifactId>google-collections</artifactId>
+        <version>1.0</version>
+      </dependency>
 
       <!-- serialization -->
       <dependency>
@@ -97,34 +131,46 @@
         <artifactId>xstream</artifactId>
         <version>1.3.1</version>
       </dependency>
-      
+
       <!-- web -->
       <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
-        <scope>provided</scope>
+        <groupId>org.eclipse.jetty.orbit</groupId>
+        <artifactId>javax.servlet</artifactId>
+        <version>${eclipse.jetty.servlet.version}</version>
       </dependency>
-
-      <!-- pig runtime -->
       <dependency>
-        <groupId>org.apache.pig</groupId>
-        <artifactId>pig</artifactId>
-        <version>${apache.pig.version}</version>
+        <groupId>org.eclipse.jetty.aggregate</groupId>
+        <artifactId>jetty-webapp</artifactId>
+        <version>${eclipse.jetty.version}</version>
       </dependency>
 
-      <!-- hadoop common -->
+      <!-- hadoop -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-common</artifactId>
         <version>${apache.hadoop.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
-
-      <!-- hadoop mapred -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-mapred</artifactId>
         <version>${apache.hadoop.version}</version>
+      </dependency>
+
+      <!-- pig -->
+      <dependency>
+        <groupId>org.apache.pig</groupId>
+        <artifactId>pig</artifactId>
+        <version>${apache.pig.version}</version>
       </dependency>
 
     </dependencies>
@@ -134,6 +180,7 @@
     <defaultGoal>package</defaultGoal>
     <pluginManagement>
       <plugins>
+
         <!-- core -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
@@ -262,6 +309,7 @@
   </build>
 
   <modules>
+    <module>common</module>
     <module>pig</module>
   </modules>
 </project>

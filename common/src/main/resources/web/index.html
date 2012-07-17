@@ -4,17 +4,11 @@
     <meta charset="utf-8">
     <title>Ambrose</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Pig pipeline visualization and monitoring">
+    <meta name="description" content="Data workflow visualization and monitoring">
     <meta name="author" content="Twitter">
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/ambrose.css" rel="stylesheet">
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-    </style>
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/ambrose.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -32,7 +26,7 @@
     <!-- navbar -->
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container-fluid">
           <a class="brand" href="#">Ambrose</a>
           <ul class="nav">
             <li class="active">
@@ -44,18 +38,18 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container-fluid">
       <!-- status line -->
-      <div class="row">
+      <div class="row-fluid">
         <div class="span12"><p>Status: <span  id="scriptStatusDialog"></span></p></div>
       </div>
 
       <!-- workflow progress bar -->
-      <div class="row">
+      <div class="row-fluid">
         <div class="span12"><div id="progressbar" class="progress"><div class="bar"></div></div></div>
       </div>
 
-      <div class="row">
+      <div class="row-fluid">
         <!-- chart tabs -->
         <div class="span12 tabbable">
           <ul class="nav nav-tabs" id="vizTabs"></ul>
@@ -64,7 +58,7 @@
       </div>
 
       <!-- summary job table -->
-      <div class="row">
+      <div class="row-fluid">
         <div class="span12">
           <table id="job-summary" class="table table-striped">
             <thead></thead>
@@ -77,11 +71,10 @@
       <footer>
         <p>&copy; Twitter 2012</p>
       </footer>
-    </div> <!-- /container -->
+    </div> <!-- /container-fluid -->
 
     <script src="js/jquery-1.7.2.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <!--script src="js/d3-2.9.1.min.js"></script-->
     <script src="js/d3-2.9.6.js"></script>
     <script src="js/jit-2.0.1.yc.js"></script>
     <script src="js/colorbrewer.js"></script>

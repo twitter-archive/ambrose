@@ -16,7 +16,7 @@ limitations under the License.
 package com.twitter.ambrose.model;
 
 import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -30,6 +30,7 @@ import java.util.Map;
  *
  * @author billg
  */
+@SuppressWarnings("deprecation")
 @JsonSerialize(
   include=JsonSerialize.Inclusion.NON_NULL
 )
@@ -67,10 +68,8 @@ public class CounterGroupInfo {
     return counterInfoMap == null ? null : counterInfoMap.get(name);
   }
 
-  @SuppressWarnings("depricated")
   public static Map<String, CounterGroupInfo> counterGroupInfoMap(Counters counters) {
     Map<String, CounterGroupInfo> counterGroupInfoMap = new HashMap<String, CounterGroupInfo>();
-
     if (counters != null) {
       for (Counters.Group group : counters) {
         CounterGroupInfo counterGroupInfo = new CounterGroupInfo(group);

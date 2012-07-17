@@ -30,6 +30,7 @@ import java.util.Properties;
  * metadata about the job run that isn't set in the job properties.
  * @author billg
  */
+@SuppressWarnings("deprecation")
 @JsonSerialize(
   include=JsonSerialize.Inclusion.NON_NULL
 )

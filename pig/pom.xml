@@ -3,7 +3,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>com.twitter.ambrose</groupId>
     <artifactId>ambrose</artifactId>
@@ -11,9 +10,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose-pig</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
   <name>Ambrose Pig</name>
 
   <repositories>
@@ -27,6 +24,12 @@
   </repositories>
 
   <dependencies>
+    <!-- ambrose -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ambrose-common</artifactId>
+    </dependency>
+
     <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
@@ -43,22 +46,39 @@
       <artifactId>slf4j-simple</artifactId>
     </dependency>
 
-    <!-- pig runtime -->
-    <dependency>
-      <groupId>org.apache.pig</groupId>
-      <artifactId>pig</artifactId>
-    </dependency>
-
     <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapred</artifactId>
     </dependency>
 
+    <!-- pig -->
     <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-      <version>1.0</version>
+      <groupId>org.apache.pig</groupId>
+      <artifactId>pig</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

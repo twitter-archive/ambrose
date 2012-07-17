@@ -35,6 +35,15 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.twitter.ambrose.service.DAGNode;
+import com.twitter.ambrose.service.StatsReadService;
+import com.twitter.ambrose.service.StatsWriteService;
+import com.twitter.ambrose.service.WorkflowEvent;
+import com.twitter.ambrose.util.JSONUtil;
+
 /**
  * In-memory implementation of both StatsReadService and StatsWriteService. Used when stats
  * collection and stats serving are happening within the same VM. This class is intended to run in
@@ -53,7 +62,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * @author billg
  */
 public class InMemoryStatsService implements StatsReadService, StatsWriteService {
-  public static final Log LOG = LogFactory.getLog(InMemoryStatsService.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InMemoryStatsService.class);
 
   private static final String DUMP_DAG_FILE_PARAM = "ambrose.write.dag.file";
   private static final String DUMP_EVENTS_FILE_PARAM = "ambrose.write.events.file";

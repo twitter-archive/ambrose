@@ -38,14 +38,13 @@ limitations under the License.
   var _ga = 0, _ga2 = 0, _gap = 0;
 
   // radii of svg figure
-  // TODO(Andy Schlaikjer): radius should be infered from parent element to
-  // allow resizing of the figure when parent is resized
-  var _r1 = 400 / 2;
-  var _r0 = _r1 - 60;
+  var _r1 = 0, _r1 = 0;
 
-  // color palette
+  // color palettes
   var _fill, _successFill, _errorFill;
-  var _jobSelectedColor = d3.rgb(98, 196, 98);
+  var _jobRunningColor = d3.rgb(98, 196, 98);
+  var _jobSelectedColor = d3.rgb(20, 155, 223);
+  var _jobMouseOverColor = _jobSelectedColor.brighter();
 
   // returns start angle for a chord group
   function _groupStartAngle(d) {
@@ -75,11 +74,11 @@ limitations under the License.
   // returns color for job arc and chord
   function _jobColor(d) {
     if (_isMouseOver(d.job)) {
-      return d3.rgb(_jobMouseOverColor);
+      return _jobMouseOverColor;
     } if (_ui.isSelected(d.job)) {
-      return d3.rgb(_jobSelectedColor).brighter();
+      return _jobSelectedColor;
     } if (d.job.status == "RUNNING") {
-      return d3.rgb(_jobSelectedColor);
+      return _jobRunningColor;
     } if (d.job.status == "COMPLETE") {
       return _successFill(d.index);
     } if (d.job.status == "FAILED") {
@@ -94,7 +93,6 @@ limitations under the License.
 
   // mouse over job
   var _jobMouseOver;
-  var _jobMouseOverColor = d3.rgb(20, 155, 223);
 
   function _handleArcMouseOver(d, i) {
     _jobMouseOver = d.job;
@@ -115,22 +113,6 @@ limitations under the License.
     this.refresh();
   }
 
-  function _handleJobStarted(event, data) {
-    // TODO(Andy Schlaikjer): highlight the started job
-  }
-
-  function _handleJobFinished(event, data) {
-    // TODO(Andy Schlaikjer): highlight the finished job
-  }
-
-  function _handleJobFailed(event, data) {
-    // TODO(Andy Schlaikjer): highlight the failed job
-  }
-
-  function _handleJobSelected(event, data) {
-    // TODO(Andy Schlaikjer): highlight the selected job
-  }
-
   chord.fn = chord.prototype = $.extend(ambrose.chart(), {
     init: function(ui) {
       ambrose.chart.fn.init.call(this, ui, "chordView", "Chord");
@@ -140,12 +122,25 @@ limitations under the License.
     initChart: function(jobs) {
       var self = this;
 
-      $('#chordView').append('<div class=\'row\'><div class=\'span6\' id=\'chordViewViz\'></div><div class=\'span6\'><table id="job-props" class="table"><thead></thead><tbody></tbody></table></div></div>');
+      $('#chordView').append(
+        '<div class="row-fluid">'
+          + '<div class="span6" id="chordViewViz"></div>'
+          + '<div class="span6"><table id="job-props" class="table"><thead /><tbody /></table></div>'
+          + '</div>'
+      );
+
+      // determine dimensions
+      var padding = 20;
+      var width = $('#vizGroup').width() / 12 * 6;
+      var maxR = 250, minR = 40;
+      _r1 = Math.max(Math.min(width / 2 - padding, maxR), minR);
+      _r0 = Math.max(_r1 - 60, minR - 10);
+      var height = (_r1 + padding) * 2
 
       // jobs themselves are arc segments around the edge of the chord diagram
       var arcMouse = d3.svg.arc()
         .innerRadius(50)
-        .outerRadius(_r0 + 300)
+        .outerRadius(_r1 + 300)
         .startAngle(_groupStartAngle)
         .endAngle(_groupEndAngle);
       var arc = d3.svg.arc()
@@ -160,13 +155,13 @@ limitations under the License.
       // instead reference the 'view' var?
       _svg = d3.select("#chordViewViz")
         .append("svg:svg")
-        .attr("width", _r1 * 3)
-        .attr("height", _r1 * 2)
+        .attr("width", width)
+        .attr("height", height)
         .on('mouseout', function(d, i) {
           _handleChartMouseOut.call(self, d, i);
         })
         .append("svg:g")
-        .attr("transform", "translate(" + (_r1 * 1.5) + "," + _r1 + ")rotate(90)")
+        .attr("transform", "translate(" + (width/2) + "," + (height/2) + ")rotate(90)")
         .append("svg:g")
         .attr("transform", "rotate(0)");
 
