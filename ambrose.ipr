@@ -149,6 +149,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ambrose.iml" filepath="$PROJECT_DIR$/ambrose.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common/ambrose-common.iml" filepath="$PROJECT_DIR$/common/ambrose-common.iml" />
       <module fileurl="file://$PROJECT_DIR$/pig/ambrose-pig.iml" filepath="$PROJECT_DIR$/pig/ambrose-pig.iml" />
     </modules>
   </component>
