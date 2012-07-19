@@ -34,19 +34,23 @@ EOF
 )
 
 # configure default args
-AMBROSE_HOME="${AMBROSE_HOME:-$(dirname "$0")/..}"
+AMBROSE_HOME="${AMBROSE_HOME:-$(cd $(dirname "$0")/..; pwd -P)}"
 AMBROSE_PORT="${AMBROSE_PORT:-8080}"
 AMBROSE_TIMEOUT="${AMBROSE_TIMEOUT:-600}" # 10 min
 
 # configure paths
-export PIG_CLASSPATH=\
-$(find "$AMBROSE_HOME/lib" -name '*.jar' -exec printf '%s:' '{}' '+')\
-"$PIG_CLASSPATH"
+AMBROSE_JARS=$(find "$AMBROSE_HOME/lib" -name '*.jar' -exec printf '%s:' '{}' '+') \
+    || die "Failed to find ambrose jars within path '$AMBROSE_HOME/lib'"
+ADDITIONAL_JARS=$(echo "$AMBROSE_JARS" | perl -n -e 'print join ":", grep {/guava/} split(/:/)') \
+    || die "Failed to find additional jars within path '$AMBROSE_HOME/lib'"
+export PIG_CLASSPATH="$AMBROSE_JARS$PIG_CLASSPATH"
 export HADOOP_USER_CLASSPATH_FIRST="true"
+
 
 # configure the ambrose pig notification listener and port
 export PIG_OPTS="\
 -Dpig.notification.listener=com.twitter.ambrose.pig.EmbeddedAmbrosePigProgressNotificationListener \
+-Dpig.additional.jars=$ADDITIONAL_JARS \
 -Dambrose.port=$AMBROSE_PORT \
 -Dambrose.post.script.sleep.seconds=$AMBROSE_TIMEOUT \
 $PIG_OPTS"
