@@ -18,7 +18,7 @@ limitations under the License.
  * Ambrose module "dag" controls the directed acyclic graph view of the
  * workflow.
  */
-(function($, ambrose) {
+define(['jquery', 'ambrose', 'ambrose-util', 'jit'], function($, ambrose, util) {
   var dag = ambrose.dag = function(ui) {
     return new ambrose.dag.fn.init(ui);
   };
@@ -299,7 +299,7 @@ limitations under the License.
       n.data.status = type;
 
       if (job.mapProgress) {
-        n.data['map progress'] = AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress);
+        n.data['map progress'] = util.task_progress_string(job.totalMappers, job.mapProgress);
         entry = $id(job.jobId + '_map progress');
         if (entry) {
           entry.innerHTML = n.data['map progress'];
@@ -307,7 +307,7 @@ limitations under the License.
       }
 
       if (job.reduceProgress) {
-        n.data['reduce progress'] = AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress);
+        n.data['reduce progress'] = util.task_progress_string(job.totalReducers, job.reduceProgress);
         entry = $id(job.jobId + '_reduce progress');
         if (entry) {
           entry.innerHTML = n.data['reduce progress'];
@@ -348,4 +348,5 @@ limitations under the License.
   // set the init function's prototype for later instantiation
   dag.fn.init.prototype = ambrose.dag.fn;
 
-}(jQuery, AMBROSE));
+  return dag;
+});

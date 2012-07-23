@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * Ambrose module "table" which controls the table view of all jobs in workflow.
  */
-(function($, d3, ambrose) {
+define(['jquery', 'ambrose', 'ambrose-util', 'd3'], function($, ambrose, util) {
   var table = ambrose.table = function(ui) {
     return new ambrose.table.fn.init(ui);
   };
@@ -95,11 +95,11 @@ limitations under the License.
     updateTableRow: function(job) {
       var row = $('#job-summary-row-num-' + job.index);
       $('.job-jt-url', row).text(job.jobId).attr('href', job.trackingUrl);
-      $('.row-job-status', row).text(AMBROSE.util.value(job.status));
-      $('.row-job-alias', row).text(AMBROSE.util.comma_join(job.aliases));
-      $('.row-job-feature', row).text(AMBROSE.util.comma_join(job.features));
-      $('.row-job-mappers', row).text(AMBROSE.util.task_progress_string(job.totalMappers, job.mapProgress));
-      $('.row-job-reducers', row).text(AMBROSE.util.task_progress_string(job.totalReducers, job.reduceProgress));
+      $('.row-job-status', row).text(util.value(job.status));
+      $('.row-job-alias', row).text(util.comma_join(job.aliases));
+      $('.row-job-feature', row).text(util.comma_join(job.features));
+      $('.row-job-mappers', row).text(util.task_progress_string(job.totalMappers, job.mapProgress));
+      $('.row-job-reducers', row).text(util.task_progress_string(job.totalReducers, job.reduceProgress));
     },
 
     supportsJob: function(data) {
@@ -112,4 +112,5 @@ limitations under the License.
   // set the init function's prototype for later instantiation
   table.fn.init.prototype = table.fn;
 
-}(jQuery, d3, AMBROSE));
+  return table;
+});
