@@ -18,7 +18,7 @@ limitations under the License.
  * Ambrose module "detail" controls the detail view for the currently selected
  * job.
  */
-(function($, d3, ambrose) {
+define(['jquery', 'ambrose', 'ambrose-util'], function($, ambrose, util) {
   var detail = ambrose.detail = function(ui) {
     return new ambrose.detail.fn.init(ui);
   };
@@ -93,14 +93,15 @@ limitations under the License.
       }
       $('#job-jt-url').text(job.jobId).attr('href', job.trackingUrl);
       $('#job-status').text(job.status);
-      $('#job-aliases').text(ambrose.util.comma_join(job.aliases));
-      $('#job-features').text(ambrose.util.comma_join(job.features));
-      $('#job-mapper-status').text(ambrose.util.task_progress_string(job.totalMappers, job.mapProgress));
-      $('#job-reducer-status').text(ambrose.util.task_progress_string(job.totalReducers, job.reduceProgress));
+      $('#job-aliases').text(util.comma_join(job.aliases));
+      $('#job-features').text(util.comma_join(job.features));
+      $('#job-mapper-status').text(util.task_progress_string(job.totalMappers, job.mapProgress));
+      $('#job-reducer-status').text(util.task_progress_string(job.totalReducers, job.reduceProgress));
     }
   };
 
   // set the init function's prototype for later instantiation
   detail.fn.init.prototype = detail.fn;
 
-}(jQuery, d3, AMBROSE));
+  return detail;
+});
