@@ -19,8 +19,7 @@ limitations under the License.
  * bind to the events this object triggers, which are listed at the bottom of
  * this module.
  */
-var AMBROSE = (function($, d3) {
-  var ambrose = {};
+define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   var ui = ambrose.ui = function() {
     return new ambrose.ui.fn.init();
   };
@@ -349,5 +348,5 @@ var AMBROSE = (function($, d3) {
   // set the init function's prototype for later instantiation
   ui.fn.init.prototype = ui.fn;
 
-  return ambrose;
-}(jQuery, d3));
+  return ui;
+});
