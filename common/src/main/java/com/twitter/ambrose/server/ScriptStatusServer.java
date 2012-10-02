@@ -69,8 +69,10 @@ public class ScriptStatusServer implements Runnable {
 
     if ("RANDOM".equalsIgnoreCase(port)) {
       try {
-        ServerSocket localmachine = new ServerSocket(0);
-        return localmachine.getLocalPort();
+        ServerSocket socket = new ServerSocket(0);
+        int randomPort = socket.getLocalPort();
+        socket.close();
+        return randomPort;
       } catch (IOException e) {
         throw new IllegalArgumentException("Could not find random port for Ambmrose server", e);
       }
