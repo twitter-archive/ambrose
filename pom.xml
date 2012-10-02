@@ -68,8 +68,6 @@
     <apache.pig.version>0.11.0-SNAPSHOT</apache.pig.version>
     <apache.hadoop.version>0.22.0</apache.hadoop.version>
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
-    <eclipse.jetty.version>8.1.3.v20120416</eclipse.jetty.version>
-    <eclipse.jetty.servlet.version>3.0.0.v201112011016</eclipse.jetty.servlet.version>
   </properties>
 
   <dependencyManagement>

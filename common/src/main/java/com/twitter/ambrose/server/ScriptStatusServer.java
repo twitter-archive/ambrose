@@ -16,34 +16,22 @@ limitations under the License.
 package com.twitter.ambrose.server;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.URL;
-import java.util.Collection;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.twitter.ambrose.service.DAGNode;
-import com.twitter.ambrose.service.DAGTransformer;
 import com.twitter.ambrose.service.StatsReadService;
-import com.twitter.ambrose.service.WorkflowEvent;
-import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Lite weight app server that serves both the JSON API and the Ambrose web pages powered from the
- * JSON. The port defaults to 8080 but can be overridden with the <pre>ambrose.port.number</pre>
- * system property.
+ * JSON. The port defaults to 8080 but can be overridden with the <pre>ambrose.port</pre>
+ * system property. For a random port to be used, set <pre>ambrose.port=RANDOM</pre>.
  * <P>
  * The JSON API supports the following URIs:
  * <ul>
@@ -62,11 +50,6 @@ public class ScriptStatusServer implements Runnable {
 
   private static final String SLASH = "/";
   private static final String ROOT_PATH = "web";
-  private static final String QUERY_PARAM_WORKFLOW_ID = "workflowId";
-  private static final String QUERY_PARAM_SINCE = "sinceId";
-
-  private static final String MIME_TYPE_HTML = "text/html";
-  private static final String MIME_TYPE_JSON = "application/json";
 
   private static final String PORT_PARAM = "ambrose.port";
   private static final String DEFAULT_PORT = "8080";
@@ -83,12 +66,24 @@ public class ScriptStatusServer implements Runnable {
 
   private static int getConfiguredPort() {
     String port = System.getProperty(PORT_PARAM, DEFAULT_PORT);
+
+    if ("RANDOM".equalsIgnoreCase(port)) {
+      try {
+        ServerSocket localmachine = new ServerSocket(0);
+        return localmachine.getLocalPort();
+      } catch (IOException e) {
+        throw new IllegalArgumentException("Could not find random port for Ambmrose server", e);
+      }
+    }
+
     try {
       return Integer.parseInt(port);
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException(String.format("Invalid port passed for %s: %s", PORT_PARAM, port), e);
     }
   }
+
+  public int getPort() { return port; };
 
   /**
    * Starts the server in it's own daemon thread.
@@ -116,7 +111,8 @@ public class ScriptStatusServer implements Runnable {
     // this needs to be loaded via the jar'ed resources, not the relative dir
     URL resourcesUrl = this.getClass().getClassLoader().getResource(ROOT_PATH);
     HandlerList handler = new HandlerList();
-    handler.setHandlers(new Handler[]{new APIHandler(), new WebAppContext(resourcesUrl.toExternalForm(), SLASH)});
+    handler.setHandlers(new Handler[]{new APIHandler(statsReadService),
+      new WebAppContext(resourcesUrl.toExternalForm(), SLASH)});
     server.setHandler(handler);
     server.setStopAtShutdown(false);
 
@@ -139,56 +135,5 @@ public class ScriptStatusServer implements Runnable {
         LOG.warn("Error stopping Jetty server", e);
       }
     }
-  }
-
-  public class APIHandler extends AbstractHandler {
-    @Override
-    public void handle(String target,
-                       HttpServletRequest request,
-                       HttpServletResponse response,
-                       int dispatch) throws IOException, ServletException {
-
-      if (target.endsWith("/dag")) {
-        response.setContentType(MIME_TYPE_JSON);
-        response.setStatus(HttpServletResponse.SC_OK);
-
-        Collection<DAGNode> nodes =
-          statsReadService.getDagNodeNameMap(request.getParameter(QUERY_PARAM_WORKFLOW_ID)).values();
-
-        // add the x, y coordinates
-        DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
-        dagTransformer.transform(nodes);
-
-        sendJson(request, response, nodes.toArray(new DAGNode[nodes.size()]));
-      } else if (target.endsWith("/events")) {
-        response.setContentType(MIME_TYPE_JSON);
-        response.setStatus(HttpServletResponse.SC_OK);
-        Integer sinceId = request.getParameter(QUERY_PARAM_SINCE) != null ?
-                Integer.getInteger(request.getParameter(QUERY_PARAM_SINCE)) : -1;
-
-        Collection<WorkflowEvent> events =
-          statsReadService.getEventsSinceId(request.getParameter(QUERY_PARAM_WORKFLOW_ID), sinceId);
-
-        sendJson(request, response, events.toArray(new WorkflowEvent[events.size()]));
-      }
-      else if (target.endsWith(".html")) {
-        response.setContentType(MIME_TYPE_HTML);
-        // this is because the next handler will be picked up here and it doesn't seem to
-        // handle html well. This is jank.
-      }
-    }
-  }
-
-  private static void sendJson(HttpServletRequest request,
-                               HttpServletResponse response, Object object) throws IOException {
-    JSONUtil.writeJson(response.getWriter(), object);
-    response.getWriter().close();
-    setHandled(request);
-  }
-
-  private static void setHandled(HttpServletRequest request) {
-    Request base_request = (request instanceof Request) ?
-        (Request)request : HttpConnection.getCurrentConnection().getRequest();
-    base_request.setHandled(true);
   }
 }
