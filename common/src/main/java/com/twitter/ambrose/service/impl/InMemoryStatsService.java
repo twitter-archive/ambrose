@@ -20,8 +20,6 @@ import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.service.WorkflowEvent;
 import com.twitter.ambrose.util.JSONUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
