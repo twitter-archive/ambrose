@@ -238,7 +238,7 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   }
 
   function _handleWorkflowProgress(event, data) {
-    _workflowProgress = data.event.eventData.scriptProgress;
+    _workflowProgress = data.event.eventData.workflowProgress;
     this.info('script progress: ' + _workflowProgress + '%');
     _progressBar.width(_workflowProgress + '%');
   }

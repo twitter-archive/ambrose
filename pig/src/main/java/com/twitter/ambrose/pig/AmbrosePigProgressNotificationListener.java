@@ -68,6 +68,15 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
   private HashSet<String> completedJobIds = new HashSet<String>();
 
+  protected static enum WorkflowProgressField {
+    workflowProgress;
+  }
+
+  protected static enum JobProgressField {
+    jobId, jobName, trackingUrl, isComplete, isSuccessful,
+    mapProgress, reduceProgress, totalMappers, totalReducers;
+  }
+
   /**
    * Intialize this class with an instance of StatsWriteService to push stats to.
    *
@@ -151,7 +160,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
           node.setJobId(assignedJobId);
           pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
 
-          Map<String, String> progressMap = buildJobStatusMap(assignedJobId);
+          Map<JobProgressField, String> progressMap = buildJobStatusMap(assignedJobId);
           if (progressMap != null) {
             pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
           }
@@ -216,8 +225,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   public void progressUpdatedNotification(String scriptId, int progress) {
 
     // first we report the scripts progress
-    Map<String, String> eventData = new HashMap<String, String>();
-    eventData.put("scriptProgress", Integer.toString(progress));
+    Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
+    eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(progress));
     pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
 
     // then for each running job, we report the job progress
@@ -225,13 +234,13 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       // don't send progress events for unstarted jobs
       if (node.getJobId() == null) { continue; }
 
-      Map<String, String> progressMap = buildJobStatusMap(node.getJobId());
+      Map<JobProgressField, String> progressMap = buildJobStatusMap(node.getJobId());
 
       //only push job progress events for a completed job once
       if (progressMap != null && !completedJobIds.contains(node.getJobId())) {
         pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
 
-        if ("true".equals(progressMap.get("isCompleted"))) {
+        if ("true".equals(progressMap.get(JobProgressField.isComplete))) {
           completedJobIds.add(node.getJobId());
         }
       }
@@ -290,7 +299,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   }
 
   @SuppressWarnings("deprecation")
-  private Map<String, String> buildJobStatusMap(String jobId)  {
+  private Map<JobProgressField, String> buildJobStatusMap(String jobId)  {
     JobClient jobClient = PigStats.get().getJobClient();
 
     try {
@@ -303,18 +312,17 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       JobID jobID = rj.getID();
       TaskReport[] mapTaskReport = jobClient.getMapTaskReports(jobID);
       TaskReport[] reduceTaskReport = jobClient.getReduceTaskReports(jobID);
-      Map<String, String> progressMap = new HashMap<String, String>();
+      Map<JobProgressField, String> progressMap = new HashMap<JobProgressField, String>();
 
-      //TODO: change this into a typed JobProgress object so other workflows can produce similar data
-      progressMap.put("jobId", jobId.toString());
-      progressMap.put("jobName", rj.getJobName());
-      progressMap.put("trackingUrl", rj.getTrackingURL());
-      progressMap.put("isComplete", Boolean.toString(rj.isComplete()));
-      progressMap.put("isSuccessful", Boolean.toString(rj.isSuccessful()));
-      progressMap.put("mapProgress", Float.toString(rj.mapProgress()));
-      progressMap.put("reduceProgress", Float.toString(rj.reduceProgress()));
-      progressMap.put("totalMappers", Integer.toString(mapTaskReport.length));
-      progressMap.put("totalReducers", Integer.toString(reduceTaskReport.length));
+      progressMap.put(JobProgressField.jobId, jobId.toString());
+      progressMap.put(JobProgressField.jobName, rj.getJobName());
+      progressMap.put(JobProgressField.trackingUrl, rj.getTrackingURL());
+      progressMap.put(JobProgressField.isComplete, Boolean.toString(rj.isComplete()));
+      progressMap.put(JobProgressField.isSuccessful, Boolean.toString(rj.isSuccessful()));
+      progressMap.put(JobProgressField.mapProgress, Float.toString(rj.mapProgress()));
+      progressMap.put(JobProgressField.reduceProgress, Float.toString(rj.reduceProgress()));
+      progressMap.put(JobProgressField.totalMappers, Integer.toString(mapTaskReport.length));
+      progressMap.put(JobProgressField.totalReducers, Integer.toString(reduceTaskReport.length));
       return progressMap;
     } catch (IOException e) {
       log.error("Error getting job info.", e);
