@@ -24,8 +24,9 @@
               <include>org.slf4j:slf4j-api</include>
               <include>org.slf4j:slf4j-simple</include>
               <include>com.google.guava:guava</include>
-              <include>org.eclipse.jetty.orbit:javax.servlet</include>
-              <include>org.eclipse.jetty.aggregate:jetty-webapp</include>
+              <include>org.mortbay.jetty:jetty</include>
+              <include>org.mortbay.jetty:jetty-util</include>
+              <include>org.mortbay.jetty:servlet-api</include>
               <include>org.apache.pig:pig</include>
             </includes>
             <useTransitiveDependencies>false</useTransitiveDependencies>

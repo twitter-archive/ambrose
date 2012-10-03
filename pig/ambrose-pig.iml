@@ -15,7 +15,9 @@
           <root url="jar://$USER_HOME$/.m2/repository/org/apache/pig/pig/0.11.0-SNAPSHOT/pig-0.11.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../pig/src" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -503,7 +505,9 @@
           <root url="jar://$USER_HOME$/.m2/repository/org/apache/pig/pig/0.11.0-SNAPSHOT/pig-0.11.0-SNAPSHOT.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../pig/src" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
