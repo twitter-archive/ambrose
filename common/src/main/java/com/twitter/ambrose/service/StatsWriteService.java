@@ -28,7 +28,7 @@ import java.util.Map;
 public interface StatsWriteService {
 
   /**
-   * Send a map of all DAGNodes in the workflow. The strcutrure of the DAG is assumed to be immutable.
+   * Send a map of all DAGNodes in the workflow. The structure of the DAG is assumed to be immutable.
    * For that reason, visualization clients are expected to request the DAG once for initial
    * rendering and then poll for events after that. For that reason this method only makes sense to
    * be called once. Subsequent calls to modify the DAG will likely go unnoticed.
