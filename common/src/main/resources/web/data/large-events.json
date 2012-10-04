@@ -4,7 +4,7 @@
       "timestamp" : 1336094017340,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "0"
+         "workflowProgress" : "0"
       },
       "eventId" : 1
    },
@@ -93,7 +93,7 @@
       "timestamp" : 1336094141233,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "1"
+         "workflowProgress" : "1"
       },
       "eventId" : 6
    },
@@ -136,7 +136,7 @@
       "timestamp" : 1336094196360,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "3"
+         "workflowProgress" : "3"
       },
       "eventId" : 9
    },
@@ -179,7 +179,7 @@
       "timestamp" : 1336094216815,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "4"
+         "workflowProgress" : "4"
       },
       "eventId" : 12
    },
@@ -877,7 +877,7 @@
       "timestamp" : 1336095014593,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "17"
+         "workflowProgress" : "17"
       },
       "eventId" : 24
    },
@@ -971,7 +971,7 @@
       "timestamp" : 1336095026056,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "17"
+         "workflowProgress" : "17"
       },
       "eventId" : 30
    },
@@ -1014,7 +1014,7 @@
       "timestamp" : 1336095035818,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "19"
+         "workflowProgress" : "19"
       },
       "eventId" : 36
    },
@@ -1447,7 +1447,7 @@
       "timestamp" : 1336095257720,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "23"
+         "workflowProgress" : "23"
       },
       "eventId" : 48
    },
@@ -1507,7 +1507,7 @@
       "timestamp" : 1336095281568,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "26"
+         "workflowProgress" : "26"
       },
       "eventId" : 56
    },
@@ -1711,7 +1711,7 @@
       "timestamp" : 1336096281736,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 65
    },
@@ -1754,7 +1754,7 @@
       "timestamp" : 1336096586238,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 73
    },
@@ -1780,7 +1780,7 @@
       "timestamp" : 1336096691007,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 81
    },
@@ -1806,7 +1806,7 @@
       "timestamp" : 1336096762050,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 89
    },
@@ -1832,7 +1832,7 @@
       "timestamp" : 1336096831046,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 97
    },
@@ -1858,7 +1858,7 @@
       "timestamp" : 1336096918657,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 105
    },
@@ -1884,7 +1884,7 @@
       "timestamp" : 1336096958952,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 113
    },
@@ -1910,7 +1910,7 @@
       "timestamp" : 1336097020537,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 121
    },
@@ -1936,7 +1936,7 @@
       "timestamp" : 1336097051373,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 129
    },
@@ -1962,7 +1962,7 @@
       "timestamp" : 1336097124759,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 137
    },
@@ -1988,7 +1988,7 @@
       "timestamp" : 1336097199188,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "27"
+         "workflowProgress" : "27"
       },
       "eventId" : 145
    },
@@ -2014,7 +2014,7 @@
       "timestamp" : 1336097662157,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 153
    },
@@ -2040,7 +2040,7 @@
       "timestamp" : 1336097741852,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 161
    },
@@ -2066,7 +2066,7 @@
       "timestamp" : 1336097846368,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 169
    },
@@ -2092,7 +2092,7 @@
       "timestamp" : 1336097933163,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 177
    },
@@ -2118,7 +2118,7 @@
       "timestamp" : 1336097979436,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 185
    },
@@ -2144,7 +2144,7 @@
       "timestamp" : 1336098087828,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 193
    },
@@ -2170,7 +2170,7 @@
       "timestamp" : 1336098114745,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 201
    },
@@ -2196,7 +2196,7 @@
       "timestamp" : 1336098144918,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 209
    },
@@ -2222,7 +2222,7 @@
       "timestamp" : 1336098319359,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 217
    },
@@ -2248,7 +2248,7 @@
       "timestamp" : 1336098357285,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 225
    },
@@ -2274,7 +2274,7 @@
       "timestamp" : 1336098428010,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 233
    },
@@ -2300,7 +2300,7 @@
       "timestamp" : 1336098433395,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 241
    },
@@ -2326,7 +2326,7 @@
       "timestamp" : 1336098459997,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 249
    },
@@ -2352,7 +2352,7 @@
       "timestamp" : 1336098470041,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "28"
+         "workflowProgress" : "28"
       },
       "eventId" : 257
    },
@@ -2378,7 +2378,7 @@
       "timestamp" : 1336098508166,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "29"
+         "workflowProgress" : "29"
       },
       "eventId" : 265
    },
@@ -2404,7 +2404,7 @@
       "timestamp" : 1336098538049,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "29"
+         "workflowProgress" : "29"
       },
       "eventId" : 273
    },
@@ -2733,7 +2733,7 @@
       "timestamp" : 1336098693201,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "32"
+         "workflowProgress" : "32"
       },
       "eventId" : 288
    },
@@ -2810,7 +2810,7 @@
       "timestamp" : 1336098714173,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "36"
+         "workflowProgress" : "36"
       },
       "eventId" : 299
    },
@@ -2870,7 +2870,7 @@
       "timestamp" : 1336098715260,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "38"
+         "workflowProgress" : "38"
       },
       "eventId" : 310
    },
@@ -2930,7 +2930,7 @@
       "timestamp" : 1336098767338,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "43"
+         "workflowProgress" : "43"
       },
       "eventId" : 321
    },
@@ -3572,7 +3572,7 @@
       "timestamp" : 1336098880390,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "46"
+         "workflowProgress" : "46"
       },
       "eventId" : 341
    },
@@ -3649,7 +3649,7 @@
       "timestamp" : 1336098907832,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "51"
+         "workflowProgress" : "51"
       },
       "eventId" : 355
    },
@@ -3709,7 +3709,7 @@
       "timestamp" : 1336098914956,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "54"
+         "workflowProgress" : "54"
       },
       "eventId" : 369
    },
@@ -4071,7 +4071,7 @@
       "timestamp" : 1336099044026,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "56"
+         "workflowProgress" : "56"
       },
       "eventId" : 385
    },
@@ -4280,7 +4280,7 @@
       "timestamp" : 1336099335241,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "57"
+         "workflowProgress" : "57"
       },
       "eventId" : 402
    },
@@ -4306,7 +4306,7 @@
       "timestamp" : 1336099405070,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "57"
+         "workflowProgress" : "57"
       },
       "eventId" : 417
    },
@@ -4332,7 +4332,7 @@
       "timestamp" : 1336099424918,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "57"
+         "workflowProgress" : "57"
       },
       "eventId" : 432
    },
@@ -4358,7 +4358,7 @@
       "timestamp" : 1336099454087,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 447
    },
@@ -4384,7 +4384,7 @@
       "timestamp" : 1336099549447,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 462
    },
@@ -4410,7 +4410,7 @@
       "timestamp" : 1336099575450,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 477
    },
@@ -4436,7 +4436,7 @@
       "timestamp" : 1336099626205,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 492
    },
@@ -4462,7 +4462,7 @@
       "timestamp" : 1336099683705,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 507
    },
@@ -4488,7 +4488,7 @@
       "timestamp" : 1336099743162,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 522
    },
@@ -4514,7 +4514,7 @@
       "timestamp" : 1336099768663,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 537
    },
@@ -4540,7 +4540,7 @@
       "timestamp" : 1336099824571,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 552
    },
@@ -4566,7 +4566,7 @@
       "timestamp" : 1336099844985,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "58"
+         "workflowProgress" : "58"
       },
       "eventId" : 567
    },
@@ -4592,7 +4592,7 @@
       "timestamp" : 1336100092590,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "60"
+         "workflowProgress" : "60"
       },
       "eventId" : 582
    },
@@ -4618,7 +4618,7 @@
       "timestamp" : 1336100166571,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "60"
+         "workflowProgress" : "60"
       },
       "eventId" : 597
    },
@@ -4644,7 +4644,7 @@
       "timestamp" : 1336100210210,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "60"
+         "workflowProgress" : "60"
       },
       "eventId" : 612
    },
@@ -4875,7 +4875,7 @@
       "timestamp" : 1336100451405,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "62"
+         "workflowProgress" : "62"
       },
       "eventId" : 630
    },
@@ -4918,7 +4918,7 @@
       "timestamp" : 1336100467533,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "62"
+         "workflowProgress" : "62"
       },
       "eventId" : 646
    },
@@ -4944,7 +4944,7 @@
       "timestamp" : 1336100474216,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "62"
+         "workflowProgress" : "62"
       },
       "eventId" : 662
    },
@@ -4970,7 +4970,7 @@
       "timestamp" : 1336100522765,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "63"
+         "workflowProgress" : "63"
       },
       "eventId" : 678
    },
@@ -4996,7 +4996,7 @@
       "timestamp" : 1336100571034,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "63"
+         "workflowProgress" : "63"
       },
       "eventId" : 694
    },
@@ -5229,7 +5229,7 @@
       "timestamp" : 1336100619765,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "67"
+         "workflowProgress" : "67"
       },
       "eventId" : 713
    },
@@ -5272,7 +5272,7 @@
       "timestamp" : 1336100640422,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "69"
+         "workflowProgress" : "69"
       },
       "eventId" : 730
    },
@@ -5554,7 +5554,7 @@
       "timestamp" : 1336100733351,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "71"
+         "workflowProgress" : "71"
       },
       "eventId" : 752
    },
@@ -5614,7 +5614,7 @@
       "timestamp" : 1336100739946,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "73"
+         "workflowProgress" : "73"
       },
       "eventId" : 771
    },
@@ -5797,7 +5797,7 @@
       "timestamp" : 1336100741406,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "76"
+         "workflowProgress" : "76"
       },
       "eventId" : 791
    },
@@ -5823,7 +5823,7 @@
       "timestamp" : 1336100747687,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "78"
+         "workflowProgress" : "78"
       },
       "eventId" : 810
    },
@@ -6027,7 +6027,7 @@
       "timestamp" : 1336100867138,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "80"
+         "workflowProgress" : "80"
       },
       "eventId" : 832
    },
@@ -6053,7 +6053,7 @@
       "timestamp" : 1336100912341,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "80"
+         "workflowProgress" : "80"
       },
       "eventId" : 852
    },
@@ -6079,7 +6079,7 @@
       "timestamp" : 1336100938553,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "80"
+         "workflowProgress" : "80"
       },
       "eventId" : 872
    },
@@ -6105,7 +6105,7 @@
       "timestamp" : 1336101191918,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "82"
+         "workflowProgress" : "82"
       },
       "eventId" : 892
    },
@@ -6131,7 +6131,7 @@
       "timestamp" : 1336101224515,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "82"
+         "workflowProgress" : "82"
       },
       "eventId" : 912
    },
@@ -6357,7 +6357,7 @@
       "timestamp" : 1336101539602,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "84"
+         "workflowProgress" : "84"
       },
       "eventId" : 935
    },
@@ -6400,7 +6400,7 @@
       "timestamp" : 1336101632615,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "84"
+         "workflowProgress" : "84"
       },
       "eventId" : 956
    },
@@ -6426,7 +6426,7 @@
       "timestamp" : 1336101721638,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "84"
+         "workflowProgress" : "84"
       },
       "eventId" : 977
    },
@@ -6452,7 +6452,7 @@
       "timestamp" : 1336102089923,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "86"
+         "workflowProgress" : "86"
       },
       "eventId" : 998
    },
@@ -6478,7 +6478,7 @@
       "timestamp" : 1336102160131,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "86"
+         "workflowProgress" : "86"
       },
       "eventId" : 1019
    },
@@ -7146,7 +7146,7 @@
       "timestamp" : 1336103277733,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "97"
+         "workflowProgress" : "97"
       },
       "eventId" : 1049
    },
@@ -7223,7 +7223,7 @@
       "timestamp" : 1336103303868,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "97"
+         "workflowProgress" : "97"
       },
       "eventId" : 1073
    },
@@ -7249,7 +7249,7 @@
       "timestamp" : 1336103320673,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "97"
+         "workflowProgress" : "97"
       },
       "eventId" : 1097
    },
@@ -7446,7 +7446,7 @@
       "timestamp" : 1336103339054,
       "eventData" : {
          "jobData" : {},
-         "scriptProgress" : "100"
+         "workflowProgress" : "100"
       },
       "eventId" : 1122
    },

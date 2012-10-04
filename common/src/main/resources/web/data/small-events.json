@@ -3,7 +3,7 @@
   "eventId" : 1,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "0"
+    "workflowProgress" : "0"
   }
 }, {
   "timestamp" : 1334796069437,
@@ -36,7 +36,7 @@
   "eventId" : 4,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "16"
+    "workflowProgress" : "16"
   }
 }, {
   "timestamp" : 1334796109423,
@@ -58,7 +58,7 @@
   "eventId" : 6,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "33"
+    "workflowProgress" : "33"
   }
 }, {
   "timestamp" : 1334796116803,
@@ -335,7 +335,7 @@
   "eventId" : 11,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "50"
+    "workflowProgress" : "50"
   }
 }, {
   "timestamp" : 1334796142621,
@@ -372,7 +372,7 @@
   "eventId" : 14,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "66"
+    "workflowProgress" : "66"
   }
 }, {
   "timestamp" : 1334796162561,
@@ -635,7 +635,7 @@
   "eventId" : 20,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "83"
+    "workflowProgress" : "83"
   }
 }, {
   "timestamp" : 1334796205033,
@@ -895,7 +895,7 @@
   "eventId" : 25,
   "eventType" : "WORKFLOW_PROGRESS",
   "eventData" : {
-    "scriptProgress" : "100"
+    "workflowProgress" : "100"
   }
 }, {
   "timestamp" : 1334796267184,
