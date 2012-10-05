@@ -313,6 +313,16 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
       if (_workflowId) {
         _dagUrl.search({ workflowId: _workflowId });
         _eventsUrl.search({ workflowId: _workflowId });
+
+        // parse workflow id for component values
+        var components = _workflowId.split(/!/);
+        if (components.length > 0) _clusterName = components[0];
+        if (components.length > 1) _userName = components[1];
+        if (components.length > 2) _workflowName = components[2];
+
+        // update navbar title
+        $('<a>').attr('href', uri.unicode()).text(_workflowName)
+          .appendTo($('<li class="active">').appendTo($('#navbar')));
       }
 
       // wrap "this" with jQuery for event handling
