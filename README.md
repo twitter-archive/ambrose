@@ -62,7 +62,7 @@ cd ambrose
 Next, you can try running the Ambrose demo on your local machine. The demo
 starts a local web server which serves the front-end client resources and sample
 data. Start the demo with the following command and then browse to
-[http://localhost:8080/index.html?localdata=small](http://localhost:8080/index.html?localdata=small):
+[http://localhost:8080/workflow.html?localdata=small](http://localhost:8080/workflow.html?localdata=small):
 
 ```
 ./bin/ambrose-demo
@@ -86,9 +86,10 @@ cd ambrose-pig-$VERSION
 
 Note that this command delegates to the `pig` script present in your local
 installation of Pig, so make sure `$PIG_HOME/bin` is in your path. Now, browse
-to [http://localhost:8080/](http://localhost:8080/) to see the progress of your
-script using the Ambrose UI. To override the default port, export `AMBROSE_PORT`
-before invoking `pig-ambrose`:
+to
+[http://localhost:8080/web/workflow.html](http://localhost:8080/web/workflow.html)
+to see the progress of your script using the Ambrose UI. To override the default
+port, export `AMBROSE_PORT` before invoking `pig-ambrose`:
 
 ```
 export AMBROSE_PORT=4567

@@ -93,7 +93,7 @@ public class ScriptStatusServer implements Runnable {
   public void start() {
     try {
       LOG.info(String.format("Starting ambrose web server on port %s. "
-        + "Browse to http://localhost:%s/web to see job progress.", port, port));
+        + "Browse to http://localhost:%s/web/workflow.html to see job progress.", port, port));
       serverThread = new Thread(this);
       serverThread.setDaemon(true);
       serverThread.start();
