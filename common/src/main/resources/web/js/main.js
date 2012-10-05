@@ -1,7 +1,7 @@
 require([
   'jquery',
   'uri',
-  'bootstrap',
+  'bootstrap.min',
   'ambrose',
   'ambrose-ui',
   'ambrose-util',
