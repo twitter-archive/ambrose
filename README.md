@@ -62,7 +62,7 @@ cd ambrose
 Next, you can try running the Ambrose demo on your local machine. The demo
 starts a local web server which serves the front-end client resources and sample
 data. Start the demo with the following command and then browse to
-[http://localhost:8080/index.html?localdata=small](http://localhost:8080/index.html?localdata=small):
+[http://localhost:8080/workflow.html?localdata=small](http://localhost:8080/workflow.html?localdata=small):
 
 ```
 ./bin/ambrose-demo
