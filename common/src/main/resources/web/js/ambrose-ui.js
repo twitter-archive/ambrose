@@ -24,6 +24,7 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
     return new ambrose.ui.fn.init();
   };
 
+  var _workflowId, _clusterName, _workflowName, _userName;
   var _dagUrl, _eventsUrl;
   var _workflowProgress = 0;
   var _jobs = [];
@@ -57,7 +58,7 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   function _loadDag() {
     var ui = this;
     _info('loading job graph');
-    d3.json(_dagUrl, function(data) {
+    d3.json(_dagUrl.unicode(), function(data) {
       // handle failure
       if (data == null) {
         ui.fatal('Failed to load dag data');
@@ -143,7 +144,11 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
     }
 
     // request new events from end-point
-    d3.json(_eventsUrl + '?lastEventId=' + _lastProcessedEventId, function(events) {
+    var uri = _eventsUrl
+      .removeSearch([ 'lastEventId' ])
+      .addSearch({ lastEventId: _lastProcessedEventId })
+      .unicode();
+    d3.json(uri, function(events) {
       // test for error
       if (events == null) {
         _consecutiveNullEvents++;
@@ -285,16 +290,29 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
      */
     init: function() {
       // initialize end-point urls
-      var url = window.location.href;
-      if (url.indexOf('?localdata=small') != -1) {
-        _dagUrl = 'data/small-dag.json';
-        _eventsUrl = 'data/small-events.json';
-      } else if (url.indexOf('?localdata=large') != -1) {
-        _dagUrl = 'data/large-dag.json';
-        _eventsUrl = 'data/large-events.json';
+      var uri = new URI(window.location.href);
+      var params = uri.search(true);
+
+      if (params.localdata) {
+        if (params.localdata == 'small') {
+          _dagUrl = 'data/small-dag.json';
+          _eventsUrl = 'data/small-events.json';
+        } else {
+          _dagUrl = 'data/large-dag.json';
+          _eventsUrl = 'data/large-events.json';
+        }
       } else {
         _dagUrl = 'dag';
         _eventsUrl = 'events';
+      }
+
+      _dagUrl = new URI(_dagUrl);
+      _eventsUrl = new URI(_eventsUrl);
+
+      _workflowId = params.workflowId;
+      if (_workflowId) {
+        _dagUrl.search({ workflowId: _workflowId });
+        _eventsUrl.search({ workflowId: _workflowId });
       }
 
       // wrap "this" with jQuery for event handling
