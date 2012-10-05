@@ -1,5 +1,6 @@
 require([
   'jquery',
+  'uri',
   'bootstrap',
   'ambrose',
   'ambrose-ui',
@@ -9,7 +10,7 @@ require([
   'ambrose-chart',
   'ambrose-chord',
   'ambrose-dag'
-], function ($, bs, ambrose) {
+], function ($, URI, bs, ambrose) {
   var ui = ambrose.ui();
   var detail = ambrose.detail(ui);
   var table = ambrose.table(ui);
