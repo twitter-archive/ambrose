@@ -86,9 +86,10 @@ cd ambrose-pig-$VERSION
 
 Note that this command delegates to the `pig` script present in your local
 installation of Pig, so make sure `$PIG_HOME/bin` is in your path. Now, browse
-to [http://localhost:8080/](http://localhost:8080/) to see the progress of your
-script using the Ambrose UI. To override the default port, export `AMBROSE_PORT`
-before invoking `pig-ambrose`:
+to
+[http://localhost:8080/web/workflow.html](http://localhost:8080/web/workflow.html)
+to see the progress of your script using the Ambrose UI. To override the default
+port, export `AMBROSE_PORT` before invoking `pig-ambrose`:
 
 ```
 export AMBROSE_PORT=4567
