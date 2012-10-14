@@ -48,7 +48,7 @@ define(['jquery', 'ambrose', 'd3', 'colorbrewer'], function($, ambrose) {
 
   // returns start angle for a chord group
   function _groupStartAngle(d) {
-    return  _ga * d.index - _ga2;
+    return  _ga * d.index;
   }
 
   // returns end angle for a chord group
@@ -161,7 +161,7 @@ define(['jquery', 'ambrose', 'd3', 'colorbrewer'], function($, ambrose) {
           _handleChartMouseOut.call(self, d, i);
         })
         .append("svg:g")
-        .attr("transform", "translate(" + (width/2) + "," + (height/2) + ")rotate(90)")
+        .attr("transform", "translate(" + (width/2) + "," + (height/2) + ")")
         .append("svg:g")
         .attr("transform", "rotate(0)");
 
@@ -283,11 +283,12 @@ define(['jquery', 'ambrose', 'd3', 'colorbrewer'], function($, ambrose) {
       // add a label to each g.group
       g.append("svg:text")
         .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-          .attr("dy", ".35em")
-        .attr("text-anchor", null)
+        .attr("dy", ".35em")
+        .attr("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
         .attr("transform", function(d) {
           return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-            + "translate(" + (_r0 + 26) + ")";
+            + "translate(" + (_r0 + 26) + ")"
+            + (d.angle > Math.PI ? "rotate(180)" : "");
         })
         .text(function(d) { return d.index + 1; });
 
