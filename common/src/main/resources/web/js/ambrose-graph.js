@@ -159,17 +159,12 @@ define(['jquery', 'ambrose'], function($, ambrose) {
       var nodesByTopologicalIndex = this.nodesByTopologicalIndex = [];
       var topologicalGroups = this.topologicalGroups = [];
 
-      // util methods
-      var getChildIds = function(node) {
-        return $.map(node.children || [], function(n, i) { return n.id; });
-      };
-
       // create working copy of graph, find roots
       $.each(nodes, function(i, node) {
         var n = g[node.id] = {
           id: node.id,
           outDegree: node.parents ? node.parents.length : 0,
-          children: getChildIds(node),
+          children: $.map(node.children || [], function(n, i) { return n.id; }),
         };
         if (n.outDegree == 0) q.push(n);
       });
@@ -195,6 +190,20 @@ define(['jquery', 'ambrose'], function($, ambrose) {
 
         q = q2;
       }
+
+      // push nodes down to lowest possible topological group
+      $.each(nodes, function(i, node) {
+        var children = node.children;
+        if (!children || children.length == 0) return;
+        var groupIndices = $.map(children, function(c) { return c.topologicalGroupIndex; });
+        var minGroupIndex = groupIndices.min() - 1;
+        if (node.topologicalGroupIndex >= minGroupIndex) return;
+        var oldGroup = topologicalGroups[node.topologicalGroupIndex];
+        var newGroup = topologicalGroups[minGroupIndex];
+        oldGroup.remove(node);
+        newGroup.push(node);
+        node.topologicalGroupIndex = minGroupIndex;
+      });
     },
 
     /**
@@ -224,6 +233,7 @@ define(['jquery', 'ambrose'], function($, ambrose) {
      * of nodes.
      */
     sortTopologicalGroups: function() {
+      // TODO
     },
   };
 
