@@ -1,8 +1,11 @@
-**/target
-*.log
-*.iws
+**/*.releaseBackup
+**/.classpath
 **/.project
 **/.settings
-**/.classpath
+**/target
+*.iws
+*.log
+*.releaseBackup
 .project
 .settings
+target

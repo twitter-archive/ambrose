@@ -19,7 +19,7 @@ limitations under the License.
  * bind to the events this object triggers, which are listed at the bottom of
  * this module.
  */
-define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
+define(['jquery', 'ambrose', 'ambrose-graph', 'd3'], function($, ambrose, graph) {
   var ui = ambrose.ui = function() {
     return new ambrose.ui.fn.init();
   };
@@ -27,8 +27,7 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   var _workflowId, _clusterName, _workflowName, _userName;
   var _dagUrl, _eventsUrl;
   var _workflowProgress = 0;
-  var _jobs = [];
-  var _jobsByName = {}, _jobsByJobId = {}, _indexByName = {}, _nameByIndex = {};
+  var _jobGraph, _jobs, _jobsByName, _jobsByJobId, _indexByName, _nameByIndex;
   var _selectedJob;
   var _pollIntervalId;
   var _lastProcessedEventId = -1;
@@ -66,8 +65,7 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
       }
 
       // save jobs data and build indices
-      _jobs = data;
-      _buildJobIndex.call(ui, _jobs);
+      _initializeJobs(data);
 
       // trigger event
       ui.trigger('dagLoaded', {jobs: _jobs});
@@ -93,32 +91,66 @@ define(['jquery', 'ambrose', 'd3'], function($, ambrose) {
   };
 
   /**
-   * Computes a unique index for each job name. Note that job names are
-   * independent of job ids. A map-reduce job receives an id only after it has
-   * been successfully submitted to a Job Tracker for processing.
+   * Resets internal jobs data and rebuilds job indices. Job id to job map is
+   * reset. Note that job ids and names are independent; A map-reduce job
+   * receives an id only after it has been successfully submitted to a Job
+   * Tracker for processing.
    */
-  function _buildJobIndex(jobs) {
-    var n = 0;
-    jobs.forEach(function(job) {
-      _jobsByName[job.name] = job;
-      if (!(job.name in _indexByName)) {
-        _nameByIndex[n] = job.name;
-        _indexByName[job.name] = job.index = n++;
+  function _initializeJobs(jobs) {
+    // initialize name to job map
+    _jobsByName = {};
+    $.each(jobs, function(i, job) {
+      var name = job.name;
+      if (name in _jobsByName) {
+        console.error("Multiple jobs found with name '" + name + "'")
+        return;
       }
+      _jobsByName[name] = job;
+    });
+
+    // initialize parent links
+    $.each(jobs, function(j, job) {
+      var name = job.name;
+      $.each(job.successorNames, function(i, childName) {
+        var child = _jobsByName[childName];
+        var predecessorNames = child.predecessorNames || (child.predecessorNames = []);
+        predecessorNames.push(name);
+      });
+    });
+
+    // build graph and sort
+    _jobGraph = graph({
+      data: jobs,
+      getId: function(d) { return d.name; },
+      getParentIds: function(d) { return d.predecessorNames; },
+    });
+    _jobGraph.sort();
+
+    // initialize remaining indices
+    _jobs = [];
+    _jobsByJobId = {};
+    _indexByName = {};
+    _nameByIndex = {};
+    $.each(_jobGraph.nodesByTopologicalIndex, function(i, node) {
+      var job = node.data;
+      var name = job.name;
+      _indexByName[name] = job.index = i;
+      _nameByIndex[i] = name;
+      _jobs.push(job);
     });
   }
 
-  function _startEventPolling () {
+  function _startEventPolling() {
     // TODO: this next line breaks things when restarting from firebug
     ui = this;
     _pollIntervalId = setInterval(function() { _pollEvents.call(ui); }, 1000);
     _info('event polling started');
-  };
+  }
 
   function _stopEventPolling() {
     clearInterval(_pollIntervalId);
     _info('event polling stopped');
-  };
+  }
 
   function _pollEvents() {
     var ui = this;
