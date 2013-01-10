@@ -96,7 +96,10 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create arc generators
       this.arc = {
         job: d3.svg.arc().innerRadius(innerRadius).outerRadius(radius),
-        mouse: d3.svg.arc().innerRadius(minRadius).outerRadius(radius),
+        mouse: d3.svg.arc().innerRadius(minRadius).outerRadius(radius)
+          .endAngle(function(group) {
+            return group.startAngle + self.dimensions.groupAngle;
+          }),
       };
 
       // create closures to pass to d3
@@ -115,11 +118,14 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       };
 
       // bind event workflow handlers
-      workflow.on('jobsLoaded', function(event, data) {
-        self.handleJobsLoaded(data);
+      workflow.on('jobsLoaded', function(event, jobs) {
+        self.handleJobsLoaded(jobs);
       });
-      workflow.on('jobStarted jobProgress jobCompleted jobFailed jobSelected jobMouseOver', function(event, data) {
-        self.handleJobUpdated(data);
+      workflow.on('jobStarted jobProgress jobCompleted jobFailed jobSelected jobMouseOver', function(event, job) {
+        self.handleJobUpdated(350);
+      });
+      workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
+        self.handleJobUpdated();
       });
     },
 
@@ -161,7 +167,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       $.each(groups, function(i, group) {
         var startAngle = ga * i;
         var endAngle = ga * (i + 1) - gas;
-        var angle = startAngle + (endAngle - startAngle) / 2;
+        var angle = startAngle + ga2;
         $.extend(group, {
           job: jobs[i],
           startAngle: startAngle,
@@ -261,31 +267,17 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
         .on('click', this.f.groupClick);
     },
 
-    jobColor: function(job) {
-      if (job.mouseover) return this.params.colors.mouseover;
-      if (job.selected) return this.params.colors.selected;
-      var status = (job.status || '').toLowerCase();
-      var color = this.params.colors[status];
-      if (color != null) return color;
-      // TODO(Andy Schlaikjer): remove darker transform
-      var fill = this.fills[status] || this.fills.queued;
-      return d3.hsl(fill(job.index)).darker(0.5);
-    },
-
-    handleJobUpdated: function() {
+    handleJobUpdated: function(duration) {
       var svg = this.svg;
       var f = this.f;
-      // update groups
-      svg.selectAll('path.arc')
-        .transition()
-        //.duration(100)
-        .style('fill', f.groupFill);
-      // update chords
-      svg.selectAll('path.chord')
-        .transition()
-        //.duration(100)
-        .style('fill', f.chordFill)
-        .style('opacity', f.chordOpacity);
+      var arc = svg.selectAll('path.arc');
+      var chord = svg.selectAll('path.chord')
+      if (duration) {
+        arc = arc.transition().duration(duration);
+        chord = chord.transition().duration(duration);
+      }
+      arc.style('fill', f.groupFill);
+      chord.style('fill', f.chordFill).style('opacity', f.chordOpacity);
     },
 
     handleGroupMouseOver: function(d, i) {
@@ -298,6 +290,17 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
 
     handleGroupClick: function(d, i) {
       this.workflow.selectJob(d.job);
+    },
+
+    jobColor: function(job) {
+      if (job.mouseover) return this.params.colors.mouseover;
+      if (job.selected) return this.params.colors.selected;
+      var status = (job.status || '').toLowerCase();
+      var color = this.params.colors[status];
+      if (color != null) return color;
+      // TODO(Andy Schlaikjer): remove darker transform
+      var fill = this.fills[status] || this.fills.queued;
+      return d3.hsl(fill(job.index)).darker(0.5);
     },
   };
 
