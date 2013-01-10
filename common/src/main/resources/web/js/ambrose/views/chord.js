@@ -280,16 +280,16 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       chord.style('fill', f.chordFill).style('opacity', f.chordOpacity);
     },
 
-    handleGroupMouseOver: function(d, i) {
-      this.workflow.mouseOverJob(d.job);
+    handleGroupMouseOver: function(group) {
+      this.workflow.mouseOverJob(group.job);
     },
 
-    handleGroupMouseOut: function(d, i) {
+    handleGroupMouseOut: function(group) {
       this.workflow.mouseOverJob(null);
     },
 
-    handleGroupClick: function(d, i) {
-      this.workflow.selectJob(d.job);
+    handleGroupClick: function(group) {
+      this.workflow.selectJob(group.job);
     },
 
     jobColor: function(job) {
