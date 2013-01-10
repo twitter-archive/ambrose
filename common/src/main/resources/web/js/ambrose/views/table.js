@@ -32,11 +32,21 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
      *
      * @param workflow the Workflow instance to bind to.
      * @param container the DOM element in which to render the view.
+     * @param params extra options.
      */
-    init: function(workflow, container) {
+    init: function(workflow, container, params) {
       this.workflow = workflow;
       this.container = $(container);
       this.initTable();
+      this.params = $.extend(true, {
+        colors: {
+          running: d3.rgb(98, 196, 98).brighter(),
+          complete: d3.rgb(98, 196, 98),
+          failed: d3.rgb(196, 98, 98),
+          mouseover: d3.rgb(98, 98, 196).brighter(),
+          selected: d3.rgb(98, 98, 196),
+        },
+      }, params);
       var self = this;
       workflow.on('jobsLoaded', function(event, jobs) {
         self.loadTable(jobs);
@@ -46,13 +56,15 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
         var jobs = [];
-        if (prev != null) jobs.push(prev);
-        if (job != null) jobs.push(job);
+        if (prev) jobs.push(prev);
+        if (job) jobs.push(job);
         self.updateTableRows(jobs);
       });
     },
 
     initTable: function() {
+      var self = this;
+      var tbody = this.tbody = $('<tbody/>');
       $('<table class="table table-condensed">'
         + '<thead><tr>'
         + '<th>#</th>'
@@ -65,7 +77,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
         + '</tr></thead>'
         + '</table>')
         .appendTo(this.container.empty())
-        .append(this.tbody = $('<tbody/>'));
+        .append(tbody);
     },
 
     loadTable: function(jobs) {
@@ -100,10 +112,10 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
         .append('a').attr('class', 'job-url')
         .attr('target', '_blank')
         .attr('href', 'javascript:void(0);');
-      tr.append('td').attr('class', 'job-status')
-      tr.append('td').attr('class', 'job-aliases')
-      tr.append('td').attr('class', 'job-features')
-      tr.append('td').attr('class', 'job-mappers')
+      tr.append('td').attr('class', 'job-status');
+      tr.append('td').attr('class', 'job-aliases');
+      tr.append('td').attr('class', 'job-features');
+      tr.append('td').attr('class', 'job-mappers');
       tr.append('td').attr('class', 'job-reducers');
       var self = this;
       tr.on('mouseover', function(job) { self.workflow.mouseOverJob(job); })
@@ -113,28 +125,42 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
 
     updateRows: function(tr, duration) {
       // update mutable row properties
-      if (duration) tr = tr.transition().duration(duration);
-      tr.style('background-color', function(job) {
-          if (job.mouseover) return d3.rgb(98, 98, 196).brighter();
-          if (job.selected) return d3.rgb(98, 98, 196);
-          if (job.status == 'RUNNING') return d3.rgb(98, 196, 98).brighter();
-          if (job.status == 'COMPLETE') return d3.rgb(98, 196, 98);
-          if (job.status == 'FAILED') return d3.rgb(196, 98, 98);
+      var colors = this.params.colors;
+      if (duration) {
+        // only update background color of rows whose jobs are not selected or mouseover
+        tr.transition().duration(duration).filter(function(job) {
+          return !(job.mouseover || job.selected);
+        }).style('background-color', function(job) {
+          if (job.status == 'RUNNING') return colors.running;
+          if (job.status == 'COMPLETE') return colors.complete;
+          if (job.status == 'FAILED') return colors.failed;
           return 'white';
         });
+      } else {
+        // rows updated due to user interaction; rapidly update background color
+        tr.style('background-color', function(job) {
+          if (job.mouseover) return colors.mouseover;
+          if (job.selected) return colors.selected;
+          if (job.status == 'RUNNING') return colors.running;
+          if (job.status == 'COMPLETE') return colors.complete;
+          if (job.status == 'FAILED') return colors.failed;
+          return 'white';
+        });
+      }
+      // update all other params normally
       tr.selectAll('a.job-url')
         .attr('href', function(job) { return job.trackingUrl || 'javascript:void(0);'; })
         .text(function(job) { return job.id; });
       tr.selectAll('td.job-status')
-        .text(function (job) { Ambrose.nullToEmpty(job.status); });
+        .text(function (job) { return Ambrose.nullToEmpty(job.status); });
       tr.selectAll('td.job-aliases')
-        .text(function (job) { Ambrose.commaDelimit(job.aliases); });
+        .text(function (job) { return Ambrose.commaDelimit(job.aliases); });
       tr.selectAll('td.job-features')
-        .text(function (job) { Ambrose.commaDelimit(job.features); });
+        .text(function (job) { return Ambrose.commaDelimit(job.features); });
       tr.selectAll('td.job-mappers')
-        .text(function (job) { Ambrose.taskProgressMessage(job.totalMappers, job.mapProgress); });
+        .text(function (job) { return Ambrose.taskProgressMessage(job.totalMappers, job.mapProgress); });
       tr.selectAll('td.job-reducers')
-        .text(function (job) { Ambrose.taskProgressMessage(job.totalReducers, job.reduceProgress); });
+        .text(function (job) { return Ambrose.taskProgressMessage(job.totalReducers, job.reduceProgress); });
     },
   };
 
