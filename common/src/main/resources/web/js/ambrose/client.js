@@ -102,7 +102,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
           console.error('Failed to get events:', self, textStatus, errorThrown);
         })
         .success(function(data, textStatus, jqXHR) {
-          console.debug('Succeeded to get events:', textStatus, data);
+          console.debug('Succeeded to get events:', textStatus, data[0]);
         });
     },
   };
