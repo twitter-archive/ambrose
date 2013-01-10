@@ -38,20 +38,22 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       this.container = $(container);
       this.initTable();
       var self = this;
-      workflow.on('jobsLoaded', function(event, data) {
-        self.handleJobsLoaded(event, data);
+      workflow.on('jobsLoaded', function(event, jobs) {
+        self.loadTable(jobs);
       });
-      workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, data) {
-        self.handleJobUpdated(event, data);
+      workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
+        self.updateTableRows([job], 350);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
-        if (job != null) self.handleJobUpdated(event, job);
-        if (prev != null) self.handleJobUpdated(event, prev);
+        var jobs = [];
+        if (prev != null) jobs.push(prev);
+        if (job != null) jobs.push(job);
+        self.updateTableRows(jobs);
       });
     },
 
     initTable: function() {
-      $('<table class="table table-condensed table-striped ambrose-views-table">'
+      $('<table class="table table-condensed">'
         + '<thead><tr>'
         + '<th>#</th>'
         + '<th>Identifier</th>'
@@ -66,12 +68,15 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
         .append(this.tbody = $('<tbody/>'));
     },
 
-    handleJobsLoaded: function(event, data) {
-      this.loadTable(data);
+    loadTable: function(jobs) {
+      var tr = this.selectRows(jobs);
+      this.removeRows(tr);
+      this.createRows(tr);
+      this.updateRows(tr);
     },
 
-    handleJobUpdated: function(event, data) {
-      this.updateTableRow(data);
+    updateTableRows: function(jobs, duration) {
+      this.updateRows(this.selectRows(jobs), duration);
     },
 
     selectRows: function(jobs) {
@@ -88,6 +93,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
     createRows: function(tr) {
       // create rows for new jobs data
       tr = tr.enter().append('tr');
+      tr.style('background-color', 'white');
       tr.append('td').attr('class', 'job-num')
         .text(function(job) { return 1 + (job.topologicalIndex || job.index); });
       tr.append('td').attr('class', 'job-id')
@@ -99,19 +105,22 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       tr.append('td').attr('class', 'job-features')
       tr.append('td').attr('class', 'job-mappers')
       tr.append('td').attr('class', 'job-reducers');
+      var self = this;
+      tr.on('mouseover', function(job) { self.workflow.mouseOverJob(job); })
+        .on('mouseout', function(job) { self.workflow.mouseOverJob(null); })
+        .on('click', function(job) { self.workflow.selectJob(job); });
     },
 
     updateRows: function(tr, duration) {
       // update mutable row properties
-      duration = duration || 250;
-      tr.transition().duration(duration)
-        .style('background-color', function(job) {
+      if (duration) tr = tr.transition().duration(duration);
+      tr.style('background-color', function(job) {
           if (job.mouseover) return d3.rgb(98, 98, 196).brighter();
           if (job.selected) return d3.rgb(98, 98, 196);
           if (job.status == 'RUNNING') return d3.rgb(98, 196, 98).brighter();
           if (job.status == 'COMPLETE') return d3.rgb(98, 196, 98);
           if (job.status == 'FAILED') return d3.rgb(196, 98, 98);
-          return null;
+          return 'white';
         });
       tr.selectAll('a.job-url')
         .attr('href', function(job) { return job.trackingUrl || 'javascript:void(0);'; })
@@ -126,64 +135,6 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
         .text(function (job) { Ambrose.taskProgressMessage(job.totalMappers, job.mapProgress); });
       tr.selectAll('td.job-reducers')
         .text(function (job) { Ambrose.taskProgressMessage(job.totalReducers, job.reduceProgress); });
-    },
-
-    loadTableD3: function(jobs) {
-      var tr = this.selectRows(jobs);
-      this.removeRows(tr);
-      this.createRows(tr);
-      this.updateRows(tr);
-    },
-
-    updateTableRowD3: function(job) {
-      this.updateRows(this.selectRows([job]));
-    },
-
-    loadTable: function(jobs) {
-      var self = this;
-      var tbody = this.tbody.empty();
-      this.rows = {};
-      $.each(jobs, function(i, job) {
-        var tr = $('<tr>'
-          + '<td class="job-num">' + (i + 1) + '</td>'
-          + '<td class="job-id"><a class="job-url" href="javascript:void(0);" target="_blank"></a></td>'
-          + '<td class="job-status"/>'
-          + '<td class="job-alias"/>'
-          + '<td class="job-feature"/>'
-          + '<td class="job-mappers"/>'
-          + '<td class="job-reducers"/>'
-          + '</tr>')
-          .appendTo(tbody)
-          .on('click', function() { self.workflow.selectJob(job); })
-          .on('mouseover', function() { self.workflow.mouseOverJob(job); })
-          .on('mouseout', function() { self.workflow.mouseOverJob(null); });
-        self.rows[job.id] = tr;
-        self.updateTableRow(job, tr);
-      });
-    },
-
-    updateTableRow: function(job, tr) {
-      // find job row
-      if (tr == null) {
-        tr = this.rows[job.id];
-        if (tr == null) {
-          console.error("No row for job id '" + job.id + "' exists");
-          return;
-        }
-      }
-      // update data
-      $('.job-url', tr).text(job.id).attr('href', job.trackingUrl);
-      $('.job-status', tr).text(Ambrose.nullToEmpty(job.status));
-      $('.job-alias', tr).text(Ambrose.commaDelimit(job.aliases));
-      $('.job-feature', tr).text(Ambrose.commaDelimit(job.features));
-      $('.job-mappers', tr).text(Ambrose.taskProgressMessage(job.totalMappers, job.mapProgress));
-      $('.job-reducers', tr).text(Ambrose.taskProgressMessage(job.totalReducers, job.reduceProgress));
-      // update css
-      tr.removeClass();
-      if (job.mouseover) tr.addClass('mouseover');
-      if (job.selected) tr.addClass('selected');
-      if (job.status == 'FAILED') tr.addClass('error');
-      if (job.status == 'COMPLETE') tr.addClass('success');
     },
   };
 
