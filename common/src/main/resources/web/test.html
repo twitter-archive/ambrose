@@ -3,14 +3,23 @@
   <head>
     <meta charset="utf-8">
     <title>Ambrose Test</title>
+    <link href="css/test.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
   </head>
   <body>
 
-    <div id="ambrose-views-table">
-    </div>
+    <div id="ambrose-views-status-message"></div>
+    <div id="ambrose-views-progress-bar"></div>
+    <div id="ambrose-views-table"></div>
+    <div id="ambrose-views-chord"></div>
 
+    <script type="text/javascript">
+      var require = {
+        waitSeconds: 15,
+        urlArgs : "bust="+new Date().getTime(),
+      };
+    </script>
     <script data-main="js/test" src="js/require-jquery.js"></script>
 
   </body>

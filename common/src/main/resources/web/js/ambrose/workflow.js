@@ -64,7 +64,10 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
       this.jobsByName = {};
       this.jobsById = {};
       this.lastEventId = -1;
-      this.selectedJob = null;
+      this.current = {
+        selected: null,
+        mouseover: null,
+      };
     },
 
     /**
@@ -100,12 +103,13 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
      * Workflow.
      */
     loadJobs: function() {
-      console.log('Loading jobs:', this);
+      this.trigger('loadingJobs');
+      console.log('Loading jobs');
 
       // define callbacks
       var self = this;
       var handleError = function(textStatus, errorThrown) {
-        console.error('Failed to load jobs:', self, textStatus, errorThrown);
+        console.error('Failed to load jobs:', textStatus, errorThrown);
         self.trigger('error.loadJobs', [null, textStatus, errorThrown]);
       };
       var handleSuccess = function(data, textStatus) {
@@ -152,13 +156,18 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
         });
 
         // build job graph and sort
-        var jobGraph = self.jobGraph = Graph({
+        var graph = self.graph = Graph({
           data: jobs,
           getId: function(d) { return d.name; },
           getParentIds: function(d) { return d.predecessorNames; },
         });
-        jobGraph.sort();
-        jobs = self.jobs = $.map(jobGraph.nodesByTopologicalIndex, function(n) { return n.data; });
+        graph.sort();
+        jobs = self.jobs = $.map(graph.nodesByTopologicalIndex, function(node, i) {
+          var job = node.data;
+          job.index = i;
+          job.node = node;
+          return job;
+        });
 
         self.trigger('jobsLoaded', [jobs, textStatus, null]);
       };
@@ -184,7 +193,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
       if (this.eventPollingIntervalId != null) return;
       if (frequency == null) frequency = 1000;
       if (maxEvents == null) maxEvents = 1;
-      console.info('Starting event polling:', this);
+      console.info('Starting event polling');
       this.clientFailureCount = 0;
       var self = this;
       this.eventPollingIntervalId = setInterval(function() {
@@ -201,7 +210,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
      */
     stopEventPolling: function() {
       if (this.eventPollingIntervalId == null) return;
-      console.info('Stopping event polling:', this);
+      console.info('Stopping event polling');
       clearInterval(this.eventPollingIntervalId);
       this.eventPollingIntervalId = null;
       this.trigger('eventPollingStopped');
@@ -223,7 +232,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
     pollEvents: function(maxEvents) {
       // stop polling if all jobs are done
       if (this.isComplete()) {
-        console.info('Workflow complete:', this);
+        console.info('Workflow complete');
         this.stopEventPolling();
         this.trigger('workflowComplete');
         return;
@@ -271,7 +280,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
 
           // check for workflow event
           if (type == 'WORKFLOW_PROGRESS') {
-            self.setProgress(event.eventData.workflowProgress);
+            self.setProgress(job.workflowProgress);
             return;
           }
 
@@ -291,11 +300,11 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
           // process job event
           switch (type) {
           case 'JOB_STARTED':
-            console.info('Job started:', self, job);
+            console.info('Job started:', job);
             job.status = 'RUNNING';
             break;
           case 'JOB_PROGRESS':
-            console.info('Job progress:', self, job);
+            console.info('Job progress:', job);
             if (job.isComplete == 'true') {
               if (job.isSuccessful == 'true') {
                 job.status = 'COMPLETE';
@@ -307,15 +316,15 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
           case 'JOB_FINISHED':
             // TODO(Andy Schlaikjer): rename JOB_FINISHED to JOB_COMPLETE in server
             type = 'JOB_COMPLETE';
-            console.info('Job complete:', self, job);
+            console.info('Job complete:', job);
             job.status = 'COMPLETE';
             break;
           case 'JOB_FAILED':
-            console.info('Job failed:', self, job);
+            console.info('Job failed:', job);
             job.status = 'FAILED';
             break;
           default:
-            console.error("Unsupported event type '" + type + "':", self);
+            console.error("Unsupported event type '" + type + "':", self, event);
             return;
           }
 
@@ -344,11 +353,13 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
      */
     isComplete: function() {
       var complete = false;
-      if (this.progress == 100) {
+      if (this.progress == '100') {
         complete = true;
-        for (var i = 0; i < this.jobs.length; i++) {
-          var job = this.jobs[i];
-          if (job.status == 'COMPLETE' || job.status == 'FAILED') {
+        var jobs = this.jobs;
+        var i = -1, n = jobs.length; while (++i < n) {
+          var job = jobs[i];
+          var status = job.status;
+          if (status != 'COMPLETE' && status != 'FAILED') {
             complete = false;
             break;
           }
@@ -403,23 +414,49 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
      */
     setProgress: function(progress) {
       this.progress = progress;
-      this.trigger('workflowProgress');
+      this.trigger('workflowProgress', [progress]);
       return this;
     },
 
     /**
-     * Selects the given job and triggers 'jobSelected' event.
+     * Updates current "mouseover" job. The mouse may be hovering only one job at a time. If you
+     * mouseover the same job twice, the second call does nothing. If you mouseover null, any
+     * current mouseover job is cleared.
      *
-     * @param data object containing either 'name' or 'id' fields with which to find job.
+     * @param data object containing either 'name' or 'id' fields with which to find job. If null, clears any current "mouseover" job.
+     * @return selected job.
+     * @throws Error if no job exists with associated name or id.
+     */
+    mouseOverJob: function(data) {
+      var job = null;
+      if (data != null) job = this.findJob(data);
+      var prev = this.current.mouseover;
+      if (job === prev) return;
+      if (prev != null) prev.mouseover = false;
+      if (job != null) job.mouseover = true;
+      this.current.mouseover = job;
+      this.trigger('jobMouseOver', [job, prev]);
+      return job;
+    },
+
+    /**
+     * Updates current "selected" job. Only one job may be selected at a time. If you select the
+     * same job twice, the second select will deselect the job. If you select null, any selected job
+     * is deselected.
+     *
+     * @param data object containing either 'name' or 'id' fields with which to find job. If null, clears any current "selected" job.
      * @return selected job.
      * @throws Error if no job exists with associated name or id.
      */
     selectJob: function(data) {
-      var job = this.findJob(data);
-      job.selected = true;
-      if (this.selectedJob) this.selectedJob.selected = false;
-      this.selectedJob = job;
-      this.trigger('jobSelected', [job]);
+      var job = null;
+      if (data != null) job = this.findJob(data);
+      var prev = this.current.selected;
+      if (prev != null) prev.selected = false;
+      if (job === prev) job = null;
+      else if (job != null) job.selected = true;
+      this.current.selected = job;
+      this.trigger('jobSelected', [job, prev]);
       return job;
     },
   };

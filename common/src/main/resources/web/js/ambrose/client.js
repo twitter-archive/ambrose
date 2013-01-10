@@ -79,7 +79,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
           console.error('Failed to get jobs:', self, textStatus, errorThrown);
         })
         .success(function(data, textStatus, jqXHR) {
-          console.debug('Succeeded to get jobs:', self, textStatus, data);
+          console.debug('Succeeded to get jobs:', textStatus, data);
         });
     },
 
@@ -102,12 +102,12 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
           console.error('Failed to get events:', self, textStatus, errorThrown);
         })
         .success(function(data, textStatus, jqXHR) {
-          console.debug('Succeeded to get events:', self, textStatus, data);
+          console.debug('Succeeded to get events:', textStatus, data);
         });
     },
   };
 
+  // Bind prototype to ctor
   Client.fn.init.prototype = Client.fn;
-
   return Client;
 });

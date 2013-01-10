@@ -153,9 +153,36 @@ define(['jquery', './core'], function($, Ambrose) {
     },
 
     /**
-     * Sorts nodes topologically, assigning each node a topologicalIndex and
-     * topologicalGroupIndex property. The graph itself also receives two new
-     * properties: nodesByTopologicalIndex and topologicalGroups.
+     * Creates a dense square transition matrix encoding number of directed edges between nodes,
+     * suitable for use with d3's chord layout.
+     */
+    buildTransitionMatrix: function(topological) {
+      if (topological == null && this.nodesByTopologicalIndex != null) topological = true;
+      var getIndex = topological ?
+        function(n) { return n.topologicalIndex; }
+      : function(n) { return n.index; };
+      var nodes = this.nodes;
+      var matrix = [];
+      for (var i = 0; i < nodes.length; i++) {
+        var row = matrix[i] = [];
+        for (var j = 0; j < nodes.length; j++) {
+          row[j] = 0;
+        }
+      }
+      $.each(nodes, function(i, node) {
+        var p = getIndex(node);
+        $.each(node.children || [], function(i, child) {
+          var c = getIndex(child);
+          matrix[c][p]++;
+        });
+      });
+      return matrix;
+    },
+
+    /**
+     * Sorts nodes topologically, assigning each node properties 'topologicalIndex' and
+     * 'topologicalGroupIndex'. The graph itself is assigned a 'topologicalGroups' property which
+     * references an array of arrays of nodes.
      */
     sort: function() {
       // state
