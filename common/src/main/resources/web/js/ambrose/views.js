@@ -23,6 +23,8 @@ define([
   './views/progress-bar',
   './views/table',
   './views/chord',
+  './views/detail',
+  './views/graph',
 ], function(Views) {
   return Views;
 });
