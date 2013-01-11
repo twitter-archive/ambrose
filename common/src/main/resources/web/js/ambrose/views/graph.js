@@ -20,6 +20,10 @@ limitations under the License.
 define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
   $, d3, colorbrewer, Ambrose, Views
 ) {
+  // utility functions
+  function isPseudo(node) { return node.pseudo; }
+  function isReal(node) { return !(node.pseudo); };
+
   // Graph ctor
   var Graph = Views.Graph = function(workflow, container, params) {
     return new Views.Graph.fn.init(workflow, container, params);
@@ -44,9 +48,11 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // define default params and override with user supplied params
       var params = this.params = $.extend(true, {
         colors: {
-          running: d3.rgb(98, 196, 98),
-          selected: d3.rgb(98, 98, 196),
+          running: d3.rgb(98, 196, 98).brighter(),
+          complete: d3.rgb(98, 196, 98),
+          failed: d3.rgb(196, 98, 98),
           mouseover: d3.rgb(98, 98, 196).brighter(),
+          selected: d3.rgb(98, 98, 196),
         },
         palettes: {
           queued: colorbrewer.Greys,
@@ -113,18 +119,22 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
         });
       });
 
-      var g = this.selectNodeGroups(jobs);
+      var graph = this.workflow.graph;
+      var nodes = graph.nodes.concat(graph.pseudoNodes).sort(function(a, b) {
+        return b.topologicalGroupIndex - a.topologicalGroupIndex;
+      });
+      var g = this.selectNodeGroups(nodes);
       this.removeNodeGroups(g);
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
     },
 
     handleJobsUpdated: function(jobs, duration) {
-      this.updateNodeGroups(this.selectNodeGroups(jobs), duration);
+      var nodes = $.map(jobs, function(job) { return job.node; });
+      this.updateNodeGroups(this.selectNodeGroups(nodes), duration);
     },
 
-    selectNodeGroups: function(jobs) {
-      var nodes = $.map(jobs, function(job) { return job.node; });
+    selectNodeGroups: function(nodes) {
       return this.svg.selectAll('g.node').data(nodes, function(node) { return node.id; });
     },
 
@@ -137,7 +147,9 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       var xs = this.xs;
       var ys = this.ys;
       var projection = this.projection;
-      g = g.enter().append('svg:g').attr('class', 'node');
+      g = g.enter().append('svg:g').attr('class', function(node) {
+        return node.pseudo ? 'pseudo' : 'node';
+      });
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges).enter()
           .append('svg:path').attr('class', 'edge')
@@ -150,15 +162,30 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
             return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
           });
       });
-      g.append('svg:circle')
+      var c = g.append('svg:circle')
         .attr('cx', function(d) { return xs(d.x); })
         .attr('cy', function(d) { return ys(d.y); })
         .attr('r', 8);
+      c.filter(isReal)
+        .on('mouseover', function(node) { self.workflow.mouseOverJob(node.data); })
+        .on('mouseout', function(node) { self.workflow.mouseOverJob(null); })
+        .on('click', function(node) { self.workflow.selectJob(node.data); });
     },
 
-    updateNodeGroups: function(g, duration) {},
-
-
+    updateNodeGroups: function(g, duration) {
+      var colors = this.params.colors;
+      var fill = function(node) {
+        var job = node.data;
+        var status = job.status;
+        if (job.mouseover) return colors.mouseover;
+        if (job.selected) return colors.selected;
+        if (status == 'RUNNING') return colors.running;
+        if (status == 'COMPLETE') return colors.complete;
+        if (status == 'FAILED') return colors.failed;
+        return '#555';
+      };
+      g.selectAll('g.node circle').attr('fill', fill);
+    },
   };
 
   // bind prototype to ctor
