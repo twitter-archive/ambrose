@@ -19,11 +19,9 @@ limitations under the License.
  */
 define([
   './views/core',
-  './views/status-message',
   './views/progress-bar',
   './views/table',
   './views/chord',
-  './views/detail',
   './views/graph',
 ], function(Views) {
   return Views;
