@@ -12,8 +12,25 @@ require(['jquery', 'ambrose'], function($, Ambrose) {
     console.info('Creating default workflow');
     var workflow = Ambrose.Workflow();
     var progressBar = Ambrose.Views.ProgressBar(workflow, $('#ambrose-views-progress-bar'));
-    var chord = Ambrose.Views.Chord(workflow, $('#ambrose-views-chord'));
-    var dag = Ambrose.Views.Graph(workflow, $('#ambrose-views-graph'));
+
+    var diagrams = $('#diagrams');
+    var chordContainer = $('#ambrose-views-chord');
+    var graphContainer = $('#ambrose-views-graph');
+
+    var height = diagrams.height();
+    var width = diagrams.width();
+
+    // who needs responsive css?
+    if (width <= 1024) {
+      chordContainer.css('display', 'none');
+      graphContainer.width(width).height(250);
+    } else {
+      chordContainer.width(height);
+      graphContainer.width(width - height);
+    }
+
+    var chord = Ambrose.Views.Chord(workflow, chordContainer);
+    var graph = Ambrose.Views.Graph(workflow, graphContainer);
     var table = Ambrose.Views.Table(workflow, $('#ambrose-views-table'));
     workflow.loadJobs();
     workflow.startEventPolling();
