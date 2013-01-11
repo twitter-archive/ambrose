@@ -71,19 +71,19 @@ define(['jquery', './core'], function($, Ambrose) {
     // for each intermediate topological group
     var prev = child;
     for (var gi = cgi - 1; gi > pgi; gi--) {
-      var g = topologicalGroups[gi];
+      var group = topologicalGroups[gi];
 
       // create pseudo node
-      var node = g.addNode({
+      var node = graph.addNode({
         pseudo: true,
         id: child.id + ':' + parent.id + ':' + gi,
         topologicalIndex: -1, // not generally useful
         topologicalGroupIndex: gi,
       });
-      g.push(node);
+      group.push(node);
 
       // add prev to node edge
-      graph.addEdge(prev, node);Q
+      graph.addEdge(prev, node);
     }
 
     // add prev to parent edge
