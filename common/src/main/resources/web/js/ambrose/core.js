@@ -55,19 +55,8 @@ define(['jquery'], function($) {
 
   // core Ambrose object containing utility methods
   return {
-    /**
-     * Empty namespace for view modules.
-     */
-    View: {},
-
-    /**
-     * @param value some value.
-     * @return value or empty string if value is null.
-     */
-    nullToEmpty: function(value) {
-      if (value == null) return '';
-      return value;
-    },
+    isNull: function(v) { return v == null; },
+    notNull: function(v) { return v != null; },
 
     /**
      * @param array values to join.
