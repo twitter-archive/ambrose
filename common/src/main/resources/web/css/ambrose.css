@@ -4,8 +4,8 @@ body {
 }
 
 #diagrams > div { height: 375px; }
-g.node circle { fill: #aaa; stroke: #333; stroke-width: 1px; }
-path.edge { fill: none; stroke: #333; stroke-width: 1px; }
+g.pseudo circle { display: none; }
+path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
 
 path.arc {}
 path.chord { fill-opacity: .67; }
