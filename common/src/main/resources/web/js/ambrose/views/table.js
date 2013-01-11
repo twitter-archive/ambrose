@@ -65,7 +65,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
     initTable: function() {
       var self = this;
       var tbody = this.tbody = $('<tbody/>');
-      $('<table class="table table-condensed">'
+      $('<table class="table">'
         + '<thead><tr>'
         + '<th>#</th>'
         + '<th>Identifier</th>'
@@ -152,7 +152,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
         .attr('href', function(job) { return job.trackingUrl || 'javascript:void(0);'; })
         .text(function(job) { return job.id; });
       tr.selectAll('td.job-status')
-        .text(function (job) { return Ambrose.nullToEmpty(job.status); });
+        .text(function (job) { return job.status || ''; });
       tr.selectAll('td.job-aliases')
         .text(function (job) { return Ambrose.commaDelimit(job.aliases); });
       tr.selectAll('td.job-features')
