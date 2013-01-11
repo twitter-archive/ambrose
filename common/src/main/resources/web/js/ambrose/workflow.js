@@ -162,6 +162,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
           getParentIds: function(d) { return d.predecessorNames; },
         });
         graph.sort();
+        graph.addPseudoNodes();
         jobs = self.jobs = $.map(graph.nodesByTopologicalIndex, function(node, i) {
           var job = node.data;
           job.index = i;
