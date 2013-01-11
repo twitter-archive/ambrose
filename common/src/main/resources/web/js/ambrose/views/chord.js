@@ -60,7 +60,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
             max: 200,
           },
           groupSpacing: 0.1,
-          groupThickness: 20,
+          groupThickness: 16,
           labelMargin: 10,
           labelSize: 12,
         },
@@ -197,7 +197,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
 
       // sort group source/target objects and redefine start/end angles
       var sourceComparator = function(a, b) { return b.subindex - a.subindex; };
-      var targetComparator = function(a, b) { return a.index - b.index; };
+      var targetComparator = function(a, b) { return b.subindex - a.subindex; };
       $.each(groups, function(i, group) {
         group.sources.sort(sourceComparator);
         group.targets.sort(targetComparator);
