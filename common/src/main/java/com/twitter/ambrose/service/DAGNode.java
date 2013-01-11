@@ -15,18 +15,18 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
-import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
-import com.twitter.ambrose.util.JSONUtil;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.type.TypeReference;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Class that represents a Job node in the DAG. The job name must not be null. At DAG creation time
@@ -113,8 +113,6 @@ public class DAGNode {
     String json = JSONUtil.readFile(sourceFile);
     List<DAGNode> nodes =
       (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
-    DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
-    dagTransformer.transform(nodes);
 
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
