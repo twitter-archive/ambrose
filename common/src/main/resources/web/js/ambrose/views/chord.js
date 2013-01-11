@@ -74,7 +74,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       var groupThickness = params.dimensions.groupThickness;
       var labelMargin = params.dimensions.labelMargin;
       var labelSize = params.dimensions.labelSize;
-      var paddingTotal = labelMargin * 2 + labelSize + padding;
+      var paddingTotal = labelMargin + labelSize + padding;
       var width = dim.width = container.width();
       var height = dim.height = container.height();
       var minDim = Math.min(width, height);
@@ -84,6 +84,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create canvas
       var svg = this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
+        .attr('class', 'ambrose-views-chord')
         .attr('width', width)
         .attr('height', height)
         .append('svg:g')
@@ -105,9 +106,8 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
         chordFill: function(d) { return self.jobColor(d.source.group.job); },
         chordStroke: function(d) { return d3.rgb(self.f.chordFill(d)).darker(); },
         chordOpacity: function(d) {
-          var job = self.workflow.current.mouseover;
-          if (job == null) return 0.8;
-          return d.source.group.job.mouseover ? 0.8 : 0.2;
+          return !(self.workflow.current.mouseover) ? 0.8
+            : (d.source.group.job.mouseover ? 0.8 : 0.2);
         },
         groupFill: function(d) { return self.jobColor(d.job); },
         groupMouseOver: function(d, i) { self.handleGroupMouseOver(d, i); },
@@ -226,6 +226,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create chords
       vchord.enter().append('svg:path').attr('class', 'chord')
         .style('fill', this.f.chordFill)
+        .style('opacity', this.f.chordOpacity)
         .attr('d', d3.svg.chord().radius(innerRadius + 2));
 
       // update groups
@@ -268,14 +269,14 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
     handleJobUpdated: function(duration) {
       var svg = this.svg;
       var f = this.f;
+      var chord = svg.selectAll('path.chord');
       var arc = svg.selectAll('path.arc');
-      var chord = svg.selectAll('path.chord')
       if (duration) {
-        arc = arc.transition().duration(duration);
         chord = chord.transition().duration(duration);
+        arc = arc.transition().duration(duration);
       }
-      arc.style('fill', f.groupFill);
       chord.style('fill', f.chordFill).style('opacity', f.chordOpacity);
+      arc.style('fill', f.groupFill);
     },
 
     handleGroupMouseOver: function(group) {

@@ -89,6 +89,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create canvas and supporting d3 objects
       this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
+        .attr('class', 'ambrose-views-graph')
         .attr('width', width)
         .attr('height', height);
       var xs = this.xs = d3.scale.linear().range([0, width]);
@@ -162,11 +163,10 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
             return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
           });
       });
-      var c = g.append('svg:circle')
+      var c = g.filter(isReal).append('svg:circle')
         .attr('cx', function(d) { return xs(d.x); })
         .attr('cy', function(d) { return ys(d.y); })
-        .attr('r', 8);
-      c.filter(isReal)
+        .attr('r', 8)
         .on('mouseover', function(node) { self.workflow.mouseOverJob(node.data); })
         .on('mouseout', function(node) { self.workflow.mouseOverJob(null); })
         .on('click', function(node) { self.workflow.selectJob(node.data); });

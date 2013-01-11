@@ -24,7 +24,7 @@
   <body>
 
     <!-- navbar -->
-    <div class="navbar navbar-fixed-top">
+    <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container-fluid">
           <a class="brand" href="#">Ambrose</a>
@@ -44,8 +44,8 @@
       </div>
 
       <div class="row-fluid" id="diagrams">
-        <div class="span4" id="ambrose-views-chord"></div>
-        <div class="span8" id="ambrose-views-graph"></div>
+        <div class="span6" id="ambrose-views-chord"></div>
+        <div class="span6" id="ambrose-views-graph"></div>
       </div>
 
       <div class="row-fluid">
@@ -54,10 +54,16 @@
 
       <hr>
       <footer>
-        <p>&copy; Twitter 2012</p>
+        <p>&copy; Twitter 2013</p>
       </footer>
     </div> <!-- /container-fluid -->
 
+    <script type="text/javascript">
+      var require = {
+        waitSeconds: 15,
+        urlArgs : "bust="+new Date().getTime(),
+      };
+    </script>
     <script data-main="js/main" src="js/require-jquery.js"></script>
 
   </body>

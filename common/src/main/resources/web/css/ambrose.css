@@ -1,11 +1,20 @@
-body {
-  padding-top: 60px;
-  padding-bottom: 40px;
+/* Page dimensions */
+body { padding-top: 60px; padding-bottom: 40px; }
+#diagrams > div { height: 350px; margin: 0; }
+#ambrose-views-chord { width: 20%; }
+#ambrose-views-graph { width: 80%; }
+
+@media all and (max-width: 1024px) {
+  #diagrams > div { height: 250px; margin: 0; }
+  #ambrose-views-chord { display: none; }
+  #ambrose-views-graph { width: 100%; }
 }
 
-#diagrams > div { height: 375px; }
-g.pseudo circle { display: none; }
-path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
+/* Table view */
+.ambrose-views-table td.job-mappers, .ambrose-views-table td.job-reducers { white-space: nowrap; }
 
-path.arc {}
-path.chord { fill-opacity: .67; }
+/* Chord view */
+.ambrose-views-chord {}
+
+/* Graph view */
+.ambrose-views-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
