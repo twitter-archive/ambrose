@@ -50,8 +50,6 @@ public class DAGNode {
   private Collection<DAGNode> successors;
   private Collection<String> successorNames;
   private String runtime;
-  private Integer dagLevel;
-  private Double x, y;
 
   public DAGNode(String name, String[] aliases, String[] features, String runtime) {
     this.name = name;
@@ -82,15 +80,6 @@ public class DAGNode {
 
   public String getJobId() { return jobId; }
   public void setJobId(String jobId) { this.jobId = jobId; }
-
-  public Integer getDagLevel() { return dagLevel; }
-  public void setDagLevel(Integer dagLevel) { this.dagLevel = dagLevel; }
-
-  public Double getX() { return x; }
-  public void setX(Double x) { this.x = x; }
-
-  public Double getY() { return y; }
-  public void setY(Double y) { this.y = y; }
 
   @JsonIgnore
   public synchronized Collection<DAGNode> getSuccessors() { return successors;}
