@@ -55,35 +55,36 @@ define(['jquery', './core'], function($, Ambrose) {
    * topological group the edge crosses.
    */
   var _createPseudoNodes = function(child, parent) {
-    var cgi = child.topologicalGroupIndex;
-    var pgi = parent.topologicalGroupIndex;
-    if (cgi - pgi < 2) return;
+    var cg = child.topologicalGroupIndex;
+    var pg = parent.topologicalGroupIndex;
+    if (cg - pg < 2) return;
 
     // init refs
     var graph = this;
     var nodes = graph.nodes;
     var nodesById = graph.nodesById;
-    var topologicalGroups = graph.topologicalGroups;
+    var groups = graph.topologicalGroups;
 
     // remove child to parent edge
     graph.removeEdge(child, parent);
 
     // for each intermediate topological group
     var prev = child;
-    for (var gi = cgi - 1; gi > pgi; gi--) {
-      var group = topologicalGroups[gi];
-
+    for (var g = cg - 1; g > pg; g--) {
       // create pseudo node
       var node = graph.addNode({
         pseudo: true,
-        id: child.id + ':' + parent.id + ':' + gi,
+        id: child.id + ':' + parent.id + ':' + g,
         topologicalIndex: -1, // not generally useful
-        topologicalGroupIndex: gi,
+        topologicalGroupIndex: g,
       });
-      group.push(node);
+
+      // add pseudo node to group
+      groups[g].push(node);
 
       // add prev to node edge
       graph.addEdge(prev, node);
+      prev = node;
     }
 
     // add prev to parent edge
@@ -127,8 +128,9 @@ define(['jquery', './core'], function($, Ambrose) {
         children: [],
         childrenById: {},
       });
-      node.index = this.nodes.push(node) - 1;
       this.nodesById[node.id] = node;
+      var nodes = node.pseudo ? this.pseudoNodes : this.nodes;
+      node.index = nodes.push(node) - 1;
       return node;
     },
 
@@ -150,33 +152,6 @@ define(['jquery', './core'], function($, Ambrose) {
       delete from.parentsById[to.id];
       to.children.remove(from);
       delete to.childrenById[from.id];
-    },
-
-    /**
-     * Creates a dense square transition matrix encoding number of directed edges between nodes,
-     * suitable for use with d3's chord layout.
-     */
-    buildTransitionMatrix: function(topological) {
-      if (topological == null && this.nodesByTopologicalIndex != null) topological = true;
-      var getIndex = topological ?
-        function(n) { return n.topologicalIndex; }
-      : function(n) { return n.index; };
-      var nodes = this.nodes;
-      var matrix = [];
-      for (var i = 0; i < nodes.length; i++) {
-        var row = matrix[i] = [];
-        for (var j = 0; j < nodes.length; j++) {
-          row[j] = 0;
-        }
-      }
-      $.each(nodes, function(i, node) {
-        var p = getIndex(node);
-        $.each(node.children || [], function(i, child) {
-          var c = getIndex(child);
-          matrix[c][p]++;
-        });
-      });
-      return matrix;
     },
 
     /**
@@ -248,11 +223,16 @@ define(['jquery', './core'], function($, Ambrose) {
      * edge from C to P would be split such that C links to CP and CP to P.
      */
     addPseudoNodes: function() {
+      this.pseudoNodes = [];
       var graph = this;
-      for (var g = 2; g < graph.topologicalGroups.length; g++) {
-        var group = graph.topologicalGroups[g];
+      var groups = this.topologicalGroups;
+      for (var g = 2; g < groups.length; g++) {
+        var group = groups[g];
         $.each(group, function(i, node) {
-          $.each(node.parents, function(j, parent) {
+          if (node.id == 'scope-815') {
+            console.log('we found it');
+          }
+          $.each(node.parents.concat(), function(j, parent) {
             _createPseudoNodes.call(graph, node, parent);
           });
         });
@@ -268,6 +248,37 @@ define(['jquery', './core'], function($, Ambrose) {
      */
     sortTopologicalGroups: function() {
       // TODO
+    },
+
+    /**
+     * Creates a dense square transition matrix encoding number of directed edges between nodes,
+     * suitable for use with d3's chord layout.
+     */
+    buildTransitionMatrix: function(topological) {
+      if (topological == null && this.nodesByTopologicalIndex != null) topological = true;
+      var getIndex = topological ?
+        function(n) { return n.topologicalIndex; }
+      : function(n) { return n.index; };
+      var nodes = this.nodes;
+      var matrix = [];
+      for (var i = 0; i < nodes.length; i++) {
+        var row = matrix[i] = [];
+        for (var j = 0; j < nodes.length; j++) {
+          row[j] = 0;
+        }
+      }
+      $.each(nodes, function(i, node) {
+        var c = getIndex(node);
+        $.each(node.parents, function(i, parent) {
+          while (parent.pseudo) parent = parent.parents[0];
+          var p = getIndex(parent);
+          if (p == null) {
+            console.log('p is null');
+          }
+          matrix[c][p]++;
+        });
+      });
+      return matrix;
     },
   };
 
