@@ -76,18 +76,16 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       var labelSize = params.dimensions.labelSize;
       var paddingTotal = labelMargin * 2 + labelSize + padding;
       var width = dim.width = container.width();
-      var radius = dim.radius = Math.max(minRadius, Math.min(maxRadius, width / 2 - paddingTotal));
+      var height = dim.height = container.height();
+      var minDim = Math.min(width, height);
+      var radius = dim.radius = Math.max(minRadius, Math.min(maxRadius, minDim / 2 - paddingTotal));
       var innerRadius = dim.innerRadius = Math.max(minRadius, radius) - groupThickness;
-      var height = dim.height = (radius + paddingTotal) * 2;
 
       // create canvas
       var svg = this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
         .attr('width', width)
         .attr('height', height)
-        .on('mouseout', function() {
-          // TODO
-        })
         .append('svg:g')
         .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
         .append('svg:g')
@@ -121,7 +119,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       workflow.on('jobsLoaded', function(event, jobs) {
         self.handleJobsLoaded(jobs);
       });
-      workflow.on('jobStarted jobProgress jobCompleted jobFailed jobSelected jobMouseOver', function(event, job) {
+      workflow.on('jobStarted jobProgress jobCompleted jobFailed', function(event, job) {
         self.handleJobUpdated(350);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
