@@ -68,9 +68,9 @@ public class WorkflowEvent {
     String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
     List<WorkflowEvent> events =
       (List<WorkflowEvent>)JSONUtil.readJson(json, new TypeReference<List<WorkflowEvent>>() { });
-    for (WorkflowEvent event : events) {
-      // useful if we need to read a file, add a field, output and re-generate
-    }
+//    for (WorkflowEvent event : events) {
+//      // useful if we need to read a file, add a field, output and re-generate
+//    }
 
     JSONUtil.writeJson("pig/src/main/resources/web/data/small-events.json2", events);
   }
