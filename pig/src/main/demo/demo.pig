@@ -31,8 +31,8 @@ masochists = FOREACH masochists GENERATE user_id, name;
 
 user_enemy = FOREACH user GENERATE user_id, name, FLATTEN(enemies) AS (enemy_id);
 user_enemy2 = FOREACH user_enemy GENERATE user_id, enemy_id;
-user_enemy_enemy = FOREACH (
-  JOIN user_enemy BY enemy_id, user_enemy2 BY user_id
+user_enemy_enemy = FOREACH (JOIN
+  user_enemy BY enemy_id, user_enemy2 BY user_id
 ) GENERATE user_enemy::user_id AS user_id, user_enemy::name AS name,
   user_enemy2::enemy_id AS enemy_enemy_id;
 user_enemies_of_enemies = FOREACH (GROUP user_enemy_enemy BY user_id) {

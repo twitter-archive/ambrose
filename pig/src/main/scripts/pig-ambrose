@@ -24,19 +24,23 @@
 function log() { echo "$@" >&2; }
 function die() { log "$@"; exit 1; }
 
-# test for presence of pig command
-which pig >/dev/null 2>&1 || die $(cat <<'EOF'
-
-Command 'pig' not found. This script requires a local installation of Apache
-Pig. Please ensure $PIG_HOME/bin is in your $PATH.
-
-EOF
-)
-
-# configure default args
+# configure args
+AMBROSE_PIG_BIN="${AMBROSE_PIG_BIN:-pig}"
 AMBROSE_HOME="${AMBROSE_HOME:-$(cd $(dirname "$0")/..; pwd -P)}"
 AMBROSE_PORT="${AMBROSE_PORT:-8080}"
 AMBROSE_TIMEOUT="${AMBROSE_TIMEOUT:-600}" # 10 min
+
+# test for presence of pig command
+which "$AMBROSE_PIG_BIN" >/dev/null 2>&1 || die $(cat <<EOF
+
+Command '$AMBROSE_PIG_BIN' not found. This script requires a local installation of Apache
+Pig. Please ensure \$PIG_HOME/bin is in your \$PATH, or export AMBROSE_PIG_BIN to reference a
+particular pig script:
+
+export AMBROSE_PIG_BIN=/path/to/my/pig/bin/pig
+
+EOF
+)
 
 # configure paths
 AMBROSE_JARS=$(find "$AMBROSE_HOME/lib" -name '*.jar' -exec printf '%s:' '{}' '+') \

@@ -15,13 +15,8 @@ limitations under the License.
 */
 
 /**
- * Main entry point. Depends on all built-in modules and returns core Ambrose object.
+ * This module defines the Ambrose.Views namespace in which other view modules are registered.
  */
-define([
-  'ambrose/core',
-  'ambrose/client',
-  'ambrose/workflow',
-  'ambrose/views',
-], function(Ambrose) {
-  return Ambrose;
-});
+define(['../core'], function(Ambrose) {
+  return Ambrose.Views = {};
+})
