@@ -24,12 +24,12 @@
   <body>
 
     <!-- navbar -->
-    <div class="navbar navbar-fixed-top">
+    <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container-fluid">
           <a class="brand" href="#">Ambrose</a>
           <ul id="navbar" class="nav pull-left">
-            <li><a href="dashboard">Dashboard</a></li>
+            <li><a href="/">Dashboard</a></li>
           </ul>
           <ul class="nav pull-right">
             <li><a target="_blank" href="https://github.com/twitter/ambrose">About</a></li>
@@ -39,40 +39,31 @@
     </div>
 
     <div class="container-fluid">
-      <!-- status line -->
       <div class="row-fluid">
-        <div class="span12"><p>Status: <span  id="scriptStatusDialog"></span></p></div>
+        <div class="span12" id="ambrose-views-progress-bar"></div>
       </div>
 
-      <!-- workflow progress bar -->
-      <div class="row-fluid">
-        <div class="span12"><div id="progressbar" class="progress"><div class="bar"></div></div></div>
+      <div class="row-fluid" id="diagrams">
+        <div class="span6" id="ambrose-views-chord"></div>
+        <div class="span6" id="ambrose-views-graph"></div>
       </div>
 
       <div class="row-fluid">
-        <!-- chart tabs -->
-        <div class="span12 tabbable">
-          <ul class="nav nav-tabs" id="vizTabs"></ul>
-          <div class="tab-content" id="vizGroup"></div>
-        </div>
-      </div>
-
-      <!-- summary job table -->
-      <div class="row-fluid">
-        <div class="span12">
-          <table id="job-summary" class="table table-striped">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
-        </div>
+        <div class="span12" id="ambrose-views-table"></div>
       </div>
 
       <hr>
       <footer>
-        <p>&copy; Twitter 2012</p>
+        <p>&copy; Twitter 2013</p>
       </footer>
     </div> <!-- /container-fluid -->
 
+    <script type="text/javascript">
+      var require = {
+        waitSeconds: 15,
+        urlArgs : "bust="+new Date().getTime(),
+      };
+    </script>
     <script data-main="js/main" src="js/require-jquery.js"></script>
 
   </body>

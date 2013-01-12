@@ -1,20 +1,20 @@
 package com.twitter.ambrose.server;
 
-import com.twitter.ambrose.service.DAGNode;
-import com.twitter.ambrose.service.DAGTransformer;
-import com.twitter.ambrose.service.StatsReadService;
-import com.twitter.ambrose.service.WorkflowEvent;
-import com.twitter.ambrose.service.impl.SugiyamaLayoutTransformer;
-import com.twitter.ambrose.util.JSONUtil;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.handler.AbstractHandler;
+import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collection;
+
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.AbstractHandler;
+
+import com.twitter.ambrose.service.DAGNode;
+import com.twitter.ambrose.service.StatsReadService;
+import com.twitter.ambrose.service.WorkflowEvent;
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Handler for the API data responses.
@@ -46,10 +46,6 @@ public class APIHandler extends AbstractHandler {
 
       Collection<DAGNode> nodes =
         statsReadService.getDagNodeNameMap(request.getParameter(QUERY_PARAM_WORKFLOW_ID)).values();
-
-      // add the x, y coordinates
-      DAGTransformer dagTransformer = new SugiyamaLayoutTransformer(true);
-      dagTransformer.transform(nodes);
 
       sendJson(request, response, nodes.toArray(new DAGNode[nodes.size()]));
     } else if (target.endsWith("/events")) {
