@@ -56,7 +56,7 @@ public class JSONUtil {
     JSONUtil.writeJson(new PrintWriter(fileName), object);
   }
 
-  public static Object readJson(String json, TypeReference type) throws IOException {
+  public static Object readJson(String json, TypeReference<?> type) throws IOException {
     ObjectMapper om = new ObjectMapper();
     om.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
