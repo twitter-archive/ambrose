@@ -49,6 +49,14 @@ public class WorkflowEvent {
     this.runtime = runtime;
   }
 
+  public WorkflowEvent(int eventId, long timestamp, EVENT_TYPE eventType, Object eventData, String runtime) {
+    this.eventId = eventId;
+    this.timestamp = timestamp;
+    this.eventType = eventType;
+    this.eventData = eventData;
+    this.runtime = runtime;
+  }
+
   public long getTimestamp() { return timestamp; }
   public int getEventId() { return eventId; }
   public EVENT_TYPE getEventType() { return eventType; }
