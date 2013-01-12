@@ -23,7 +23,7 @@ import com.twitter.ambrose.util.JSONUtil;
  */
 public class APIHandler extends AbstractHandler {
   private static final String QUERY_PARAM_WORKFLOW_ID = "workflowId";
-  private static final String QUERY_PARAM_SINCE = "sinceId";
+  private static final String QUERY_PARAM_LAST_EVENT_ID = "lastEventId";
 
   private static final String MIME_TYPE_HTML = "text/html";
   private static final String MIME_TYPE_JSON = "application/json";
@@ -51,8 +51,8 @@ public class APIHandler extends AbstractHandler {
     } else if (target.endsWith("/events")) {
       response.setContentType(MIME_TYPE_JSON);
       response.setStatus(HttpServletResponse.SC_OK);
-      Integer sinceId = request.getParameter(QUERY_PARAM_SINCE) != null ?
-              Integer.getInteger(request.getParameter(QUERY_PARAM_SINCE)) : -1;
+      Integer sinceId = request.getParameter(QUERY_PARAM_LAST_EVENT_ID) != null ?
+              Integer.parseInt(request.getParameter(QUERY_PARAM_LAST_EVENT_ID)) : -1;
 
       Collection<WorkflowEvent> events =
         statsReadService.getEventsSinceId(request.getParameter(QUERY_PARAM_WORKFLOW_ID), sinceId);
