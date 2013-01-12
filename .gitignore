@@ -1,8 +1,9 @@
-**/target
-*.log
+*.iml
 *.iws
-**/.project
-**/.settings
-**/.classpath
+*.log
+*.releaseBackup
+.classpath
+.idea
 .project
 .settings
+target

@@ -15,13 +15,14 @@ limitations under the License.
 */
 
 /**
- * Main entry point. Depends on all built-in modules and returns core Ambrose object.
+ * Depends on all built-in view modules and returns Views object.
  */
 define([
-  'ambrose/core',
-  'ambrose/client',
-  'ambrose/workflow',
-  'ambrose/views',
-], function(Ambrose) {
-  return Ambrose;
+  './views/core',
+  './views/progress-bar',
+  './views/table',
+  './views/chord',
+  './views/graph',
+], function(Views) {
+  return Views;
 });
