@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URL;
 
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -29,33 +31,52 @@ import org.slf4j.LoggerFactory;
 import com.twitter.ambrose.service.StatsReadService;
 
 /**
- * Lite weight app server that serves both the JSON API and the Ambrose web pages powered from the
- * JSON. The port defaults to 8080 but can be overridden with the <pre>ambrose.port</pre>
- * system property. For a random port to be used, set <pre>ambrose.port=RANDOM</pre>.
- * <P>
+ * Light weight application server that serves both the JSON API and the Ambrose web pages powered
+ * from the JSON. The port defaults to {@value #PORT_DEFAULT} but can be overridden with the
+ * {@value #PORT_PARAM} system property. For a random port to be used, set {@value #PORT_PARAM} to
+ * zero or {@value #PORT_RANDOM}.
+ * <p/>
  * The JSON API supports the following URIs:
  * <ul>
- *   <li><pre>/dag</pre> returns the DAG of the workflow</li>
- *   <li><pre>/events</pre> returns all events since the start of the workflow. Optionally the
- *   <pre>sinceId=&;teventId></pre> query param can be used to return only events since a given
- *   event id</li>
+ * <li><code>/jobs</code> returns the workflow jobs.</li>
+ * <li><code>/events</code> returns all events since the start of the workflow. Optionally the
+ * <code>sinceEventId</code> query parameter can be used to return only events after a given event.</li>
  * </ul>
- * </P>
- * <P>
- * </P>
+ *
  * @author billg
  */
 public class ScriptStatusServer implements Runnable {
+  /**
+   * Name of system property used to configure port on which to bind HTTP server.
+   */
+  public static final String PORT_PARAM = "ambrose.port";
+  /**
+   * Default port on which to bind HTTP server.
+   */
+  public static final String PORT_DEFAULT = "8080";
+  /**
+   * Value of {@link #PORT_PARAM} used to signal a random port should be used.
+   */
+  public static final String PORT_RANDOM = "random";
   private static final Logger LOG = LoggerFactory.getLogger(ScriptStatusServer.class);
-
   private static final String SLASH = "/";
   private static final String ROOT_PATH = "web";
 
-  private static final String PORT_PARAM = "ambrose.port";
-  private static final String DEFAULT_PORT = "8080";
+  private static int getConfiguredPort() {
+    String port = System.getProperty(PORT_PARAM, PORT_DEFAULT);
+    if (PORT_RANDOM.equalsIgnoreCase(port)) {
+      port = "0";
+    }
+    try {
+      return Integer.parseInt(port);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException(String.format(
+          "Parameter '%s' value '%s' is not a valid port number", PORT_PARAM, port), e);
+    }
+  }
 
-  private int port;
-  private StatsReadService statsReadService;
+  private final StatsReadService statsReadService;
+  private final int port;
   private Server server;
   private Thread serverThread;
 
@@ -64,36 +85,16 @@ public class ScriptStatusServer implements Runnable {
     this.port = getConfiguredPort();
   }
 
-  private static int getConfiguredPort() {
-    String port = System.getProperty(PORT_PARAM, DEFAULT_PORT);
-
-    if ("RANDOM".equalsIgnoreCase(port)) {
-      try {
-        ServerSocket socket = new ServerSocket(0);
-        int randomPort = socket.getLocalPort();
-        socket.close();
-        return randomPort;
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Could not find random port for Ambmrose server", e);
-      }
-    }
-
-    try {
-      return Integer.parseInt(port);
-    } catch (NumberFormatException e) {
-      throw new IllegalArgumentException(String.format("Invalid port passed for %s: %s", PORT_PARAM, port), e);
-    }
-  }
-
-  public int getPort() { return port; };
+  public int getPort() {
+    return port;
+  };
 
   /**
    * Starts the server in it's own daemon thread.
    */
   public void start() {
     try {
-      LOG.info(String.format("Starting ambrose web server on port %s. "
-        + "Browse to http://localhost:%s/web/workflow.html to see job progress.", port, port));
+      LOG.info("Starting Ambrose web server on port {}", port);
       serverThread = new Thread(this);
       serverThread.setDaemon(true);
       serverThread.start();
@@ -107,14 +108,26 @@ public class ScriptStatusServer implements Runnable {
    */
   @Override
   public void run() {
-
-    server = new Server(port);
+    // override newServerSocket to log local port once bound
+    Connector connector = new SocketConnector() {
+      @Override
+      protected ServerSocket newServerSocket(String host, int port, int backlog) throws IOException {
+        ServerSocket ss = super.newServerSocket(host, port, backlog);
+        int localPort = ss.getLocalPort();
+        LOG.info("Ambrose web server listening on port {}", localPort);
+        LOG.info("Browse to http://localhost:{}/web/workflow.html to see job progress", localPort);
+        return ss;
+      }
+    };
+    connector.setPort(port);
+    server = new Server();
+    server.setConnectors(new Connector[] { connector });
 
     // this needs to be loaded via the jar'ed resources, not the relative dir
     URL resourcesUrl = this.getClass().getClassLoader().getResource(ROOT_PATH);
     HandlerList handler = new HandlerList();
-    handler.setHandlers(new Handler[]{new APIHandler(statsReadService),
-      new WebAppContext(resourcesUrl.toExternalForm(), SLASH)});
+    handler.setHandlers(new Handler[] { new APIHandler(statsReadService),
+        new WebAppContext(resourcesUrl.toExternalForm(), SLASH) });
     server.setHandler(handler);
     server.setStopAtShutdown(false);
 
@@ -122,7 +135,7 @@ public class ScriptStatusServer implements Runnable {
       server.start();
       server.join();
     } catch (Exception e) {
-      LOG.error("Error launching ScriptStatusServer on port " + port, e);
+      LOG.error("Error launching ScriptStatusServer", e);
     }
   }
 
