@@ -94,7 +94,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
     selectRows: function(jobs) {
       // select rows and bind to jobs data
       return d3.select(this.tbody.get(0)).selectAll('tr')
-        .data(jobs, function(job) { return job.id; });
+        .data(jobs, function(job) { return job.name; });
     },
 
     removeRows: function(tr) {
@@ -150,7 +150,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       // update all other params normally
       tr.selectAll('a.job-url')
         .attr('href', function(job) { return job.trackingUrl || 'javascript:void(0);'; })
-        .text(function(job) { return job.id; });
+        .text(function(job) { return job.id || 'pending'; });
       tr.selectAll('td.job-status')
         .text(function (job) { return job.status || ''; });
       tr.selectAll('td.job-aliases')

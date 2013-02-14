@@ -184,7 +184,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
         var tg = t.group = groups[t.index];
         sg.sources.push(s);
         tg.targets.push(t);
-        chord.id = sg.job.id + '-' + tg.job.id;
+        chord.id = sg.job.name + '-' + tg.job.name;
         /*
          * The following sort values allow proper ordering of group sources and targets when the
          * underlying graph is not topologically sorted. With topological sorting, we're guaranteed
@@ -230,9 +230,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
         .attr('d', d3.svg.chord().radius(innerRadius + 2));
 
       // update groups
-      var vgroup = svg.selectAll('g.group').data(groups, function(group) {
-        return group.job.id;
-      });
+      var vgroup = svg.selectAll('g.group').data(groups, function(group) { return group.job.name; });
       // remove groups
       vgroup.exit().remove();
       // create groups
