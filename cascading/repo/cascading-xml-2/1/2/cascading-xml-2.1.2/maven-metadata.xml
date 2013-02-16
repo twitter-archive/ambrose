@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>cascading-xml-2.1.2</groupId>
+  <artifactId>cascading-xml-2.1.2</artifactId>
+  <version>1.0</version>
+  <versioning>
+    <versions>
+      <version>1.0</version>
+    </versions>
+    <lastUpdated>20130201172237</lastUpdated>
+  </versioning>
+</metadata>

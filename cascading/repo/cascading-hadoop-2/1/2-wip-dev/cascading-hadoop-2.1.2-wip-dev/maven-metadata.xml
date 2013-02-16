@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>cascading-hadoop-2.1.2-wip-dev</groupId>
+  <artifactId>cascading-hadoop-2.1.2-wip-dev</artifactId>
+  <versioning>
+    <release>1.0</release>
+    <versions>
+      <version>1.0</version>
+    </versions>
+    <lastUpdated>20130210231810</lastUpdated>
+  </versioning>
+</metadata>

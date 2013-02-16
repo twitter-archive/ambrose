@@ -7,6 +7,7 @@
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>7</version>
+
   </parent>
 
   <groupId>com.twitter.ambrose</groupId>
@@ -85,6 +86,13 @@
         <artifactId>ambrose-pig</artifactId>
         <version>${project.version}</version>
       </dependency>
+
+    <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-cascading</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
 
       <!-- testing -->
       <dependency>
@@ -176,6 +184,13 @@
         <groupId>org.apache.pig</groupId>
         <artifactId>pig</artifactId>
         <version>${apache.pig.version}</version>
+      </dependency>
+
+      <!-- cascading -->
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading</artifactId>
+        <version>${cascading.version}</version>
       </dependency>
 
     </dependencies>
@@ -313,6 +328,40 @@
           </configuration>
         </plugin>
 
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty-plugin</artifactId>
+        <version>6.1.10</version>
+        <configuration>
+          <contextPath>${basedir}</contextPath>
+          <webAppSourceDirectory>${basedir}/common/src/main/resources/web</webAppSourceDirectory>
+            <scanIntervalSeconds>10</scanIntervalSeconds>
+            <stopKey>foo</stopKey>
+            <stopPort>9999</stopPort>
+        </configuration>
+        <executions>
+                <execution>
+                        <id>start-jetty</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                                <goal>run</goal>
+                        </goals>
+                        <configuration>
+                                <scanIntervalSeconds>0</scanIntervalSeconds>
+                                <daemon>true</daemon>
+                        </configuration>
+                </execution>
+                <execution>
+                        <id>stop-jetty</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                                <goal>stop</goal>
+                        </goals>
+                </execution>
+        </executions>
+</plugin>
+
+
       </plugins>
     </pluginManagement>
   </build>
@@ -320,5 +369,9 @@
   <modules>
     <module>common</module>
     <module>pig</module>
+    <module>cascading</module>
   </modules>
+
+
 </project>
+

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>commons-configuration-1.6</groupId>
+  <artifactId>commons-configuration-1.6</artifactId>
+  <version>1.0</version>
+  <versioning>
+    <versions>
+      <version>1.0</version>
+    </versions>
+    <lastUpdated>20130201172250</lastUpdated>
+  </versioning>
+</metadata>
