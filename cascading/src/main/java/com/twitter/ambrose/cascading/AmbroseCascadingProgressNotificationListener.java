@@ -1,55 +1,44 @@
 package com.twitter.ambrose.cascading;
 
-import DotGraphParser.CascadingEdge;
-import DotGraphParser.DotParser;
 import cascading.CascadingNotifier;
 import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowStep;
 import cascading.flow.Flows;
-import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowStepGraph;
 import cascading.flow.planner.FlowStepJob;
-import cascading.flow.planner.Scope;
-import cascading.management.state.ClientState;
 import cascading.stats.hadoop.HadoopStepStats;
 import com.twitter.ambrose.model.JobInfo;
-import com.twitter.ambrose.model.WorkflowInfo;
 import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.service.WorkflowEvent;
-import com.twitter.ambrose.util.JSONUtil;
-import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
-
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
-import org.jgrapht.GraphHelper;
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+/**
+ * CascadingNotifier that collects plan and job information from within a Pig runtime,
+ * builds Ambrose model objects, and passes the objects to an Ambrose StatsWriteService object. This
+ * listener can be used regardless of what mode Ambrose is running in.
+ *
+ * @see EmbeddedAmbroseCascadingProgressNotificationListener for a sublclass that can be used to run an
+ * embedded Ambrose web server from Main method.
+ * @author ahmed
+ */
 public class AmbroseCascadingProgressNotificationListener implements CascadingNotifier {
 
     private static final String RUNTIME = "Cascading";
@@ -59,6 +48,8 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
     private Map<String, DAGNode> dagNodeNameMap = new TreeMap<String, DAGNode>();
     private HashSet<String> completedJobIds = new HashSet<String>();
     protected Log log = LogFactory.getLog(getClass());
+    private int totalNumberOfJobs;
+    private int runnigJobs;
 
     protected static enum WorkflowProgressField {
 
@@ -84,14 +75,24 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         return statsWriteService;
     }
 
+    /**
+     * The onStarting event is fired when a Flow instance receives the start() message.
+     * -a Flow is cut down into executing units called stepFlow
+     * -stepFlow contains a stepFlowJob which represents the mapreduce job to be
+     * submitted to Hadoop
+     * -the DAG graph is constructed from the step graph found in flow object
+     * @param flow
+     */
     @Override
     public void onStarting(Flow flow) {
         BaseFlow bf = (BaseFlow) flow;
         List<BaseFlowStep> steps = bf.getFlowSteps();
+        totalNumberOfJobs = steps.size();
+        runnigJobs = 0;
 
-        // to write a dot file of jobs graph
-        //bf.writeDOT("dagFile");
-        //bf.writeStepsDOT("step");
+        Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
+        eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(0));
+        pushEvent(0+"", WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
 
         //Flows is a utility helper class to call the protected method getFlowStepGraph.
         Flows flows = null;
@@ -99,8 +100,6 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         // DAGNodes Graph to be sent to ambrose
         AmbroseCascadingGraphConvertor convertor = new AmbroseCascadingGraphConvertor((SimpleDirectedGraph) flows.getStepGraphFrom(flow), dagNodeNameMap);
         convertor.convert();
-
-
         try {
             statsWriteService.sendDagNodeNameMap(null, this.dagNodeNameMap);
         } catch (IOException e) {
@@ -108,25 +107,40 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         }
 
     }
-
+    /**
+     *  The onStopping event is fired when a Flow instance receives the stop() message.
+     *
+     * @param flow
+     */
     @Override
-    public void onStopping(Flow flow) {
-        // TODO Auto-generated method stub
+    public void onStopping(Flow flow) {    }
 
-    }
-
+    /**
+     * The onCompleted event is fired when a Flow instance has completed all work whether if was success or failed. If
+     * there was a thrown exception, onThrowable will be fired before this event.
+     * @param flow
+     */
     @Override
-    public void onCompleted(Flow flow) {
-        // TODO Auto-generated method stub
+    public void onCompleted(Flow flow) {    }
 
-    }
 
+    /**
+     * The onThrowable event is fired if any child {@link cascading.flow.FlowStep} throws a Throwable type. This throwable is passed
+     * as an argument to the event. This event method should return true if the given throwable was handled and should
+     * not be rethrown from the {@link Flow#complete()} method.
+     * @param flow
+     * @param throwable
+     * @return true if this listener has handled the given throwable
+     */
     @Override
     public boolean onThrowable(Flow flow, Throwable throwable) {
-        // TODO Auto-generated method stub
         return false;
     }
 
+    /**
+     * jobCompleted event is fired when a stepFlowJob completed its work
+     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
+     */
     @Override
     public void onJobCompleted(String jobId) {
         //get job node
@@ -141,8 +155,14 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
 
     }
 
+    /**
+     * jobFailed event is fired if job failed during execution
+     * A job_failed event is pushed with node represents the failed job
+     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
+     */
     @Override
     public void onJobFailed(String jobId) {
+        //search for the node with id = JobId
         Set<String> keys = this.dagNodeNameMap.keySet();
         for (String key : keys) {
             DAGNode node = ((DAGNode) dagNodeNameMap.get(key));
@@ -154,13 +174,20 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
 
     }
 
+    /**
+     * jobProgress event is fired whenever a job made a progress
+     * @param jobName the name of the job that casscading assign to it
+     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
+     * @param flowStepJob the execution unit of the current job
+     */
     @Override
     public void onJobProgress(String jobName, String jobId, FlowStepJob<?> flowStepJob) {
-        HadoopFlowStepJob h = (HadoopFlowStepJob) flowStepJob;
-        HadoopStepStats h2 = ((HadoopStepStats) h.createStepStats(ClientState.NULL));
-        JobClient jc = h2.getJobClient();
-        RunningJob rj = h2.getRunningJob();
 
+        //getting Hadoop running job and job client
+        HadoopStepStats stats= (HadoopStepStats) flowStepJob.getStepStats();
+        RunningJob rj = stats.getRunningJob();
+        JobClient jc = stats.getJobClient();
+        
         Map<JobProgressField, String> progressMap = buildJobStatusMap(rj, jc);
         if (progressMap != null) {
             pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
@@ -172,24 +199,33 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
 
 
     }
-
+    /**
+     * jobStarted event is fired whenever a job is submitted to Hadoop and begun its excution
+     * @param jobName the name of the job that casscading assign to it
+     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
+     * @param flowStepJob the execution unit of the current job
+     */
+    @Override
     public void onJobStarted(String jobName, String jobId, FlowStepJob<?> flowStepJob) {
-        //get hadoop running job
-        HadoopFlowStepJob h = (HadoopFlowStepJob) flowStepJob;
-        HadoopStepStats h2 = ((HadoopStepStats) h.createStepStats(ClientState.NULL));
-        RunningJob rj = h2.getRunningJob();
-        JobClient jc = h2.getJobClient();
+       
+        //getting Hadoop running job and job client
+        HadoopStepStats stats= (HadoopStepStats) flowStepJob.getStepStats();
+        RunningJob rj = stats.getRunningJob();
+        JobClient jc = stats.getJobClient();
+
+        //update overall progress
+        runnigJobs++;
+        int progress = (int)(((runnigJobs * 1.0 )/totalNumberOfJobs)*100);
+        Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
+        eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(progress));
+        pushEvent(jobId, WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
 
         DAGNode node = this.dagNodeNameMap.get(jobName);
         if (node == null) {
             log.warn("jobStartedNotification - unrecorgnized operator name found  for jobId " + jobId);
-            System.out.println("name = " + jobName);
-            System.out.println(dagNodeNameMap);
         } else {
             node.setJobId(jobId);
-
             pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
-
             Map<JobProgressField, String> progressMap = buildJobStatusMap(rj, jc);
             if (progressMap != null) {
                 pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
@@ -230,3 +266,4 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         return null;
     }
 }
+
