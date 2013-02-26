@@ -50,6 +50,7 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
     protected Log log = LogFactory.getLog(getClass());
     private int totalNumberOfJobs;
     private int runnigJobs;
+    private String currentFlowId;   //id of the flow being excuted
 
     protected static enum WorkflowProgressField {
 
@@ -89,10 +90,11 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         List<BaseFlowStep> steps = bf.getFlowSteps();
         totalNumberOfJobs = steps.size();
         runnigJobs = 0;
+        currentFlowId = flow.getID();
 
         Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
         eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(0));
-        pushEvent(0+"", WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
+        pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
 
         //Flows is a utility helper class to call the protected method getFlowStepGraph.
         Flows flows = null;
@@ -148,7 +150,7 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         for (String key : keys) {
             DAGNode node = ((DAGNode) dagNodeNameMap.get(key));
             if (node != null && node.getJobId() != null && node.getJobId().equals(jobId)) {
-                pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_FINISHED, node);
+                pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.JOB_FINISHED, node);
                 return;
             }
         }
@@ -167,7 +169,7 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         for (String key : keys) {
             DAGNode node = ((DAGNode) dagNodeNameMap.get(key));
             if (node != null && node.getJobId().equals(jobId)) {
-                pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_FAILED, node);
+                pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.JOB_FAILED, node);
                 return;
             }
         }
@@ -190,7 +192,7 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         
         Map<JobProgressField, String> progressMap = buildJobStatusMap(rj, jc);
         if (progressMap != null) {
-            pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
+            pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
         }
 
         if ("true".equals(progressMap.get(JobProgressField.isComplete))) {
@@ -218,25 +220,25 @@ public class AmbroseCascadingProgressNotificationListener implements CascadingNo
         int progress = (int)(((runnigJobs * 1.0 )/totalNumberOfJobs)*100);
         Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
         eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(progress));
-        pushEvent(jobId, WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
+        pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
 
         DAGNode node = this.dagNodeNameMap.get(jobName);
         if (node == null) {
             log.warn("jobStartedNotification - unrecorgnized operator name found  for jobId " + jobId);
         } else {
             node.setJobId(jobId);
-            pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
+            pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
             Map<JobProgressField, String> progressMap = buildJobStatusMap(rj, jc);
             if (progressMap != null) {
-                pushEvent(jobId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
+                pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
             }
 
         }
     }
 
-    private void pushEvent(String scriptId, WorkflowEvent.EVENT_TYPE eventType, Object eventData) {
+    private void pushEvent(String flowId, WorkflowEvent.EVENT_TYPE eventType, Object eventData) {
         try {
-            statsWriteService.pushEvent(scriptId, new WorkflowEvent(eventType, eventData, RUNTIME));
+            statsWriteService.pushEvent(flowId, new WorkflowEvent(eventType, eventData, RUNTIME));
         } catch (IOException e) {
             log.error("Couldn't send event to StatsWriteService", e);
         }
