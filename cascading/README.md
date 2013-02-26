@@ -8,7 +8,7 @@ embedded [Jetty](http://jetty.codehaus.org/jetty/) server that exposes job infor
 To run Ambrose with an actual Cascading program (Cascading Getting Started)[http://www.cascading.org/documentation/]
 
 
-In Cascading main, you have to add 2 lines ofcode at the end of the main:
+In Cascading main, you have to add 2 lines of code at the end of the main:
 
 create the embedded cascading listener :
 
