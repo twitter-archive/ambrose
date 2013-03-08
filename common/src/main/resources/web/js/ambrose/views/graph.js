@@ -151,14 +151,14 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
  			// creating tip on node click
       var vis = d3.select("#ambrose-views-graph")		
 		.append("svg:svg")
-		.attr("id","physical-plan-graph")
+		.attr("id","job-sub-graph")
 		.style("position", "absolute")
 
  	vis.append("svg:rect")					
 		.attr("id","tip")
 		.on('click', function(node) {
-		  	 d3.select("#job-physical-plan").remove();
- 		  	 d3.select("#physical-plan-graph").attr("visibility","hidden");
+		  	 d3.select("#job-sub-graph-view").remove();
+ 		  	 d3.select("#job-sub-graph").attr("visibility","hidden");
 		    });
 				    
       var projection = this.projection;
@@ -191,10 +191,10 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
         	x  = (event.pageY);
         	y = (event.pageX);
         	
-        	d3.select("#job-physical-plan").remove();
+        	d3.select("#job-sub-graph-view").remove();
         	d3.json(url + '-subg',function(subg) {
-								drawingPhysicalPlan(x,y,subg);
-									} );	
+						drawingPhysicalPlan(x,y,subg);
+							} );	
 		      }
         );
         
@@ -297,8 +297,8 @@ function drawingPhysicalPlan(x,y,subg){
 	var reducerNodeColor = "#483D8B";
 
 	//remove old one
-	d3.select("#physical-plan-graph").select("#job-physical-plan").remove();
-	d3.select("#physical-plan-graph").attr("visibility","hidden");
+	d3.select("#job-sub-graph").select("#job-sub-graph-view").remove();
+	d3.select("#job-sub-graph").attr("visibility","hidden");
 	//resizing tip to fit mapper and reducer
 	d3.select("#tip").style("z-index", "50")
 			.attr("width", 2*maxHeight+200)
@@ -310,13 +310,13 @@ function drawingPhysicalPlan(x,y,subg){
 			.attr("stroke-width",5);
 	
 	//moving tip to node 
-	d3.select("#physical-plan-graph").style("z-index", "50")
+	d3.select("#job-sub-graph").style("z-index", "50")
 			.style("top", x +"px").style("left", y +"px");
 			
 	//changing tip size according to physical plan size	
-	 var vis= d3.select("#physical-plan-graph")
+	 var vis= d3.select("#job-sub-graph")
 	 		.append("svg:g")
-			.attr("id","job-physical-plan")			
+			.attr("id","job-sub-graph-view")			
 			.attr("dx", +100)
 			.attr("width", 2*maxHeight+ 200)
 			.attr("height", maxWidth)	  
@@ -351,5 +351,5 @@ function drawingPhysicalPlan(x,y,subg){
 			.text("Job Reducer")
 			.style("fill",reducerNodeColor);
 
-	d3.select("#physical-plan-graph").attr("visibility","visible");
+	d3.select("#job-sub-graph").attr("visibility","visible");
 }
