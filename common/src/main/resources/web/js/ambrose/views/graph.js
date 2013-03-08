@@ -150,16 +150,16 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       
  			// creating tip on node click
       var vis = d3.select("#ambrose-views-graph")		
-									.append("svg:svg")
-									.attr("id","physical-plan-graph")
-									.style("position", "absolute")
+		.append("svg:svg")
+		.attr("id","physical-plan-graph")
+		.style("position", "absolute")
 
-		 	vis.append("svg:rect")					
-				.attr("id","tip")
-				.on('click', function(node) {
-				  	 d3.select("#job-physical-plan").remove();
- 				  	 d3.select("#physical-plan-graph").attr("visibility","hidden");
-				    });
+ 	vis.append("svg:rect")					
+		.attr("id","tip")
+		.on('click', function(node) {
+		  	 d3.select("#job-physical-plan").remove();
+ 		  	 d3.select("#physical-plan-graph").attr("visibility","hidden");
+		    });
 				    
       var projection = this.projection;
       g = g.enter().append('svg:g').attr('class', function(node) {
