@@ -16,6 +16,7 @@ limitations under the License.
 package com.twitter.ambrose.service.impl;
 
 import com.twitter.ambrose.service.DAGNode;
+import com.twitter.ambrose.service.MRNode;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.service.WorkflowEvent;
@@ -63,6 +64,9 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
 
   private Writer dagWriter = null;
   private Writer eventsWriter = null;
+  
+  private Map<String, MRNode> mappers = new HashMap<String, MRNode>();
+  private Map<String, MRNode> reducers = new HashMap<String, MRNode>();
 
   public InMemoryStatsService() {
     String dumpDagFileName = System.getProperty(DUMP_DAG_FILE_PARAM);
@@ -121,5 +125,25 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
       JSONUtil.writeJson(eventsWriter, events.toArray(new WorkflowEvent[events.size()]));
       eventsWriter.close();
     }
+  }
+
+  @Override
+  public Map<String, MRNode> getMappersSubgraph() {		
+    return mappers;
+  }
+	
+  @Override
+  public Map<String, MRNode> getReducersSubgraph() {
+    return reducers;
+  }
+
+  @Override
+  public void sendMappersSubgraph(Map<String, MRNode> mappers) {
+    this.mappers = mappers;
+  }
+
+  @Override
+  public void sendReducersSubgraph(Map<String, MRNode> reducers) {
+    this.reducers = reducers;		
   }
 }

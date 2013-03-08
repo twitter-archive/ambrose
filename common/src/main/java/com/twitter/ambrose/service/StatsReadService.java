@@ -44,4 +44,16 @@ public interface StatsReadService {
    * @return a Collection of WorkflowEvents, ordered by eventId ascending
    */
   public Collection<WorkflowEvent> getEventsSinceId(String workflowId, int eventId) throws IOException;
+  
+  /**
+   * Get a map of mappers for all jobs in the workflow.
+   * @return Map of the mappers subgraphs for all jobs, where jobId is the key
+   */
+  public Map<String, MRNode> getMappersSubgraph() throws IOException;
+ 
+  /**
+   * Get a map of reducers for all jobs in the workflow.
+   * @return Map of the reducers subgraphs for all jobs, where jobId is the key
+   */
+  public Map<String, MRNode> getReducersSubgraph() throws IOException;
 }

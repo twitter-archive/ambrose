@@ -44,4 +44,16 @@ public interface StatsWriteService {
    * @param event the event bound to the workflow
    */
   public void pushEvent(String workflowId, WorkflowEvent event) throws IOException;
+  
+  /**
+   * Send a map of mappers subgraphs for all jobs 
+   * @param mappers a map of MRNodes with the jobId as a key
+   */
+  public void sendMappersSubgraph(Map<String, MRNode> mappers)  throws IOException;
+  
+  /**
+   * Send a map of reducers subgraphs for all jobs
+   * @param reducers a map of MRNodes with the jobId as a key
+   */
+  public void sendReducersSubgraph(Map<String, MRNode> reducers)  throws IOException;
 }

@@ -72,7 +72,7 @@ public class DAGNode {
     this.successorNames = successorNames;
     this.runtime = runtime;
   }
-
+  
   public String getName() { return name; }
   public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
   public String[] getFeatures() { return features == null ? new String[0] : features; }

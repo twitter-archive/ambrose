@@ -18,6 +18,8 @@ package com.twitter.ambrose.pig;
 import com.twitter.ambrose.model.JobInfo;
 import com.twitter.ambrose.model.WorkflowInfo;
 import com.twitter.ambrose.service.DAGNode;
+import com.twitter.ambrose.service.MRNode;
+import com.twitter.ambrose.service.MRSubgNode;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.service.WorkflowEvent;
 import org.apache.commons.logging.Log;
@@ -29,6 +31,10 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.PhysicalOperator;
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.plans.PhysicalPlan;
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POLoad;
+import org.apache.pig.backend.hadoop.executionengine.physicalLayer.relationalOperators.POStore;
 import org.apache.pig.impl.plan.OperatorKey;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
@@ -38,6 +44,7 @@ import org.apache.pig.tools.pigstats.ScriptState;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,16 +74,19 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private Map<String, DAGNode> dagNodeNameMap = new TreeMap<String, DAGNode>();
 
   private HashSet<String> completedJobIds = new HashSet<String>();
-
+  
   protected static enum WorkflowProgressField {
     workflowProgress;
   }
-
+  
   protected static enum JobProgressField {
     jobId, jobName, trackingUrl, isComplete, isSuccessful,
     mapProgress, reduceProgress, totalMappers, totalReducers;
   }
 
+  private Map<String, MRNode>  mappers = new TreeMap<String,MRNode>();
+  private Map<String, MRNode>  reducers = new TreeMap<String,MRNode>();
+  
   /**
    * Intialize this class with an instance of StatsWriteService to push stats to.
    *
@@ -103,8 +113,11 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         toArray(ScriptState.get().getAlias(entry.getValue())),
         toArray(ScriptState.get().getPigFeature(entry.getValue())), RUNTIME);
 
-      this.dagNodeNameMap.put(node.getName(), node);
+      this.dagNodeNameMap.put(node.getName(), node);                
 
+      //subgraph content 
+      getMapperReducerForJob(entry.getValue(), node.getName());
+      
       // this shows how we can get the basic info about all nameless jobs before any execute.
       // we can traverse the plan to build a DAG of this info
       log.info("initialPlanNotification: alias: " + toString(node.getAliases())
@@ -129,12 +142,12 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
     //TODO: upgrade to trunk pig which has scriptId and pass it here
     try {
-      statsWriteService.sendDagNodeNameMap(null, this.dagNodeNameMap);
+      statsWriteService.sendDagNodeNameMap(null, this.dagNodeNameMap);     
     } catch (IOException e) {
       log.error("Couldn't send dag to StatsWriteService", e);
     }
   }
-
+  
   /**
    * Called with a job is started. This is the first time that we are notified of a new jobId for a
    * launched job. Hence this method binds the jobId to the DAGNode and pushes a status event.
@@ -157,12 +170,15 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
           log.warn("jobStartedNotification - unrecorgnized operator name found ("
                   + jobStats.getName() + ") for jobId " + assignedJobId);
         } else {
-          node.setJobId(assignedJobId);
-          pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
+            mappers.get(jobStats.getName()).setJobId(assignedJobId);
+            reducers.get(jobStats.getName()).setJobId(assignedJobId);
 
-          Map<JobProgressField, String> progressMap = buildJobStatusMap(assignedJobId);
-          if (progressMap != null) {
-            pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
+            node.setJobId(assignedJobId);
+            pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
+
+            Map<JobProgressField, String> progressMap = buildJobStatusMap(assignedJobId);
+            if (progressMap != null) {
+              pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
           }
         }
       }
@@ -342,5 +358,98 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       sb.append(string);
     }
     return sb.toString();
+  }
+  
+  /***
+   * Takes the Mapper/Reducer and build it's subgraph "physical operators"
+   * @param  mapper/reducer , jobName
+   * @return map <opName,node> the subgraph of the mapper/reducer and assigns to this subgraph the parent jobId
+   */  
+  private void buildFromPredecessor(PhysicalPlan plan, MRSubgNode root, PhysicalOperator key,int[] level ) {
+    Collection<PhysicalOperator> nodeChildrenOps = plan.getPredecessors(key);
+    List<MRSubgNode> nodeChildren = new ArrayList<MRSubgNode>();
+    // Base case
+    if(nodeChildrenOps != null ) {
+        for( PhysicalOperator child : nodeChildrenOps ) {
+            MRSubgNode nodeChild = new MRSubgNode(getOpName(child));
+            level[0]++;
+            buildFromPredecessor(plan, nodeChild, child,level);
+            nodeChildren.add(nodeChild);
+        }
+        root.setChildren(nodeChildren);
+    }
+  }
+  
+  private MRNode buildSubgraph(PhysicalPlan plan, String jname) {
+    int[] level = {0};
+    MRNode mr =  new MRNode(jname);
+    //get root
+    PhysicalOperator poRt = plan.getLeaves().get(0);
+    MRSubgNode rt = new MRSubgNode(getOpName(poRt));
+    buildFromPredecessor(plan,rt,poRt,level);
+    mr.setTree(rt);
+    mr.setLevel(level[0]+1);
+    return mr;
+   }
+  
+  /***
+   * Takes a job from the initialPlan method and sets it's mapper and reducer subgraphs.
+   * @param job
+   * @param jobName
+   */
+  private void getMapperReducerForJob( MapReduceOper job, String jName ) {
+    PhysicalPlan mapper = job.mapPlan;	// get it's nodes
+    PhysicalPlan reducer = job.reducePlan; // get it's nodes
+
+    this.mappers.put(jName, buildSubgraph(mapper,jName) );
+    this.reducers.put(jName, buildSubgraph(reducer, jName) ); 
+
+    try {
+        statsWriteService.sendReducersSubgraph(reducers);
+        statsWriteService.sendMappersSubgraph(mappers);
+      } catch (IOException e) {
+        log.error("Couldn't send dag to StatsWriteService", e);
+      }
+    }
+
+  /** get a physical operator name -- for nodes inside subgraphs "MRPlans"
+   * @param PhysicalOperator
+   * @return opName 
+   */
+  private String getOpName(PhysicalOperator op) {
+    String opCanonicalName = op.getClass().getCanonicalName();
+    String fileNameLong=null;
+    
+    if( op instanceof POStore ){
+        fileNameLong=((POStore)op).getSFile().getFileName();
+    }
+    if( op instanceof POLoad ){
+        fileNameLong=((POLoad)op).getLFile().getFileName();
+    }
+
+    String[] opNameLongSplitted = opCanonicalName.split("\\.");
+    String opName = new String(opCanonicalName);
+    
+    if( opNameLongSplitted.length >= 1 ) {
+        opName = opNameLongSplitted[opNameLongSplitted.length -1];
+    } else {
+        opName=opCanonicalName;
+    }
+
+    StringBuffer opNameBuffer=new StringBuffer(opName);
+    
+    if( fileNameLong != null ) {
+        String[] fileNameLongSplitted = fileNameLong.split("/");
+        String fileName = new String(fileNameLong);
+        
+        if( fileNameLongSplitted.length >= 1 ) {
+            fileName = fileNameLongSplitted[fileNameLongSplitted.length -1];
+        }
+        
+        String subFileName=fileName.substring(0, 5);
+        opNameBuffer.append(":");
+        opNameBuffer.append(subFileName);
+    }
+    return opNameBuffer.toString();
   }
 }

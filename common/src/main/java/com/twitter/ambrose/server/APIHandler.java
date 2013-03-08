@@ -1,5 +1,9 @@
 package com.twitter.ambrose.server;
 
+import java.util.*;
+import com.twitter.ambrose.service.MRNode;
+import com.twitter.ambrose.service.MRSubgNode;
+
 import java.io.IOException;
 import java.util.Collection;
 
@@ -29,6 +33,9 @@ public class APIHandler extends AbstractHandler {
   private static final String MIME_TYPE_JSON = "application/json";
 
   private StatsReadService statsReadService;
+  private Map<String, MRNode> mappers = null;
+  private Map<String, MRNode> reducers = null;
+  Map<String, List<MRNode>> m = new HashMap<String, List<MRNode>>();
 
   public APIHandler(StatsReadService statsReadService) {
     this.statsReadService = statsReadService;
@@ -63,9 +70,21 @@ public class APIHandler extends AbstractHandler {
       response.setContentType(MIME_TYPE_HTML);
       // this is because the next handler will be picked up here and it doesn't seem to
       // handle html well. This is jank.
-    }
+    } else if ( target.endsWith("-subg") ) {
+    	String jobId = target.substring(target.lastIndexOf("/")+1 , target.lastIndexOf('-') );
+        mappers = statsReadService.getMappersSubgraph(); 
+        reducers = statsReadService.getReducersSubgraph();    	  
+    	if ( !m.containsKey(jobId) ) {
+            ArrayList<MRNode> mr = new ArrayList<MRNode>();	    	    	 	    	 
+            mr.add(mappers.get(jobId));
+            mr.add(reducers.get(jobId));
+            m.put(jobId, mr); 
+          }
+    	  
+    	  Collection<MRNode> subs = m.get(jobId);        	  
+    	  sendJson(request, response, subs );
+      }
   }
-
   private static void sendJson(HttpServletRequest request,
                                HttpServletResponse response, Object object) throws IOException {
     JSONUtil.writeJson(response.getWriter(), object);
