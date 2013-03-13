@@ -45,6 +45,30 @@
       <artifactId>cascading-hadoop</artifactId>
       <version>1.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.cascading</groupId>
+      <artifactId>cascading-xml</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cascading</groupId>
+      <artifactId>cascading-local</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <!-- cascading dependences -->
+    <dependency>
+      <groupId>janino</groupId>
+      <artifactId>janino</artifactId>
+      <version>2.5.10</version>
+    </dependency>
+
+    <!-- cascading xml -->
+    <dependency>
+      <groupId>org.ccil.cowan.tagsoup</groupId>
+      <artifactId>tagsoup</artifactId>
+      <version>1.2.1</version>
+    </dependency>
 
     <!-- ambrose -->
     <dependency>
@@ -60,6 +84,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>13.0.1</version>
     </dependency>
 
     <!-- web -->
