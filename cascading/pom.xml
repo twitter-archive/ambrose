@@ -21,27 +21,36 @@
       <releases><enabled>true</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
     </repository>
-<!--other repositories if any-->
     <repository>
-        <id>project.local</id>
-        <name>project</name>
-        <url>file:${project.basedir}/cascading/repo</url>
+      <id>ambrose-cascading</id>
+      <url>https://github.com/engeshra/ambroseCascading-mvn-repo/raw/master/repository</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
-
   </repositories>
 
-
-
-
   <dependencies>
+      <!-- modified cascading -->
+     <dependency>
+      <groupId>com.cascading</groupId>
+      <artifactId>cascading-core</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.cascading</groupId>
+      <artifactId>cascading-hadoop</artifactId>
+      <version>1.0</version>
+    </dependency>
+
     <!-- ambrose -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ambrose-common</artifactId>
-      <!--<scope>system</scope>
-      <systemPath>${project.basedir}/common/target/ambrose-common-0.1.0-SNAPSHOT.jar</systemPath> -->
     </dependency>
-
 
     <!-- logging -->
     <dependency>
@@ -53,136 +62,32 @@
       <artifactId>slf4j-simple</artifactId>
     </dependency>
 
-
-      <!-- web -->
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>${mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty-util</artifactId>
-        <version>${mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>${mortbay.jetty.servlet.version}</version>
-      </dependency>
-
-
+    <!-- web -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>${mortbay.jetty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>${mortbay.jetty.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>${mortbay.jetty.servlet.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.jgrapht</groupId>
+    	<artifactId>jgrapht-jdk1.5</artifactId>
+    	<version>0.7.3</version>
+    </dependency>
 
     <!-- testing -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-    </dependency>
-
-        <dependency>
-      <artifactId> commons-codec-1.4 </artifactId>
-      <groupId> commons-codec-1.4 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> cascading-core-2.1.2-wip-dev </artifactId>
-      <groupId> cascading-core-2.1.2-wip-dev </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> commons-logging-1.1.1 </artifactId>
-      <groupId> commons-logging-1.1.1 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> commons-httpclient-3.0.1 </artifactId>
-      <groupId> commons-httpclient-3.0.1 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> tagsoup-1.2 </artifactId>
-      <groupId> tagsoup-1.2 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> cascading-local-2.1.2 </artifactId>
-      <groupId> cascading-local-2.1.2 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> jackson-core-asl-1.8.8 </artifactId>
-      <groupId> jackson-core-asl-1.8.8 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> commons-lang-2.4 </artifactId>
-      <groupId> commons-lang-2.4 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> cascading-xml-2.1.2 </artifactId>
-      <groupId> cascading-xml-2.1.2 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> jackson-mapper-asl-1.8.8 </artifactId>
-      <groupId> jackson-mapper-asl-1.8.8 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> cascading-hadoop-2.1.2-wip-dev </artifactId>
-      <groupId> cascading-hadoop-2.1.2-wip-dev </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> slf4j-api-1.6.1 </artifactId>
-      <groupId> slf4j-api-1.6.1 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> hadoop-client-1.0.4 </artifactId>
-      <groupId> hadoop-client-1.0.4 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> commons-configuration-1.6 </artifactId>
-      <groupId> commons-configuration-1.6 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> guava-13.0 </artifactId>
-      <groupId> guava-13.0 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> commons-compiler </artifactId>
-      <groupId> commons-compiler </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> jgrapht-jdk1.6-0.8.1 </artifactId>
-      <groupId> jgrapht-jdk1.6-0.8.1 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> hadoop-core-1.0.4 </artifactId>
-      <groupId> hadoop-core-1.0.4 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> janino-2.6.1 </artifactId>
-      <groupId> janino-2.6.1 </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> riffle-0.1-dev </artifactId>
-      <groupId> riffle-0.1-dev </groupId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <artifactId> janino </artifactId>
-      <groupId> janino </groupId>
-      <version>1.0</version>
     </dependency>
   </dependencies>
 
@@ -195,45 +100,25 @@
   </properties>
 
   <build>
-    <defaultGoal>package</defaultGoal>
-    <pluginManagement>
-      <plugins>
-<plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <version>6.1.10</version>
-        <configuration>
-          <webAppSourceDirectory>${project.parent.basedir}/common/src/main/resources/web</webAppSourceDirectory>
-            <scanIntervalSeconds>10</scanIntervalSeconds>
-            <stopKey>foo</stopKey>
-            <stopPort>9999</stopPort>
-        </configuration>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
-                <execution>
-                        <id>start-jetty</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                                <goal>run</goal>
-                        </goals>
-                        <configuration>
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <daemon>true</daemon>
-                        </configuration>
-                </execution>
-                <execution>
-                        <id>stop-jetty</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                                <goal>stop</goal>
-                        </goals>
-                </execution>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+                <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+            </configuration>
+          </execution>
         </executions>
-
-</plugin>
-
-
-      </plugins>
-    </pluginManagement>
+      </plugin>
+    </plugins>
   </build>
 
 </project>
