@@ -62,6 +62,12 @@
       <artifactId>janino</artifactId>
       <version>2.5.10</version>
     </dependency>
+    <dependency>
+      <groupId>com.commons</groupId>
+      <artifactId>commons-compiler</artifactId>
+      <version>1.0</version>
+    </dependency>
+
 
     <!-- cascading xml -->
     <dependency>
