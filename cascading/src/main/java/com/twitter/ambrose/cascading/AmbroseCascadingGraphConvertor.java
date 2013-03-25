@@ -16,22 +16,19 @@
  */
 package com.twitter.ambrose.cascading;
 
-import cascading.flow.FlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import com.twitter.ambrose.service.DAGNode;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
- *
- * @author hadoop
+ * This class is responsible for converting the SimpleDirectedGraph object used 
+ * to represent a flow into a map of DagNodes
  */
 public class AmbroseCascadingGraphConvertor {
 
@@ -40,7 +37,7 @@ public class AmbroseCascadingGraphConvertor {
     /* Output Map of the generated DAGNode and their names */
     protected Map<String, DAGNode> dagNamesMap;
 
-    /*
+    /*EmbeddedAmbroseCascadingProgressNotificationListener
      * Constractor of AmbroseCascadingGraphConvertor
      *
      * @param graph FlowStepGraph (which implement SimpleDirectedGraph)

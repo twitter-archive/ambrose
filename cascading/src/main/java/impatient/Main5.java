@@ -19,27 +19,12 @@
  */
 package impatient;
 
-import java.io.IOException;
 import java.util.Properties;
-
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobID;
-import org.apache.hadoop.mapred.RunningJob;
-
-import cascading.flow.planner.BaseFlowStep;
-
-import cascading.CascadingNotifier;
-import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.BaseFlow;
-import cascading.flow.FlowListener;
-import cascading.flow.FlowStep;
 import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.flow.hadoop.planner.HadoopFlowStepJob;
 import cascading.flow.planner.FlowStepJob;
-import cascading.management.state.ClientState;
 import cascading.operation.Insert;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.regex.RegexFilter;
@@ -57,11 +42,10 @@ import cascading.pipe.assembly.Unique;
 import cascading.pipe.joiner.LeftJoin;
 import cascading.property.AppProps;
 import cascading.scheme.hadoop.TextDelimited;
-import cascading.stats.hadoop.HadoopStepStats;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
-import com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingProgressNotificationListener;
+import com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier;
 
 public class Main5 {
 
@@ -172,14 +156,10 @@ public class Main5 {
 
         // write a DOT file and run the flow
         tfidfFlow = flowConnector.connect(flowDef);
-        tfidfFlow.writeDOT("dot/tfidf.dot");
-        BaseFlow x = (BaseFlow) Main5.tfidfFlow;
-
-        x.writeStepsDOT("dot/step-tfidf.dot");
-
-        EmbeddedAmbroseCascadingProgressNotificationListener server = new EmbeddedAmbroseCascadingProgressNotificationListener();
-        FlowStepJob.setJobNotifier(server);
         
+        //run ambrose and cascading
+        EmbeddedAmbroseCascadingNotifier server = new EmbeddedAmbroseCascadingNotifier();
+        FlowStepJob.setJobNotifier(server);
         tfidfFlow.addListener(server);
         tfidfFlow.complete();
     }

@@ -24,37 +24,28 @@ import com.twitter.ambrose.service.impl.InMemoryStatsService;
 import java.io.IOException;
 
 /**
- * Sublclass of AmbrosePigProgressNotificationListener that starts a ScriptStatusServer embedded in
- * the running Pig client VM. Stats are collected using by this class via InMemoryStatsService,
+ * Subclass of AmbroseCascadingNotifier where cascading run inside. Stats are collected using by this class via InMemoryStatsService,
  * which is what serves stats to ScriptStatusServer.
  * <P>
- * To use this class with pig, start pig as follows:
+ * To use this class with cascading, start cascading as follows:
  * <pre>
- * $ bin/pig \
- *  -Dpig.notification.listener=com.twitter.ambrose.pig.EmbeddedAmbrosePigProgressNotificationListener \
- *  -f path/to/script.pig
+ * EmbeddedAmbroseCascadingNotifier server = new EmbeddedAmbroseCascadingNotifier();
+ * FlowStepJob.setJobNotifier(server);
+ * flow.addListener(server);
+ * flow.complete();
  * </pre>
- * Additional <pre>-D</pre> options can be set as system as system properties. Note that these must
- * be set via <pre>PIG_OPTS</pre>. For example, <pre>export PIG_OPTS=-Dambrose.port.number=8188</pre>.
- * <ul>
- *   <li><pre>ambrose.port.number</pre> (default=8080) port for the ambrose tool to listen on.</li>
- *   <li><pre>ambrose.post.script.sleep.seconds</pre> number of seconds to keep the VM running after
- *   the script is complete. This is useful to keep Ambrose up once the job is done.</li>
- * </ul>
  * </P>
- * @author billg
  */
-public class EmbeddedAmbroseCascadingProgressNotificationListener
-             extends AmbroseCascadingProgressNotificationListener {
+public class EmbeddedAmbroseCascadingNotifier
+             extends AmbroseCascadingNotifier {
 
   private InMemoryStatsService service;
   private ScriptStatusServer server;
   private static final String POST_SCRIPT_SLEEP_SECS_PARAM = "ambrose.post.script.sleep.seconds";
 
-  public EmbeddedAmbroseCascadingProgressNotificationListener() {
+  public EmbeddedAmbroseCascadingNotifier() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService)getStatsWriteService();
-
     this.server = new ScriptStatusServer(service);
     this.server.start();
   }
@@ -91,5 +82,4 @@ public class EmbeddedAmbroseCascadingProgressNotificationListener
       log.warn("Sleep interrupted", e);
     }
   }
-
 }
