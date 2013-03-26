@@ -89,7 +89,7 @@ export AMBROSE_PORT=4567
 
 ## Maven repository
 
-An initial Ambrose release will be pushed to Maven Central once Pig 0.11 has been released.
+An initial Ambrose release will be pushed to Maven Central soon.
 
 ## How to contribute
 

@@ -13,16 +13,6 @@
   <artifactId>ambrose-pig</artifactId>
   <name>Ambrose Pig</name>
 
-  <repositories>
-    <repository>
-      <id>apache</id>
-      <name>Apache Repos</name>
-      <url>https://repository.apache.org/content/groups/public/</url>
-      <releases><enabled>true</enabled></releases>
-      <snapshots><enabled>true</enabled></snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
     <!-- ambrose -->
     <dependency>
