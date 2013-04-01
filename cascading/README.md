@@ -33,4 +33,8 @@ tfidfFlow.complete();
 ```
 Note: tfidfFlow is the Flow of Cascading example: (impatient part%) [http://www.cascading.org/2012/07/31/cascading-for-the-impatient-part-5/]
 
+## Authors
+
+* Ahmed Eshra ([@engeshra](https://twitter.com/engeshra))
+* Ahmed Mohsen ([@Ahmed--Mohsen](https://twitter.com/Ahmed__Mohsen))
 
