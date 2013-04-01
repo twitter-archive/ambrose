@@ -53,10 +53,10 @@ public class Main5 {
 
     public static void main(String[] args) {
         String docPath = "test/data/rain.txt";
-        String wcPath = "test/data/out";
+        String wcPath = "target/output/out";
 
         String stopPath = "test/data/en.stop";
-        String tfidfPath = "test/data/out2";
+        String tfidfPath = "target/output/out2";
 
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, Main5.class);
