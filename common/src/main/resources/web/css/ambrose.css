@@ -6,7 +6,7 @@ body { position: relative; padding-top: 40px; }
 #ambrose-view-graph {}
 
 /* Progress Bar view */
-.ambrose-view-progress-bar { margin: 20px; }
+.ambrose-view-progress-bar { margin: 20px 0px; }
 
 /* Table view */
 .ambrose-view-table td.job-mappers, .ambrose-view-table td.job-reducers { white-space: nowrap; }
