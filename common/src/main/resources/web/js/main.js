@@ -7,7 +7,7 @@ requirejs.config({
   }
 });
 
-require(['jquery', 'ambrose'], function($, Ambrose) {
+require(['jquery', 'bootstrap', 'ambrose'], function($, Bootstrap, Ambrose) {
   $(document).ready(function() {
     console.info('Creating default workflow');
     var workflow = Ambrose.Workflow();
