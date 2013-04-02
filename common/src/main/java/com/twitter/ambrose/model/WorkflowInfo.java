@@ -39,7 +39,7 @@ public class WorkflowInfo {
 
   private String workflowId;
   private String workflowFingerprint;
-  private List<JobInfo> jobInfoList;
+  private List<Job> jobs;
 
   /**
    * Creates a new immutable WorkflowInfo object.
@@ -49,20 +49,20 @@ public class WorkflowInfo {
    * @param workflowFingerprint the fingerprint of this workflow. The same workflow logic run
    * repeatedly, potentially over different input data, should result in the same fingerprint. A
    * change to the logic should result in a different fingerprint.
-   * @param jobInfoList
+   * @param jobs
    */
   @JsonCreator
   public WorkflowInfo(@JsonProperty("workflowId") String workflowId,
                       @JsonProperty("workflowFingerprint") String workflowFingerprint,
-                      @JsonProperty("jobInfoList") List<JobInfo> jobInfoList) {
+                      @JsonProperty("jobs") List<Job> jobs) {
     this.workflowId = workflowId;
     this.workflowFingerprint = workflowFingerprint;
-    this.jobInfoList = jobInfoList;
+    this.jobs = jobs;
   }
 
   public String getWorkflowId() { return workflowId; }
   public String getWorkflowFingerprint() { return workflowFingerprint; }
-  public List<JobInfo> getJobInfoList() { return jobInfoList; }
+  public List<Job> getJobs() { return jobs; }
 
   /**
    * Serializes a WorkflowInfo object and it's children into a JSON String.

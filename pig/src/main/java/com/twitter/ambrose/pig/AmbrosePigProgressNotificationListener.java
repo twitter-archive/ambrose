@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.twitter.ambrose.pig;
 
-import com.twitter.ambrose.model.JobInfo;
+import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.WorkflowInfo;
 import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.StatsWriteService;
@@ -63,7 +63,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private StatsWriteService statsWriteService;
 
   private String workflowVersion;
-  private List<JobInfo> jobInfoList = new ArrayList<JobInfo>();
+  private List<Job> jobs = new ArrayList<Job>();
   private Map<String, DAGNode> dagNodeNameMap = new TreeMap<String, DAGNode>();
 
   private HashSet<String> completedJobIds = new HashSet<String>();
@@ -176,9 +176,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void jobFailedNotification(String scriptId, JobStats stats) {
-    JobInfo jobInfo = collectStats(scriptId, stats);
-    jobInfoList.add(jobInfo);
-    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_FAILED, jobInfo);
+    Job job = collectStats(scriptId, stats);
+    jobs.add(job);
+    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_FAILED, job);
   }
 
   /**
@@ -188,9 +188,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void jobFinishedNotification(String scriptId, JobStats stats) {
-    JobInfo jobInfo = collectStats(scriptId, stats);
-    jobInfoList.add(jobInfo);
-    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_FINISHED, jobInfo);
+    Job job = collectStats(scriptId, stats);
+    jobs.add(job);
+    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_FINISHED, job);
   }
 
   /**
@@ -206,7 +206,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     if (workflowVersion == null) {
       log.warn("scriptFingerprint not set for this script - not saving stats." );
     } else {
-      WorkflowInfo workflowInfo = new WorkflowInfo(scriptId, workflowVersion, jobInfoList);
+      WorkflowInfo workflowInfo = new WorkflowInfo(scriptId, workflowVersion, jobs);
 
       try {
         outputStatsData(workflowInfo);
@@ -264,7 +264,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    * @param stats
    * @return
    */
-  protected JobInfo collectStats(String scriptId, JobStats stats) {
+  protected Job collectStats(String scriptId, JobStats stats) {
 
     // put the job conf into a Properties object so we can serialize them
     Properties jobConfProperties = new Properties();
@@ -281,7 +281,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       }
     }
 
-    return new PigJobInfo(stats, jobConfProperties);
+    return new PigJob(stats, jobConfProperties);
   }
 
   private void outputStatsData(WorkflowInfo workflowInfo) throws IOException {

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.twitter.ambrose.model;
+package com.twitter.ambrose.model.hadoop;
 
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Counters.Counter;
@@ -34,13 +34,13 @@ import java.util.Map;
 @JsonSerialize(
   include=JsonSerialize.Inclusion.NON_NULL
 )
-public class CounterGroupInfo {
+public class CounterGroup {
 
   private String groupName;
   private String groupDisplayName;
   private Map<String, CounterInfo> counterInfoMap;
 
-  public CounterGroupInfo(Counters.Group group) {
+  public CounterGroup(Counters.Group group) {
     this.groupName = group.getName();
     this.groupDisplayName = group.getDisplayName();
     this.counterInfoMap = new HashMap<String, CounterInfo>();
@@ -52,9 +52,9 @@ public class CounterGroupInfo {
   }
 
   @JsonCreator
-  public CounterGroupInfo(@JsonProperty("groupName") String groupName,
-                          @JsonProperty("groupDisplayName") String groupDisplayName,
-                          @JsonProperty("counterInfoMap") Map<String, CounterInfo> counterInfoMap) {
+  public CounterGroup(@JsonProperty("groupName") String groupName,
+                      @JsonProperty("groupDisplayName") String groupDisplayName,
+                      @JsonProperty("counterInfoMap") Map<String, CounterInfo> counterInfoMap) {
     this.groupName = groupName;
     this.groupDisplayName = groupDisplayName;
     this.counterInfoMap = counterInfoMap;
@@ -68,12 +68,12 @@ public class CounterGroupInfo {
     return counterInfoMap == null ? null : counterInfoMap.get(name);
   }
 
-  public static Map<String, CounterGroupInfo> counterGroupInfoMap(Counters counters) {
-    Map<String, CounterGroupInfo> counterGroupInfoMap = new HashMap<String, CounterGroupInfo>();
+  public static Map<String, CounterGroup> counterGroupInfoMap(Counters counters) {
+    Map<String, CounterGroup> counterGroupInfoMap = new HashMap<String, CounterGroup>();
     if (counters != null) {
       for (Counters.Group group : counters) {
-        CounterGroupInfo counterGroupInfo = new CounterGroupInfo(group);
-        counterGroupInfoMap.put(counterGroupInfo.getGroupName(), counterGroupInfo);
+        CounterGroup counterGroup = new CounterGroup(group);
+        counterGroupInfoMap.put(counterGroup.getGroupName(), counterGroup);
       }
     }
     return counterGroupInfoMap;
