@@ -11,11 +11,11 @@ require(['jquery', 'bootstrap', 'ambrose'], function($, Bootstrap, Ambrose) {
   $(document).ready(function() {
     console.info('Creating default workflow');
     var workflow = Ambrose.Workflow();
-    var progressBar = Ambrose.Views.ProgressBar(workflow, $('#ambrose-views-progress-bar'));
+    var progressBar = Ambrose.Views.ProgressBar(workflow, $('#ambrose-view-progress-bar'));
 
     var diagrams = $('#diagrams');
-    var chordContainer = $('#ambrose-views-chord');
-    var graphContainer = $('#ambrose-views-graph');
+    var chordContainer = $('#ambrose-view-chord');
+    var graphContainer = $('#ambrose-view-graph');
 
     var height = diagrams.height();
     var width = diagrams.width();
@@ -31,7 +31,7 @@ require(['jquery', 'bootstrap', 'ambrose'], function($, Bootstrap, Ambrose) {
 
     var chord = Ambrose.Views.Chord(workflow, chordContainer);
     var graph = Ambrose.Views.Graph(workflow, graphContainer);
-    var table = Ambrose.Views.Table(workflow, $('#ambrose-views-table'));
+    var table = Ambrose.Views.Table(workflow, $('#ambrose-view-table'));
     workflow.loadJobs();
     workflow.startEventPolling();
   });

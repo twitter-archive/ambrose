@@ -84,7 +84,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create canvas
       var svg = this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
-        .attr('class', 'ambrose-views-chord')
+        .attr('class', 'ambrose-view-chord')
         .attr('width', width)
         .attr('height', height)
         .append('svg:g')

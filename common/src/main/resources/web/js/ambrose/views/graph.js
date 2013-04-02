@@ -89,7 +89,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create canvas and supporting d3 objects
       this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
-        .attr('class', 'ambrose-views-graph')
+        .attr('class', 'ambrose-view-graph')
         .attr('width', width)
         .attr('height', height);
       var xs = this.xs = d3.scale.linear().range([0, width]);
