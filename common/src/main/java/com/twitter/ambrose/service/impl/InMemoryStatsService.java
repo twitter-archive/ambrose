@@ -64,6 +64,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
 
   private Writer dagWriter = null;
   private Writer eventsWriter = null;
+  private boolean eventWritten = false;
 
   public InMemoryStatsService() {
     String dumpDagFileName = System.getProperty(DUMP_DAG_FILE_PARAM);
@@ -87,8 +88,10 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public synchronized void sendDagNodeNameMap(String workflowId, Map<String, DAGNode<Job>> dagNodeNameMap) {
+  public synchronized void sendDagNodeNameMap(String workflowId,
+                                              Map<String, DAGNode<Job>> dagNodeNameMap) throws IOException {
     this.dagNodeNameMap = dagNodeNameMap;
+    writeJsonDagNodenameMapToDisk(dagNodeNameMap);
   }
 
   @Override
@@ -105,21 +108,33 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public synchronized void pushEvent(String workflowId, WorkflowEvent event) {
+  public synchronized void pushEvent(String workflowId, WorkflowEvent event) throws IOException {
     eventMap.put(event.getEventId(), event);
+    writeJsonEventToDisk(event);
   }
 
-  public void writeJsonToDisk() throws IOException {
-
+  private void writeJsonDagNodenameMapToDisk(Map<String, DAGNode<Job>> dagNodeNameMap) throws IOException {
     if (dagWriter != null && dagNodeNameMap != null) {
-      Collection<DAGNode<Job>> nodes = getDagNodeNameMap(null).values();
+      Collection<DAGNode<Job>> nodes = dagNodeNameMap.values();
       JSONUtil.writeJson(dagWriter, nodes.toArray(new DAGNode[dagNodeNameMap.size()]));
-      dagWriter.close();
     }
+  }
 
-    if (eventsWriter != null && eventMap != null) {
-      Collection<WorkflowEvent> events = getEventsSinceId(null, -1);
-      JSONUtil.writeJson(eventsWriter, events.toArray(new WorkflowEvent[events.size()]));
+  private void writeJsonEventToDisk(WorkflowEvent event) throws IOException {
+    if (eventsWriter != null && event != null) {
+      eventsWriter.append(!eventWritten ? "[ " : ", ");
+      JSONUtil.writeJson(eventsWriter, event);
+      eventsWriter.flush();
+      eventWritten = true;
+    }
+  }
+
+  public void flushJsonToDisk() throws IOException {
+
+    if (dagWriter != null) { dagWriter.close(); }
+
+    if (eventsWriter != null) {
+      if (eventWritten) { eventsWriter.append("\n]"); }
       eventsWriter.close();
     }
   }

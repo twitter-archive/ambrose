@@ -77,7 +77,7 @@ public class EmbeddedAmbrosePigProgressNotificationListener
 
       log.info("Job complete but sleeping for " + sleepTimeSeconds
         + " seconds to keep the PigStats REST server running. Hit ctrl-c to exit.");
-      service.writeJsonToDisk();
+      service.flushJsonToDisk();
       Thread.sleep(sleepTimeSeconds * 1000);
       server.stop();
 
