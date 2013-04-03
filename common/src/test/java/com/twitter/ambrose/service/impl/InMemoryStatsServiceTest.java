@@ -19,6 +19,7 @@ import com.twitter.ambrose.service.WorkflowEvent;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -46,7 +47,7 @@ public class InMemoryStatsServiceTest {
   }
 
   @Test
-  public void testGetAllEvents() {
+  public void testGetAllEvents() throws IOException {
     for(WorkflowEvent event : testEvents) {
       service.pushEvent(workflowId, event);
     }
@@ -62,7 +63,7 @@ public class InMemoryStatsServiceTest {
   }
 
   @Test
-  public void testGetEventsSince() {
+  public void testGetEventsSince() throws IOException {
     for(WorkflowEvent event : testEvents) {
       service.pushEvent(workflowId, event);
     }
