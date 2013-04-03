@@ -24,6 +24,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +39,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class JSONUtil {
   private static final ObjectMapper mapper = new ObjectMapper();
   static {
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);

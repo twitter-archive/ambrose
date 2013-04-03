@@ -39,9 +39,6 @@ import com.twitter.ambrose.util.JSONUtil;
  * om.getSerializationConfig().set(SerializationConfig.Feature.INDENT_OUTPUT, true);
  * String json = om.writeValueAsString(dagNode);
  */
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
 public class DAGNode<T extends Job> {
   private String name;
   private T job;

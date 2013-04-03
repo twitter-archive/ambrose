@@ -15,14 +15,13 @@ limitations under the License.
 */
 package com.twitter.ambrose.model.hadoop;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Counters.Counter;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Immutable class that represents a group of Hadoop counters along with the individual counter
@@ -31,9 +30,6 @@ import java.util.Map;
  * @author billg
  */
 @SuppressWarnings("deprecation")
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
 public class CounterGroup {
 
   private String groupName;
@@ -83,9 +79,6 @@ public class CounterGroup {
    * CounterInfo holds the name, displayName and value of a given counter. A counter group contains
    * multiple of these.
    */
-  @JsonSerialize(
-    include=JsonSerialize.Inclusion.NON_NULL
-  )
   public static class CounterInfo {
     private String name, displayName;
     private long value;
