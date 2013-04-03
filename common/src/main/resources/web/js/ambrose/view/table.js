@@ -154,7 +154,8 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       // update all other params normally
       tr.selectAll('a.job-url')
         .attr('href', function(job) {
-          return job.mapReduceJobState.trackingURL || 'javascript:void(0);';
+          var mrState = job.mapReduceJobState || {};
+          return mrState.trackingURL || 'javascript:void(0);';
         })
         .text(function(job) { return job.id || 'pending'; });
       tr.selectAll('td.job-status')
@@ -164,14 +165,16 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       tr.selectAll('td.job-features')
         .text(function (job) { return commaDelimit(job.features); });
       tr.selectAll('td.job-mappers').text(function (job) {
+        var mrState = job.mapReduceJobState || {};
         return taskProgressMessage(
-          job.mapReduceJobState.totalMappers,
-          job.mapReduceJobState.mapProgress);
+          mrState.totalMappers,
+          mrState.mapProgress);
       });
       tr.selectAll('td.job-reducers').text(function (job) {
+        var mrState = job.mapReduceJobState || {};
         return taskProgressMessage(
-          job.mapReduceJobState.totalReducers,
-          job.mapReduceJobState.reduceProgress);
+          mrState.totalReducers,
+          mrState.reduceProgress);
       });
     },
   };
