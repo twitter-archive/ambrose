@@ -62,7 +62,7 @@ define(['jquery', 'd3', '../core', './core'], function(
         self.handleJobsUpdated([job], 350);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
-        self.handleJobsUpdated($.grep([prev, job], function(j) { j != null; }));
+        self.handleJobsUpdated($.grep([prev, job], function(j) { return j != null; }));
       });
     },
 
@@ -164,13 +164,10 @@ define(['jquery', 'd3', '../core', './core'], function(
       var colors = this.params.colors;
       var fill = function(node) {
         var job = node.data;
-        var status = job.status;
+        var status = job.status || '';
         if (job.mouseover) return colors.mouseover;
         if (job.selected) return colors.selected;
-        if (status == 'RUNNING') return colors.running;
-        if (status == 'COMPLETE') return colors.complete;
-        if (status == 'FAILED') return colors.failed;
-        return '#555';
+        return colors[status.toLowerCase()] || '#555';
       };
       g.selectAll('g.node circle').attr('fill', fill);
     },
