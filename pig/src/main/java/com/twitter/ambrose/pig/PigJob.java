@@ -17,6 +17,7 @@ package com.twitter.ambrose.pig;
 
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
+import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
@@ -46,6 +47,7 @@ public class PigJob extends Job {
 
   private String[] aliases;
   private String[] features;
+  private MapReduceJobState mapReduceJobState;
   private List<InputInfo> inputInfoList;
   private List<OutputInfo> outputInfoList;
 
@@ -57,8 +59,39 @@ public class PigJob extends Job {
     this.features = features;
   }
 
-  public PigJob(JobStats stats, Properties configuration) {
-    super(RUNTIME, configuration);
+  @JsonCreator
+  public PigJob(@JsonProperty("id") String id,
+                @JsonProperty("aliases") String[] aliases,
+                @JsonProperty("features") String[] features,
+                @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
+                @JsonProperty("metrics") Map<String, Number> metrics,
+                @JsonProperty("configuration") Properties configuration,
+                @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
+                @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
+                @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
+    super(RUNTIME, id, metrics, configuration);
+    this.aliases = aliases;
+    this.features = features;
+    this.mapReduceJobState = mapReduceJobState;
+    this.counterGroupMap = counterGroupMap;
+    this.inputInfoList = inputInfoList;
+    this.outputInfoList = outputInfoList;
+  }
+
+  public String[] getAliases() { return aliases; }
+  public String[] getFeatures() { return features; }
+
+  public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
+  public void setMapReduceJobState(MapReduceJobState mapReduceJobState) {
+    this.mapReduceJobState = mapReduceJobState;
+  }
+
+  public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
+  public CounterGroup getCounterGroupInfo(String name) {
+    return counterGroupMap == null ? null : counterGroupMap.get(name);
+  }
+
+  public void setJobStats(JobStats stats) {
     this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
     this.inputInfoList = inputInfoList(stats.getInputs());
     this.outputInfoList = outputInfoList(stats.getOutputs());
@@ -84,27 +117,6 @@ public class PigJob extends Job {
     metrics.put("reduceOutputRecords", stats.getReduceOutputRecords());
     metrics.put("SMMSpillCount", stats.getSMMSpillCount());
     setMetrics(metrics);
-  }
-
-  @JsonCreator
-  public PigJob(@JsonProperty("id") String id,
-                @JsonProperty("metrics") Map<String, Number> metrics,
-                @JsonProperty("configuration") Properties configuration,
-                @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
-                @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
-                @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    super(RUNTIME, id, metrics, configuration);
-    this.counterGroupMap = counterGroupMap;
-    this.inputInfoList = inputInfoList;
-    this.outputInfoList = outputInfoList;
-  }
-
-  public String[] getAliases() { return aliases; }
-  public String[] getFeatures() { return features; }
-
-  public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
-  public CounterGroup getCounterGroupInfo(String name) {
-    return counterGroupMap == null ? null : counterGroupMap.get(name);
   }
 
   private static List<InputInfo> inputInfoList(List<InputStats> inputStatsList) {
