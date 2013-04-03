@@ -134,7 +134,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
     if (dagWriter != null) { dagWriter.close(); }
 
     if (eventsWriter != null) {
-      if (eventWritten) { eventsWriter.append("\n]"); }
+      if (eventWritten) { eventsWriter.append("]\n"); }
       eventsWriter.close();
     }
   }
