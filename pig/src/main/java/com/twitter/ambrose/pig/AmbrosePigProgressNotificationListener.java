@@ -15,12 +15,12 @@ limitations under the License.
 */
 package com.twitter.ambrose.pig;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.WorkflowInfo;
+import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
-import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.StatsWriteService;
-import com.twitter.ambrose.service.WorkflowEvent;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -59,8 +59,6 @@ import java.util.TreeMap;
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
   protected Log log = LogFactory.getLog(getClass());
 
-  private static final String RUNTIME = "pig";
-
   private StatsWriteService statsWriteService;
 
   private String workflowVersion;
@@ -69,10 +67,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = new TreeMap<String, DAGNode<PigJob>>();
 
   private HashSet<String> completedJobIds = new HashSet<String>();
-
-  protected static enum WorkflowProgressField {
-    workflowProgress;
-  }
 
   protected static enum JobProgressField {
     jobId, jobName, trackingUrl, isComplete, isSuccessful,
@@ -164,7 +158,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
           node.getJob().setId(assignedJobId);
           addMapReduceJobState(node.getJob());
           dagNodeJobIdMap.put(node.getJob().getId(), node);
-          pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
+          pushEvent(scriptId, new Event.JobStartedEvent(node));
         }
       }
     }
@@ -184,7 +178,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     addCompletedJobStats(node.getJob(), stats);
-    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_FAILED, node);
+    pushEvent(scriptId, new Event.JobFailedEvent(node));
   }
 
   /**
@@ -201,7 +195,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     addCompletedJobStats(node.getJob(), stats);
-    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_FINISHED, node);
+    pushEvent(scriptId, new Event.JobFinishedEvent(node));
   }
 
   /**
@@ -217,12 +211,12 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     if (workflowVersion == null) {
       log.warn("scriptFingerprint not set for this script - not saving stats." );
     } else {
-      WorkflowInfo workflowInfo = new WorkflowInfo(scriptId, workflowVersion, jobs);
+      Workflow workflow = new Workflow(scriptId, workflowVersion, jobs);
 
       try {
-        outputStatsData(workflowInfo);
+        outputStatsData(workflow);
       } catch (IOException e) {
-        log.error("Exception outputting workflowInfo", e);
+        log.error("Exception outputting workflow", e);
       }
     }
   }
@@ -236,9 +230,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   public void progressUpdatedNotification(String scriptId, int progress) {
 
     // first we report the scripts progress
-    Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
-    eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(progress));
-    pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.WORKFLOW_PROGRESS, eventData);
+    Map<Event.WorkflowProgressField, String> eventData = new HashMap<Event.WorkflowProgressField, String>();
+    eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
+    pushEvent(scriptId, new Event.WorkflowProgressEvent(eventData));
 
     // then for each running job, we report the job progress
     for (DAGNode<PigJob> node : dagNodeNameMap.values()) {
@@ -249,7 +243,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
       //only push job progress events for a completed job once
       if (node.getJob().getMapReduceJobState() != null && !completedJobIds.contains(node.getJob().getId())) {
-        pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, node);
+        pushEvent(scriptId, new Event.JobProgressEvent(node));
 
         if (node.getJob().getMapReduceJobState().isComplete()) {
           completedJobIds.add(node.getJob().getId());
@@ -292,15 +286,15 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     jobs.add(job);
   }
 
-  private void outputStatsData(WorkflowInfo workflowInfo) throws IOException {
+  private void outputStatsData(Workflow workflow) throws IOException {
     if(log.isDebugEnabled()) {
-      log.debug("Collected stats for script:\n" + WorkflowInfo.toJSON(workflowInfo));
+      log.debug("Collected stats for script:\n" + Workflow.toJSON(workflow));
     }
   }
 
-  private void pushEvent(String scriptId, WorkflowEvent.EVENT_TYPE eventType, Object eventData) {
+  private void pushEvent(String scriptId, Event event) {
     try {
-      statsWriteService.pushEvent(scriptId, new WorkflowEvent(eventType, eventData, RUNTIME));
+      statsWriteService.pushEvent(scriptId, event);
     } catch (IOException e) {
       log.error("Couldn't send event to StatsWriteService", e);
     }

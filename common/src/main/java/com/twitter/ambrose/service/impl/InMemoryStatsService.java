@@ -15,11 +15,11 @@ limitations under the License.
 */
 package com.twitter.ambrose.service.impl;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.StatsWriteService;
-import com.twitter.ambrose.service.WorkflowEvent;
 import com.twitter.ambrose.util.JSONUtil;
 
 import java.io.FileNotFoundException;
@@ -59,8 +59,8 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   private static final String DUMP_EVENTS_FILE_PARAM = "ambrose.write.events.file";
 
   private Map<String, DAGNode<Job>> dagNodeNameMap = new HashMap<String, DAGNode<Job>>();
-  private SortedMap<Integer, WorkflowEvent> eventMap =
-    new ConcurrentSkipListMap<Integer, WorkflowEvent>();
+  private SortedMap<Integer, Event> eventMap =
+    new ConcurrentSkipListMap<Integer, Event>();
 
   private Writer dagWriter = null;
   private Writer eventsWriter = null;
@@ -100,16 +100,16 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public synchronized Collection<WorkflowEvent> getEventsSinceId(String workflowId, int sinceId) {
+  public synchronized Collection<Event> getEventsSinceId(String workflowId, int sinceId) {
     int minId = sinceId >= 0 ? sinceId + 1 : sinceId;
 
-    SortedMap<Integer, WorkflowEvent> tailMap = eventMap.tailMap(minId);
+    SortedMap<Integer, Event> tailMap = eventMap.tailMap(minId);
     return tailMap.values();
   }
 
   @Override
-  public synchronized void pushEvent(String workflowId, WorkflowEvent event) throws IOException {
-    eventMap.put(event.getEventId(), event);
+  public synchronized void pushEvent(String workflowId, Event event) throws IOException {
+    eventMap.put(event.getId(), event);
     writeJsonEventToDisk(event);
   }
 
@@ -120,7 +120,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
     }
   }
 
-  private void writeJsonEventToDisk(WorkflowEvent event) throws IOException {
+  private void writeJsonEventToDisk(Event event) throws IOException {
     if (eventsWriter != null && event != null) {
       eventsWriter.append(!eventWritten ? "[ " : ", ");
       JSONUtil.writeJson(eventsWriter, event);

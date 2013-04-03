@@ -7,13 +7,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.AbstractHandler;
 
-import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.StatsReadService;
-import com.twitter.ambrose.service.WorkflowEvent;
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
@@ -54,10 +54,10 @@ public class APIHandler extends AbstractHandler {
       Integer sinceId = request.getParameter(QUERY_PARAM_LAST_EVENT_ID) != null ?
               Integer.parseInt(request.getParameter(QUERY_PARAM_LAST_EVENT_ID)) : -1;
 
-      Collection<WorkflowEvent> events =
+      Collection<Event> events =
         statsReadService.getEventsSinceId(request.getParameter(QUERY_PARAM_WORKFLOW_ID), sinceId);
 
-      sendJson(request, response, events.toArray(new WorkflowEvent[events.size()]));
+      sendJson(request, response, events.toArray(new Event[events.size()]));
     }
     else if (target.endsWith(".html")) {
       response.setContentType(MIME_TYPE_HTML);
