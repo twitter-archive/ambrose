@@ -65,7 +65,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
     initTable: function() {
       var self = this;
       var tbody = this.tbody = $('<tbody/>');
-      $('<table class="table ambrose-views-table">'
+      $('<table class="table ambrose-view-table">'
         + '<thead><tr>'
         + '<th>#</th>'
         + '<th>Identifier</th>'

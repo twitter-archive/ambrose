@@ -21,7 +21,7 @@ define([
   'ambrose/core',
   'ambrose/client',
   'ambrose/workflow',
-  'ambrose/views',
+  'ambrose/view',
 ], function(Ambrose) {
   return Ambrose;
 });

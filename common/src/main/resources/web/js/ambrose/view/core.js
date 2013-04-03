@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 /**
- * This module defines the Ambrose.Views namespace in which other view modules are registered.
+ * This module defines the Ambrose.View namespace in which other view modules are registered.
  */
 define(['../core'], function(Ambrose) {
-  return Ambrose.Views = {};
+  return Ambrose.View = {};
 })

@@ -1,14 +1,18 @@
 /* Page dimensions */
-body { padding-top: 60px; padding-bottom: 40px; }
+body { position: relative; padding-top: 40px; }
 #diagrams > div { height: 350px; margin: 0; }
-#ambrose-views-chord {}
-#ambrose-views-graph {}
+#ambrose-view-progress-bar {}
+#ambrose-view-chord {}
+#ambrose-view-graph {}
+
+/* Progress Bar view */
+.ambrose-view-progress-bar { margin: 20px 0px; }
 
 /* Table view */
-.ambrose-views-table td.job-mappers, .ambrose-views-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table td.job-mappers, .ambrose-view-table td.job-reducers { white-space: nowrap; }
 
 /* Chord view */
-.ambrose-views-chord {}
+.ambrose-view-chord {}
 
 /* Graph view */
-.ambrose-views-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
+.ambrose-view-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }

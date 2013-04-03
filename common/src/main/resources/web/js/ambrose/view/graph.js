@@ -18,15 +18,15 @@ limitations under the License.
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
 define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
-  $, d3, colorbrewer, Ambrose, Views
+  $, d3, colorbrewer, Ambrose, View
 ) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
   function isReal(node) { return !(node.pseudo); };
 
   // Graph ctor
-  var Graph = Views.Graph = function(workflow, container, params) {
-    return new Views.Graph.fn.init(workflow, container, params);
+  var Graph = View.Graph = function(workflow, container, params) {
+    return new View.Graph.fn.init(workflow, container, params);
   }
 
   /**
@@ -89,7 +89,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create canvas and supporting d3 objects
       this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
-        .attr('class', 'ambrose-views-graph')
+        .attr('class', 'ambrose-view-graph')
         .attr('width', width)
         .attr('height', height);
       var xs = this.xs = d3.scale.linear().range([0, width]);
