@@ -37,7 +37,7 @@ define(['jquery', '../core', './core'], function($, Ambrose, View) {
       this.workflow = workflow;
       this.container = $(container).empty();
       this.bar = $('<div class="bar">')
-        .appendTo($('<div class="progress">').appendTo(this.container))
+        .appendTo($('<div class="progress ambrose-view-progress-bar">').appendTo(this.container))
         .css('width', '0');
       var self = this;
       workflow.on('workflowProgress', function(event, data) {

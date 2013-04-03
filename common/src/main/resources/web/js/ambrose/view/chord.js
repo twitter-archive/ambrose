@@ -18,11 +18,11 @@ limitations under the License.
  * Ambrose module "chord" provides a chord diagram of the job graph.
  */
 define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
-  $, d3, colorbrewer, Ambrose, Views
+  $, d3, colorbrewer, Ambrose, View
 ) {
   // Chord ctor
-  var Chord = Views.Chord = function(workflow, container, params) {
-    return new Views.Chord.fn.init(workflow, container, params);
+  var Chord = View.Chord = function(workflow, container, params) {
+    return new View.Chord.fn.init(workflow, container, params);
   }
 
   /**
@@ -84,7 +84,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       // create canvas
       var svg = this.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
-        .attr('class', 'ambrose-views-chord')
+        .attr('class', 'ambrose-view-chord')
         .attr('width', width)
         .attr('height', height)
         .append('svg:g')
