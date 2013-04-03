@@ -35,14 +35,14 @@ import java.util.List;
 @JsonSerialize(
   include=JsonSerialize.Inclusion.NON_NULL
 )
-public class WorkflowInfo {
+public class Workflow {
 
   private String workflowId;
   private String workflowFingerprint;
   private List<Job> jobs;
 
   /**
-   * Creates a new immutable WorkflowInfo object.
+   * Creates a new immutable Workflow object.
    *
    * @param workflowId the id of the workflow. This surrogate id should distinguish between one
    * workflow invocation and another.
@@ -52,9 +52,9 @@ public class WorkflowInfo {
    * @param jobs
    */
   @JsonCreator
-  public WorkflowInfo(@JsonProperty("workflowId") String workflowId,
-                      @JsonProperty("workflowFingerprint") String workflowFingerprint,
-                      @JsonProperty("jobs") List<Job> jobs) {
+  public Workflow(@JsonProperty("workflowId") String workflowId,
+                  @JsonProperty("workflowFingerprint") String workflowFingerprint,
+                  @JsonProperty("jobs") List<Job> jobs) {
     this.workflowId = workflowId;
     this.workflowFingerprint = workflowFingerprint;
     this.jobs = jobs;
@@ -65,29 +65,29 @@ public class WorkflowInfo {
   public List<Job> getJobs() { return jobs; }
 
   /**
-   * Serializes a WorkflowInfo object and it's children into a JSON String.
+   * Serializes a Workflow object and it's children into a JSON String.
    *
-   * @param workflowInfo the object to serialize
+   * @param workflow the object to serialize
    * @return a JSON string.
    * @throws IOException
    */
-  public static String toJSON(WorkflowInfo workflowInfo) throws IOException {
+  public static String toJSON(Workflow workflow) throws IOException {
     ObjectMapper om = new ObjectMapper();
     om.getSerializationConfig().set(SerializationConfig.Feature.INDENT_OUTPUT, true);
-    return om.writeValueAsString(workflowInfo);
+    return om.writeValueAsString(workflow);
   }
 
   /**
-   * Derializes a JSON WorkflowInfo string into a WorkflowInfo object. Unrecognized properties will
+   * Derializes a JSON Workflow string into a Workflow object. Unrecognized properties will
    * be ignored.
    *
    * @param workflowInfoJson the string to convert into a JSON object.
-   * @return a WorkflowInfo object.
+   * @return a Workflow object.
    * @throws IOException
    */
-  public static WorkflowInfo fromJSON(String workflowInfoJson) throws IOException {
+  public static Workflow fromJSON(String workflowInfoJson) throws IOException {
     ObjectMapper om = new ObjectMapper();
     om.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return om.readValue(workflowInfoJson, WorkflowInfo.class);
+    return om.readValue(workflowInfoJson, Workflow.class);
   }
 }

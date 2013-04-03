@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 
 import java.io.IOException;
@@ -45,5 +47,5 @@ public interface StatsWriteService<T extends Job> {
    * @param workflowId the id of the workflow being updated
    * @param event the event bound to the workflow
    */
-  public void pushEvent(String workflowId, WorkflowEvent event) throws IOException;
+  public void pushEvent(String workflowId, Event event) throws IOException;
 }

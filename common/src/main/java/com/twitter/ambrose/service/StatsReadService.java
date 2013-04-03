@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 
 import java.io.IOException;
@@ -45,5 +47,5 @@ public interface StatsReadService<T extends Job> {
    * @param eventId the eventId that all returned events will be greater than
    * @return a Collection of WorkflowEvents, ordered by eventId ascending
    */
-  public Collection<WorkflowEvent> getEventsSinceId(String workflowId, int eventId) throws IOException;
+  public Collection<Event> getEventsSinceId(String workflowId, int eventId) throws IOException;
 }

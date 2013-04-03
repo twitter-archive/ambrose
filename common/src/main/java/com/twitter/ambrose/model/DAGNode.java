@@ -13,14 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.twitter.ambrose.service;
+package com.twitter.ambrose.model;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import com.twitter.ambrose.model.Job;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -32,7 +31,7 @@ import com.twitter.ambrose.util.JSONUtil;
 /**
  * Class that represents a Job node in the DAG. The job name must not be null. At DAG creation time
  * the jobID will probably be null. Ideally this will be set on the node when the job is started,
- * and the node will be sent as a <pre>WorkflowEvent.EVENT_TYPE.JOB_STARTED</pre> event.
+ * and the node will be sent as a <pre>Event.Type.JOB_STARTED</pre> event.
  *
  * This class can be converted to JSON as-is by doing something like this:
  *
