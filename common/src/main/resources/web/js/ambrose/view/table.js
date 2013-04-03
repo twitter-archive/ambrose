@@ -38,15 +38,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       this.workflow = workflow;
       this.container = $(container);
       this.initTable();
-      this.params = $.extend(true, {
-        colors: {
-          running: d3.rgb(98, 196, 98).brighter(),
-          complete: d3.rgb(98, 196, 98),
-          failed: d3.rgb(196, 98, 98),
-          mouseover: d3.rgb(98, 98, 196).brighter(),
-          selected: d3.rgb(98, 98, 196),
-        },
-      }, params);
+      this.params = $.extend(true, {}, View.Theme, params);
       var self = this;
       workflow.on('jobsLoaded', function(event, jobs) {
         self.loadTable(jobs);

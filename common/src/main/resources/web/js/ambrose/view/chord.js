@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * Ambrose module "chord" provides a chord diagram of the job graph.
  */
-define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
-  $, d3, colorbrewer, Ambrose, View
+define(['jquery', 'd3', '../core', './core'], function(
+  $, d3, Ambrose, View
 ) {
   // Chord ctor
   var Chord = View.Chord = function(workflow, container, params) {
@@ -43,16 +43,6 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
 
       // define default params and override with user supplied params
       var params = this.params = $.extend(true, {
-        colors: {
-          running: d3.rgb(98, 196, 98),
-          selected: d3.rgb(98, 98, 196),
-          mouseover: d3.rgb(98, 98, 196).brighter(),
-        },
-        palettes: {
-          queued: colorbrewer.Greys,
-          complete: colorbrewer.Greens,
-          failed: colorbrewer.Reds,
-        },
         dimensions: {
           padding: 20,
           radius: {
@@ -64,7 +54,7 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
           labelMargin: 10,
           labelSize: 12,
         },
-      }, params);
+      }, View.Theme, params);
 
       // initialize dimensions
       var dim = this.dimensions = {};

@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
-  $, d3, colorbrewer, Ambrose, View
+define(['jquery', 'd3', '../core', './core'], function(
+  $, d3, Ambrose, View
 ) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
@@ -47,22 +47,10 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
 
       // define default params and override with user supplied params
       var params = this.params = $.extend(true, {
-        colors: {
-          running: d3.rgb(98, 196, 98).brighter(),
-          complete: d3.rgb(98, 196, 98),
-          failed: d3.rgb(196, 98, 98),
-          mouseover: d3.rgb(98, 98, 196).brighter(),
-          selected: d3.rgb(98, 98, 196),
-        },
-        palettes: {
-          queued: colorbrewer.Greys,
-          complete: colorbrewer.Greens,
-          failed: colorbrewer.Reds,
-        },
         dimensions: {
           padding: 20,
         },
-      }, params);
+      }, View.Theme, params);
 
       this.resetView();
 
