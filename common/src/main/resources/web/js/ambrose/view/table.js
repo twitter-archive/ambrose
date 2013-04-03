@@ -111,7 +111,10 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       tr.append('td').attr('class', 'job-id')
         .append('a').attr('class', 'job-url')
         .attr('target', '_blank')
-        .attr('href', 'javascript:void(0);');
+        .attr('href', 'javascript:void(0);')
+        .on('click', function() {
+          d3.event.stopPropagation();
+        });
       tr.append('td').attr('class', 'job-status');
       tr.append('td').attr('class', 'job-aliases');
       tr.append('td').attr('class', 'job-features');
