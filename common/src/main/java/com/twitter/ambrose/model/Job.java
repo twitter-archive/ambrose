@@ -19,7 +19,6 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -36,22 +35,32 @@ import java.util.Properties;
 )
 public class Job {
 
+  private String id;
   private String runtime;
   private Properties configuration;
   private Map<String, Number> metrics;
 
+  public Job(String runtime) {
+    this(runtime, null, null, null);
+  }
+
   public Job(String runtime, Properties configuration) {
-    this.runtime = runtime;
-    this.configuration = configuration;
+    this(runtime, null, null, configuration);
   }
 
   @JsonCreator
-  public Job(@JsonProperty("runtume") String runtime,
+  public Job(@JsonProperty("runtime") String runtime,
+             @JsonProperty("id") String id,
              @JsonProperty("metrics") Map<String, Number> metrics,
              @JsonProperty("configuration") Properties configuration) {
+    this.runtime = runtime;
+    this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;
   }
+
+  public String getId() { return id; }
+  public void setId(String id) { this.id = id; }
 
   public String getRuntime() { return runtime; }
 

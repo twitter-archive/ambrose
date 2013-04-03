@@ -42,15 +42,23 @@ import java.util.Properties;
   include=JsonSerialize.Inclusion.NON_NULL
 )
 public class PigJob extends Job {
-  private static final String PIG_RUNTIME = "pig";
+  private static final String RUNTIME = "pig";
 
+  private String[] aliases;
+  private String[] features;
   private List<InputInfo> inputInfoList;
   private List<OutputInfo> outputInfoList;
 
   private Map<String, CounterGroup> counterGroupMap;
 
-  public PigJob(JobStats stats, Properties jobConfProperties) {
-    super(PIG_RUNTIME, jobConfProperties);
+  public PigJob(String[] aliases, String[] features) {
+    super(RUNTIME);
+    this.aliases = aliases;
+    this.features = features;
+  }
+
+  public PigJob(JobStats stats, Properties configuration) {
+    super(RUNTIME, configuration);
     this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
     this.inputInfoList = inputInfoList(stats.getInputs());
     this.outputInfoList = outputInfoList(stats.getOutputs());
@@ -71,7 +79,7 @@ public class PigJob extends Job {
     metrics.put("numberReduces", stats.getNumberReduces());
     metrics.put("proactiveSpillCountObjects", stats.getProactiveSpillCountObjects());
     metrics.put("proactiveSpillCountRecs", stats.getProactiveSpillCountRecs());
-    metrics.put("recordWrittern", stats.getRecordWrittern());
+    metrics.put("recordWritten", stats.getRecordWrittern());
     metrics.put("reduceInputRecords", stats.getReduceInputRecords());
     metrics.put("reduceOutputRecords", stats.getReduceOutputRecords());
     metrics.put("SMMSpillCount", stats.getSMMSpillCount());
@@ -79,16 +87,20 @@ public class PigJob extends Job {
   }
 
   @JsonCreator
-  public PigJob(@JsonProperty("metrics") Map<String, Number> metrics,
+  public PigJob(@JsonProperty("id") String id,
+                @JsonProperty("metrics") Map<String, Number> metrics,
                 @JsonProperty("configuration") Properties configuration,
                 @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
                 @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
                 @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    super(PIG_RUNTIME, metrics, configuration);
+    super(RUNTIME, id, metrics, configuration);
     this.counterGroupMap = counterGroupMap;
     this.inputInfoList = inputInfoList;
     this.outputInfoList = outputInfoList;
   }
+
+  public String[] getAliases() { return aliases; }
+  public String[] getFeatures() { return features; }
 
   public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
   public CounterGroup getCounterGroupInfo(String name) {

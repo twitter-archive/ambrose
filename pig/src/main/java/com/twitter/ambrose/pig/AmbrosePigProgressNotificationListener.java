@@ -99,16 +99,18 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
     // first pass builds all nodes
     for (Map.Entry<OperatorKey, MapReduceOper> entry : planKeys.entrySet()) {
-      DAGNode node = new DAGNode(entry.getKey().toString(),
-        toArray(ScriptState.get().getAlias(entry.getValue())),
-        toArray(ScriptState.get().getPigFeature(entry.getValue())), RUNTIME);
+      String nodeName = entry.getKey().toString();
+      String[] aliases = toArray(ScriptState.get().getAlias(entry.getValue()).trim());
+      String[] features = toArray(ScriptState.get().getPigFeature(entry.getValue()).trim());
+
+      DAGNode<PigJob> node = new DAGNode<PigJob>(nodeName, new PigJob(aliases, features));
 
       this.dagNodeNameMap.put(node.getName(), node);
 
       // this shows how we can get the basic info about all nameless jobs before any execute.
       // we can traverse the plan to build a DAG of this info
-      log.info("initialPlanNotification: alias: " + toString(node.getAliases())
-              + ", name: " + node.getName() + ", feature: " + toString(node.getFeatures()));
+      log.info("initialPlanNotification: aliases: " + aliases + ", name: " + node.getName() +
+          ", features: " + features);
     }
 
     // second pass connects the edges
@@ -157,7 +159,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
           log.warn("jobStartedNotification - unrecorgnized operator name found ("
                   + jobStats.getName() + ") for jobId " + assignedJobId);
         } else {
-          node.setJobId(assignedJobId);
+          node.getJob().setId(assignedJobId);
           pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_STARTED, node);
 
           Map<JobProgressField, String> progressMap = buildJobStatusMap(assignedJobId);
@@ -232,16 +234,16 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     // then for each running job, we report the job progress
     for (DAGNode node : dagNodeNameMap.values()) {
       // don't send progress events for unstarted jobs
-      if (node.getJobId() == null) { continue; }
+      if (node.getJob().getId() == null) { continue; }
 
-      Map<JobProgressField, String> progressMap = buildJobStatusMap(node.getJobId());
+      Map<JobProgressField, String> progressMap = buildJobStatusMap(node.getJob().getId());
 
       //only push job progress events for a completed job once
-      if (progressMap != null && !completedJobIds.contains(node.getJobId())) {
+      if (progressMap != null && !completedJobIds.contains(node.getJob().getId())) {
         pushEvent(scriptId, WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, progressMap);
 
         if ("true".equals(progressMap.get(JobProgressField.isComplete))) {
-          completedJobIds.add(node.getJobId());
+          completedJobIds.add(node.getJob().getId());
         }
       }
     }

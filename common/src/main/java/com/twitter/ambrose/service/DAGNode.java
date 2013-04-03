@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import com.twitter.ambrose.model.Job;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -42,44 +43,28 @@ import com.twitter.ambrose.util.JSONUtil;
 @JsonSerialize(
   include=JsonSerialize.Inclusion.NON_NULL
 )
-public class DAGNode {
+public class DAGNode<T extends Job> {
   private String name;
-  private String[] aliases;
-  private String[] features;
-  private String jobId;
+  private T job;
+
   private Collection<DAGNode> successors;
   private Collection<String> successorNames;
-  private String runtime;
 
-  public DAGNode(String name, String[] aliases, String[] features, String runtime) {
+  public DAGNode(String name, T job) {
     this.name = name;
-    this.aliases = aliases;
-    this.features = features;
-    this.runtime = runtime;
+    this.job = job;
   }
 
   @JsonCreator
   public DAGNode(@JsonProperty("name") String name,
-                 @JsonProperty("aliases") String[] aliases,
-                 @JsonProperty("features") String[] features,
-                 @JsonProperty("jobId") String jobId,
-                 @JsonProperty("successorNames") Collection<String> successorNames,
-                 @JsonProperty("runtime") String runtime) {
+                 @JsonProperty("job") T job,
+                 @JsonProperty("successorNames") Collection<String> successorNames) {
     this.name = name;
-    this.aliases = aliases;
-    this.features = features;
-    this.jobId = jobId;
     this.successorNames = successorNames;
-    this.runtime = runtime;
   }
 
   public String getName() { return name; }
-  public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
-  public String[] getFeatures() { return features == null ? new String[0] : features; }
-  public String getRuntime() { return runtime; }
-
-  public String getJobId() { return jobId; }
-  public void setJobId(String jobId) { this.jobId = jobId; }
+  public T getJob() { return job; }
 
   @JsonIgnore
   public synchronized Collection<DAGNode> getSuccessors() { return successors;}
