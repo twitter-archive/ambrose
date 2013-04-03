@@ -15,11 +15,6 @@ limitations under the License.
 */
 package com.twitter.ambrose.util;
 
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.type.TypeReference;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,25 +24,34 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+
 /**
  * Helper method for dealing with JSON in a common way.
  *
  * @author billg
  */
 public class JSONUtil {
+  private static final ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+  }
 
   /**
    * Writes object to the writer as JSON using Jackson and adds a new-line before flushing.
+   *
    * @param writer the writer to write the JSON to
    * @param object the object to write as JSON
    * @throws IOException if the object can't be serialized as JSON or written to the writer
    */
   public static void writeJson(Writer writer, Object object) throws IOException {
-    ObjectMapper om = new ObjectMapper();
-    om.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
-    om.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-
-    writer.write(om.writeValueAsString(object));
+    mapper.writeValue(writer, object);
     writer.write("\n");
     writer.flush();
   }
@@ -57,11 +61,7 @@ public class JSONUtil {
   }
 
   public static Object readJson(String json, TypeReference<?> type) throws IOException {
-    ObjectMapper om = new ObjectMapper();
-    om.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    // not currently setting successors, only successorNames
-    return om.readValue(json, type);
+    return mapper.readValue(json, type);
   }
 
   public static String readFile(String path) throws IOException {
@@ -70,11 +70,8 @@ public class JSONUtil {
       FileChannel fc = stream.getChannel();
       MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
       return Charset.defaultCharset().decode(bb).toString();
-    }
-    finally {
+    } finally {
       stream.close();
     }
   }
-
-
 }

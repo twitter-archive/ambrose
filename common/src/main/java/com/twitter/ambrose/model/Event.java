@@ -16,12 +16,13 @@ limitations under the License.
 package com.twitter.ambrose.model;
 
 import com.twitter.ambrose.util.JSONUtil;
-import org.codehaus.jackson.type.TypeReference;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 
 /**
  * Class that represents a Event of a given Type. Each one of these created will have
