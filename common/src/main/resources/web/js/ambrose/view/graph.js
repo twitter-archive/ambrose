@@ -62,7 +62,7 @@ define(['jquery', 'd3', '../core', './core'], function(
         self.handleJobsUpdated([job], 350);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
-        self.handleJobsUpdated($.grep([prev, job], Ambrose.notNull));
+        self.handleJobsUpdated($.grep([prev, job], function(j) { j != null; }));
       });
     },
 
