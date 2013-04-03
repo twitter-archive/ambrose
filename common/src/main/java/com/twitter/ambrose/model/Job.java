@@ -29,7 +29,6 @@ import java.util.Properties;
  *
  * @author billg
  */
-@SuppressWarnings("deprecation")
 @JsonSerialize(
   include=JsonSerialize.Inclusion.NON_NULL
 )
