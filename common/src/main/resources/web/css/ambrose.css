@@ -9,7 +9,13 @@ body { position: relative; padding-top: 40px; }
 .ambrose-view-progress-bar { margin: 20px 0px; }
 
 /* Table view */
-.ambrose-view-table td.job-mappers, .ambrose-view-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table td.job-mappers,
+.ambrose-view-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table a,
+.ambrose-view-table a:link,
+.ambrose-view-table a:visited,
+.ambrose-view-table a:hover,
+.ambrose-view-table a:active { color: #000; text-decoration: none; }
 
 /* Chord view */
 .ambrose-view-chord {}
