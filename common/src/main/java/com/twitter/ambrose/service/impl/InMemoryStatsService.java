@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.twitter.ambrose.service.impl;
 
+import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.service.DAGNode;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.StatsWriteService;
@@ -51,13 +52,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author billg
  */
-public class InMemoryStatsService implements StatsReadService, StatsWriteService {
+public class InMemoryStatsService implements StatsReadService, StatsWriteService<Job> {
   private static final Logger LOG = LoggerFactory.getLogger(InMemoryStatsService.class);
 
   private static final String DUMP_DAG_FILE_PARAM = "ambrose.write.dag.file";
   private static final String DUMP_EVENTS_FILE_PARAM = "ambrose.write.events.file";
 
-  private Map<String, DAGNode> dagNodeNameMap = new HashMap<String, DAGNode>();
+  private Map<String, DAGNode<Job>> dagNodeNameMap = new HashMap<String, DAGNode<Job>>();
   private SortedMap<Integer, WorkflowEvent> eventMap =
     new ConcurrentSkipListMap<Integer, WorkflowEvent>();
 
@@ -86,12 +87,12 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public synchronized void sendDagNodeNameMap(String workflowId, Map<String, DAGNode> dagNodeNameMap) {
+  public synchronized void sendDagNodeNameMap(String workflowId, Map<String, DAGNode<Job>> dagNodeNameMap) {
     this.dagNodeNameMap = dagNodeNameMap;
   }
 
   @Override
-  public synchronized Map<String, DAGNode> getDagNodeNameMap(String workflowId) {
+  public synchronized Map<String, DAGNode<Job>> getDagNodeNameMap(String workflowId) {
     return dagNodeNameMap;
   }
 
@@ -111,7 +112,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   public void writeJsonToDisk() throws IOException {
 
     if (dagWriter != null && dagNodeNameMap != null) {
-      Collection<DAGNode> nodes = getDagNodeNameMap(null).values();
+      Collection<DAGNode<Job>> nodes = getDagNodeNameMap(null).values();
       JSONUtil.writeJson(dagWriter, nodes.toArray(new DAGNode[dagNodeNameMap.size()]));
       dagWriter.close();
     }

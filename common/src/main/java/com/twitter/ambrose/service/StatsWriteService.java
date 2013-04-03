@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.model.Job;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -25,7 +27,7 @@ import java.util.Map;
  *
  * @author billg
  */
-public interface StatsWriteService {
+public interface StatsWriteService<T extends Job> {
 
   /**
    * Send a map of all DAGNodes in the workflow. The structure of the DAG is assumed to be immutable.
@@ -35,7 +37,7 @@ public interface StatsWriteService {
    * @param workflowId the id of the workflow being updated
    * @param dagNodeNameMap a Map of DAGNodes where the key is the DAGNode name
    */
-  public void sendDagNodeNameMap(String workflowId, Map<String, DAGNode> dagNodeNameMap) throws IOException;
+  public void sendDagNodeNameMap(String workflowId, Map<String, DAGNode<T>> dagNodeNameMap) throws IOException;
 
   /**
    * Push an events for a given workflow.

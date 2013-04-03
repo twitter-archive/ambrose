@@ -44,10 +44,6 @@ public class Job {
     this(runtime, null, null, null);
   }
 
-  public Job(String runtime, Properties configuration) {
-    this(runtime, null, null, configuration);
-  }
-
   @JsonCreator
   public Job(@JsonProperty("runtime") String runtime,
              @JsonProperty("id") String id,
@@ -65,6 +61,7 @@ public class Job {
   public String getRuntime() { return runtime; }
 
   public Properties getConfiguration() { return configuration; }
+  public void setConfiguration(Properties configuration) { this.configuration = configuration; }
 
   public Map<String, Number> getMetrics() { return metrics; }
   protected void setMetrics(Map<String, Number> metrics) { this.metrics = metrics; }
