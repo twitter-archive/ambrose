@@ -51,7 +51,7 @@ public class Event<T> {
     this.payload = payload;
   }
 
-  private Event(int eventId, long timestamp, Type type, T payload) {
+  public Event(int eventId, long timestamp, Type type, T payload) {
     this.id = eventId;
     this.timestamp = timestamp;
     this.type = type;

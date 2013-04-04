@@ -171,6 +171,11 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void jobFailedNotification(String scriptId, JobStats stats) {
+    if (stats.getJobId() == null) {
+      log.warn("jobId for failed job not found. This should only happen in local mode");
+      return;
+    }
+
     DAGNode<PigJob> node = dagNodeJobIdMap.get(stats.getJobId());
     if (node == null) {
       log.warn("Unrecognized jobId reported for failed job: " + stats.getJobId());
