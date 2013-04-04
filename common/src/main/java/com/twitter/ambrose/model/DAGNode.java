@@ -81,9 +81,7 @@ public class DAGNode<T extends Job> {
   public static void main(String[] args) throws IOException {
     String sourceFile = "pig/src/main/resources/web/data/large-dag.json";
     String json = JSONUtil.readFile(sourceFile);
-    List<DAGNode> nodes =
-      (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
-
+    List<DAGNode> nodes = JSONUtil.toObject(json, new TypeReference<List<DAGNode>>() { });
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
 }

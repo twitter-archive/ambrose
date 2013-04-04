@@ -64,7 +64,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <slf4j.version>1.6.4</slf4j.version>
+    <slf4j.version>1.7.5</slf4j.version>
     <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
     <apache.pig.version>0.11.0</apache.pig.version>
     <apache.hadoop.version>0.22.0</apache.hadoop.version>

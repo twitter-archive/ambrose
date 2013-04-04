@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -58,7 +59,29 @@ public class JSONUtil {
     }
   }
 
-  public static Object readJson(String json, TypeReference<?> type) throws IOException {
+  /**
+   * Serializes object to JSON string.
+   *
+   * @param object object to serialize.
+   * @return json string.
+   * @throws IOException
+   */
+  public static String toJson(Object object) throws IOException {
+    StringWriter writer = new StringWriter();
+    writeJson(writer, object);
+    return writer.toString();
+  }
+
+  /**
+   * Parse JSON string to object.
+   *
+   * @param json string containing JSON.
+   * @param type type reference describing type of object to parse from json.
+   * @param <T> type of object to parse from json.
+   * @return object parsed from json.
+   * @throws IOException
+   */
+  public static <T> T toObject(String json, TypeReference<T> type) throws IOException {
     return mapper.readValue(json, type);
   }
 
