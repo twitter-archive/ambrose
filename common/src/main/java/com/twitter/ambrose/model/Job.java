@@ -18,6 +18,8 @@ package com.twitter.ambrose.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import java.util.Map;
 import java.util.Properties;
@@ -29,23 +31,20 @@ import java.util.Properties;
  *
  * @author billg
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "runtime")
+@JsonTypeName("default")
 public class Job {
-
   private String id;
-  private String runtime;
   private Properties configuration;
   private Map<String, Number> metrics;
 
-  public Job(String runtime) {
-    this(runtime, null, null, null);
+  public Job() {
+    this(null, null, null);
   }
 
-  @JsonCreator
-  public Job(@JsonProperty("runtime") String runtime,
-             @JsonProperty("id") String id,
-             @JsonProperty("metrics") Map<String, Number> metrics,
-             @JsonProperty("configuration") Properties configuration) {
-    this.runtime = runtime;
+  public Job(String id,
+             Map<String, Number> metrics,
+             Properties configuration) {
     this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;
@@ -53,8 +52,6 @@ public class Job {
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
-
-  public String getRuntime() { return runtime; }
 
   public Properties getConfiguration() { return configuration; }
   public void setConfiguration(Properties configuration) { this.configuration = configuration; }

@@ -33,7 +33,6 @@ public class PigJobTest {
   }
 
   public static void assertJobEquals(PigJob expected, PigJob found) {
-    assertEquals(expected.getRuntime(), found.getRuntime());
     assertEquals(expected.getId(), found.getId());
     assertArrayEquals(expected.getAliases(), found.getAliases());
     assertArrayEquals(expected.getFeatures(), found.getFeatures());

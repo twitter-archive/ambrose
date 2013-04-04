@@ -19,14 +19,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
@@ -40,9 +41,8 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
  *
  * @author billg
  */
+@JsonTypeName("pig")
 public class PigJob extends Job {
-  private static final String RUNTIME = "pig";
-
   private String[] aliases;
   private String[] features;
   private MapReduceJobState mapReduceJobState;
@@ -52,7 +52,7 @@ public class PigJob extends Job {
   private Map<String, CounterGroup> counterGroupMap;
 
   public PigJob(String[] aliases, String[] features) {
-    super(RUNTIME);
+    super();
     this.aliases = aliases;
     this.features = features;
   }
@@ -61,7 +61,7 @@ public class PigJob extends Job {
   public PigJob(@JsonProperty("id") String id,
                 @JsonProperty("aliases") String[] aliases,
                 @JsonProperty("features") String[] features) {
-    super(RUNTIME);
+    super(id, null, null);
     this.aliases = aliases;
     this.features = features;
     this.mapReduceJobState = mapReduceJobState;

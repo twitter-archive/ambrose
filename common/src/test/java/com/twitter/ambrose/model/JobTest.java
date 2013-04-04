@@ -33,7 +33,7 @@ public class JobTest {
     metrics.put("somemetric", 6);
     Properties properties = new Properties();
     properties.setProperty("someprop", "propvalue");
-    Job job = new Job("pig", "scope-123", metrics, properties);
+    Job job = new Job("scope-123", metrics, properties);
 
     testRoundTrip(job);
   }

@@ -28,8 +28,8 @@ public class DAGNodeTest {
 
   private void testRoundTrip(DAGNode expected) throws IOException {
     String asJson = toJson(expected);
-    DAGNode asDAGNodeAgain = toDAGNode(asJson);
     System.out.println("DAGNode as json: " + asJson);
+    DAGNode asDAGNodeAgain = toDAGNode(asJson);
     assertEquals(expected.getName(), asDAGNodeAgain.getName());
     assertNotNull(asDAGNodeAgain.getJob());
     ModelTestUtils.assertJobEquals(expected.getJob(), asDAGNodeAgain.getJob());
@@ -37,7 +37,7 @@ public class DAGNodeTest {
 
   @Test
   public void testRoundTrip() throws IOException {
-    DAGNode<Job> node = new DAGNode<Job>("dag name", new Job("pig", "scope-123", null, null));
+    DAGNode<Job> node = new DAGNode<Job>("dag name", new Job("scope-123", null, null));
     testRoundTrip(node);
   }
 }

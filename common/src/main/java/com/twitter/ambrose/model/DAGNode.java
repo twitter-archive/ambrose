@@ -23,6 +23,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -42,7 +43,7 @@ import com.twitter.ambrose.util.JSONUtil;
 public class DAGNode<T extends Job> {
   private String name;
   private T job;
-
+  @JsonIgnore
   private Collection<DAGNode<? extends Job>> successors;
   private Collection<String> successorNames;
 
@@ -51,18 +52,13 @@ public class DAGNode<T extends Job> {
     this.job = job;
   }
 
-  @JsonCreator
-  public DAGNode(@JsonProperty("name") String name,
-                 @JsonProperty("job") T job,
-                 @JsonProperty("successorNames") Collection<String> successorNames) {
-    this.name = name;
-    this.successorNames = successorNames;
+  public DAGNode() {
+    this(null, null);
   }
 
   public String getName() { return name; }
   public T getJob() { return job; }
 
-  @JsonIgnore
   public synchronized Collection<DAGNode<? extends Job>> getSuccessors() { return successors; }
   public synchronized void setSuccessors(Collection<DAGNode<? extends Job>> successors) {
     Collection<String> successorNames = new HashSet<String>();
