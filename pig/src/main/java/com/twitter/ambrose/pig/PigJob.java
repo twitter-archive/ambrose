@@ -25,6 +25,7 @@ import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.twitter.ambrose.model.Job;
@@ -59,14 +60,8 @@ public class PigJob extends Job {
   @JsonCreator
   public PigJob(@JsonProperty("id") String id,
                 @JsonProperty("aliases") String[] aliases,
-                @JsonProperty("features") String[] features,
-                @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-                @JsonProperty("metrics") Map<String, Number> metrics,
-                @JsonProperty("configuration") Properties configuration,
-                @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
-                @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
-                @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    super(RUNTIME, id, metrics, configuration);
+                @JsonProperty("features") String[] features) {
+    super(RUNTIME);
     this.aliases = aliases;
     this.features = features;
     this.mapReduceJobState = mapReduceJobState;
@@ -78,16 +73,21 @@ public class PigJob extends Job {
   public String[] getAliases() { return aliases; }
   public String[] getFeatures() { return features; }
 
+  @JsonIgnore
   public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
+  @JsonIgnore
   public void setMapReduceJobState(MapReduceJobState mapReduceJobState) {
     this.mapReduceJobState = mapReduceJobState;
   }
 
+  @JsonIgnore
   public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
+  @JsonIgnore
   public CounterGroup getCounterGroupInfo(String name) {
     return counterGroupMap == null ? null : counterGroupMap.get(name);
   }
 
+  @JsonIgnore
   public void setJobStats(JobStats stats) {
     this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
     this.inputInfoList = inputInfoList(stats.getInputs());

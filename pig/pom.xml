@@ -25,6 +25,11 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
+    <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.1</version>
+    </dependency>
 
     <!-- logging -->
     <dependency>

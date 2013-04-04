@@ -43,7 +43,7 @@ public class DAGNode<T extends Job> {
   private String name;
   private T job;
 
-  private Collection<DAGNode> successors;
+  private Collection<DAGNode<? extends Job>> successors;
   private Collection<String> successorNames;
 
   public DAGNode(String name, T job) {
@@ -63,8 +63,8 @@ public class DAGNode<T extends Job> {
   public T getJob() { return job; }
 
   @JsonIgnore
-  public synchronized Collection<DAGNode> getSuccessors() { return successors;}
-  public synchronized void setSuccessors(Collection<DAGNode> successors) {
+  public synchronized Collection<DAGNode<? extends Job>> getSuccessors() { return successors; }
+  public synchronized void setSuccessors(Collection<DAGNode<? extends Job>> successors) {
     Collection<String> successorNames = new HashSet<String>();
     if (successors != null) {
       for(DAGNode node : successors) {
