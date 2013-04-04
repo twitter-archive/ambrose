@@ -17,6 +17,23 @@ limitations under the License.
 /**
  * This module defines the Ambrose.View namespace in which other view modules are registered.
  */
-define(['../core'], function(Ambrose) {
-  return Ambrose.View = {};
+define(['jquery', '../core', 'd3', 'colorbrewer'], function(
+  $, Ambrose, d3, colorbrewer
+) {
+  return Ambrose.View = {
+    Theme: {
+      colors: {
+        running: d3.rgb(98, 196, 98).brighter(),
+        complete: d3.rgb(98, 196, 98),
+        failed: d3.rgb(196, 98, 98),
+        mouseover: d3.rgb(98, 98, 196).brighter().brighter(),
+        selected: d3.rgb(98, 98, 196).brighter(),
+      },
+      palettes: {
+        queued: colorbrewer.Greys,
+        complete: colorbrewer.Greens,
+        failed: colorbrewer.Reds,
+      },
+    }
+  };
 })

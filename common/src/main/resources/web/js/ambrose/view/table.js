@@ -38,15 +38,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       this.workflow = workflow;
       this.container = $(container);
       this.initTable();
-      this.params = $.extend(true, {
-        colors: {
-          running: d3.rgb(98, 196, 98).brighter(),
-          complete: d3.rgb(98, 196, 98),
-          failed: d3.rgb(196, 98, 98),
-          mouseover: d3.rgb(98, 98, 196).brighter(),
-          selected: d3.rgb(98, 98, 196),
-        },
-      }, params);
+      this.params = $.extend(true, {}, View.Theme, params);
       var self = this;
       workflow.on('jobsLoaded', function(event, jobs) {
         self.loadTable(jobs);
@@ -111,7 +103,10 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       tr.append('td').attr('class', 'job-id')
         .append('a').attr('class', 'job-url')
         .attr('target', '_blank')
-        .attr('href', 'javascript:void(0);');
+        .attr('href', 'javascript:void(0);')
+        .on('click', function() {
+          d3.event.stopPropagation();
+        });
       tr.append('td').attr('class', 'job-status');
       tr.append('td').attr('class', 'job-aliases');
       tr.append('td').attr('class', 'job-features');
@@ -127,40 +122,60 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
       // update mutable row properties
       var colors = this.params.colors;
       if (duration) {
-        // only update background color of rows whose jobs are not selected or mouseover
+        // rows updated due to event; transition background color gradually
         tr.transition().duration(duration).filter(function(job) {
+          // don't update rows whose jobs are selected or mouseover
           return !(job.mouseover || job.selected);
         }).style('background-color', function(job) {
-          if (job.status == 'RUNNING') return colors.running;
-          if (job.status == 'COMPLETE') return colors.complete;
-          if (job.status == 'FAILED') return colors.failed;
-          return 'white';
+          var status = job.status || '';
+          return colors[status.toLowerCase()] || 'white';
         });
+
       } else {
         // rows updated due to user interaction; rapidly update background color
         tr.style('background-color', function(job) {
           if (job.mouseover) return colors.mouseover;
           if (job.selected) return colors.selected;
-          if (job.status == 'RUNNING') return colors.running;
-          if (job.status == 'COMPLETE') return colors.complete;
-          if (job.status == 'FAILED') return colors.failed;
-          return 'white';
+          var status = job.status || '';
+          return colors[status.toLowerCase()] || 'white';
         });
       }
+
+      function commaDelimit(array) {
+        if (array == null) return '';
+        return array.join(', ');
+      }
+
+      function taskProgressMessage(totalTasks, taskProgress) {
+        if (totalTasks == null || taskProgress == null) return '';
+        return totalTasks + ' (' + Math.round(Number(taskProgress) * 100, 0) + '%)';
+      }
+
       // update all other params normally
       tr.selectAll('a.job-url')
-        .attr('href', function(job) { return job.trackingUrl || 'javascript:void(0);'; })
+        .attr('href', function(job) {
+          var mrState = job.mapReduceJobState || {};
+          return mrState.trackingURL || 'javascript:void(0);';
+        })
         .text(function(job) { return job.id || 'pending'; });
       tr.selectAll('td.job-status')
         .text(function (job) { return job.status || ''; });
       tr.selectAll('td.job-aliases')
-        .text(function (job) { return Ambrose.commaDelimit(job.aliases); });
+        .text(function (job) { return commaDelimit(job.aliases); });
       tr.selectAll('td.job-features')
-        .text(function (job) { return Ambrose.commaDelimit(job.features); });
-      tr.selectAll('td.job-mappers')
-        .text(function (job) { return Ambrose.taskProgressMessage(job.totalMappers, job.mapProgress); });
-      tr.selectAll('td.job-reducers')
-        .text(function (job) { return Ambrose.taskProgressMessage(job.totalReducers, job.reduceProgress); });
+        .text(function (job) { return commaDelimit(job.features); });
+      tr.selectAll('td.job-mappers').text(function (job) {
+        var mrState = job.mapReduceJobState || {};
+        return taskProgressMessage(
+          mrState.totalMappers,
+          mrState.mapProgress);
+      });
+      tr.selectAll('td.job-reducers').text(function (job) {
+        var mrState = job.mapReduceJobState || {};
+        return taskProgressMessage(
+          mrState.totalReducers,
+          mrState.reduceProgress);
+      });
     },
   };
 

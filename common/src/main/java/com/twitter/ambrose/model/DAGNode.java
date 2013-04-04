@@ -20,11 +20,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import com.twitter.ambrose.util.JSONUtil;
 
@@ -39,9 +39,6 @@ import com.twitter.ambrose.util.JSONUtil;
  * om.getSerializationConfig().set(SerializationConfig.Feature.INDENT_OUTPUT, true);
  * String json = om.writeValueAsString(dagNode);
  */
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
 public class DAGNode<T extends Job> {
   private String name;
   private T job;
@@ -84,9 +81,7 @@ public class DAGNode<T extends Job> {
   public static void main(String[] args) throws IOException {
     String sourceFile = "pig/src/main/resources/web/data/large-dag.json";
     String json = JSONUtil.readFile(sourceFile);
-    List<DAGNode> nodes =
-      (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
-
+    List<DAGNode> nodes = JSONUtil.toObject(json, new TypeReference<List<DAGNode>>() { });
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
 }

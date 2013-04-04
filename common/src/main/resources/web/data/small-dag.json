@@ -1,31 +1,25 @@
 [ {
-  "name" : "scope-44",
-  "aliases" : [ "JOINED", "L", "R" ],
-  "features" : [ "HASH_JOIN" ],
-  "jobId" : "job_201204041958_199287",
-  "successorNames" : [ "scope-48" ],
-  "runtime" : "pig",
-  "y" : -60.0,
-  "x" : 0.0,
-  "dagLevel" : 0
+  "name" : "scope-148",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-115", "1-116", "enemies_users_histogram", "friends_users_histogram", "masochists", "narcissists", "user", "user_counts" ],
+    "features" : [ "MULTI_QUERY", "COMBINER" ]
+  },
+  "successorNames" : [ "scope-168" ]
 }, {
-  "name" : "scope-48",
-  "aliases" : [ "ORDERED" ],
-  "features" : [ "SAMPLER" ],
-  "jobId" : "job_201204041958_199293",
-  "successorNames" : [ "scope-63" ],
-  "runtime" : "pig",
-  "y" : -60.0,
-  "x" : 120.0,
-  "dagLevel" : 1
+  "name" : "scope-168",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-117", "user_enemy", "user_enemy2", "user_enemy_enemy" ],
+    "features" : [ "HASH_JOIN" ]
+  },
+  "successorNames" : [ "scope-172" ]
 }, {
-  "name" : "scope-63",
-  "aliases" : [ "ORDERED" ],
-  "features" : [ "ORDER_BY" ],
-  "jobId" : "job_201204041958_199296",
-  "successorNames" : [ ],
-  "runtime" : "pig",
-  "y" : -60.0,
-  "x" : 240.0,
-  "dagLevel" : 2
+  "name" : "scope-172",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-118", "1-119", "1-120", "name", "user_enemies_of_enemies" ],
+    "features" : [ "GROUP_BY", "DISTINCT" ]
+  },
+  "successorNames" : [ ]
 } ]

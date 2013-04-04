@@ -15,15 +15,14 @@ limitations under the License.
 */
 package com.twitter.ambrose.model;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Class that represents the runtime stats for a given workflow. A workflow consists of 1 or more
@@ -32,9 +31,6 @@ import java.util.List;
  *
  * @author billg
  */
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
 public class Workflow {
 
   private String workflowId;

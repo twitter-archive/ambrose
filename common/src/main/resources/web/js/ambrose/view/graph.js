@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
-  $, d3, colorbrewer, Ambrose, View
+define(['jquery', 'd3', '../core', './core'], function(
+  $, d3, Ambrose, View
 ) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
@@ -44,37 +44,24 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       var self = this;
       this.workflow = workflow;
       this.container = container = $(container);
-
-      // define default params and override with user supplied params
-      var params = this.params = $.extend(true, {
-        colors: {
-          running: d3.rgb(98, 196, 98).brighter(),
-          complete: d3.rgb(98, 196, 98),
-          failed: d3.rgb(196, 98, 98),
-          mouseover: d3.rgb(98, 98, 196).brighter(),
-          selected: d3.rgb(98, 98, 196),
-        },
-        palettes: {
-          queued: colorbrewer.Greys,
-          complete: colorbrewer.Greens,
-          failed: colorbrewer.Reds,
-        },
-        dimensions: {
-          padding: 20,
-        },
-      }, params);
-
+      this.params = $.extend(true, {}, View.Theme, params);
       this.resetView();
 
+      // ensure we resize appropriately
+      $(window).resize(function() {
+        self.resetView();
+        self.handleJobsLoaded();
+      });
+
       // bind event workflow handlers
-      workflow.on('jobsLoaded', function(event, jobs) {
-        self.handleJobsLoaded(jobs);
+      workflow.on('jobsLoaded', function() {
+        self.handleJobsLoaded();
       });
       workflow.on('jobStarted jobProgress jobCompleted jobFailed', function(event, job) {
         self.handleJobsUpdated([job], 350);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
-        self.handleJobsUpdated($.grep([prev, job], Ambrose.notNull));
+        self.handleJobsUpdated($.grep([prev, job], function(j) { return j != null; }));
       });
     },
 
@@ -84,7 +71,6 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       var dim = this.dimensions = {};
       var width = dim.width = container.width();
       var height = dim.height = container.height();
-      var padding = this.params.dimensions.padding;
 
       // create canvas and supporting d3 objects
       this.svg = d3.select(container.empty().get(0))
@@ -97,14 +83,13 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       this.projection = function(d) { return [xs(d.x), ys(d.y)]; };
     },
 
-    handleJobsLoaded: function(jobs) {
+    handleJobsLoaded: function() {
       // compute node x,y coords
       var graph = this.workflow.graph;
       var groups = graph.topologicalGroups;
       var groupCount = groups.length;
       var groupDelta = 1 / groupCount;
       var groupOffset = groupDelta / 2;
-      // var edges = this.edges = [];
       $.each(groups, function(i, group) {
         var x = i * groupDelta + groupOffset;
         var nodeCount = group.length;
@@ -176,13 +161,10 @@ define(['jquery', 'd3', 'colorbrewer', '../core', './core'], function(
       var colors = this.params.colors;
       var fill = function(node) {
         var job = node.data;
-        var status = job.status;
+        var status = job.status || '';
         if (job.mouseover) return colors.mouseover;
         if (job.selected) return colors.selected;
-        if (status == 'RUNNING') return colors.running;
-        if (status == 'COMPLETE') return colors.complete;
-        if (status == 'FAILED') return colors.failed;
-        return '#555';
+        return colors[status.toLowerCase()] || '#555';
       };
       g.selectAll('g.node circle').attr('fill', fill);
     },

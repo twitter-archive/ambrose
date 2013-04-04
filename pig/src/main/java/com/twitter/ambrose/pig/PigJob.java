@@ -15,21 +15,21 @@ limitations under the License.
 */
 package com.twitter.ambrose.pig;
 
-import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.hadoop.CounterGroup;
-import com.twitter.ambrose.model.hadoop.MapReduceJobState;
-import org.apache.pig.tools.pigstats.InputStats;
-import org.apache.pig.tools.pigstats.JobStats;
-import org.apache.pig.tools.pigstats.OutputStats;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.apache.pig.tools.pigstats.InputStats;
+import org.apache.pig.tools.pigstats.JobStats;
+import org.apache.pig.tools.pigstats.OutputStats;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.twitter.ambrose.model.Job;
+import com.twitter.ambrose.model.hadoop.CounterGroup;
+import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 
 /**
  * Subclass of Job used to hold initialization logic and Pig-specific bindings for a Job.
@@ -39,9 +39,6 @@ import java.util.Properties;
  *
  * @author billg
  */
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
 public class PigJob extends Job {
   private static final String RUNTIME = "pig";
 

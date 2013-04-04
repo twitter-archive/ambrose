@@ -24,16 +24,16 @@ define(['jquery'], function($) {
   };
 
   // pattern for separator char + alpha
-  var rSepAlpha = /[-_ ]+([a-z])/ig;
+  var separatorAlphaPattern = /[-_ ]+([a-z])/ig;
 
   // util function used by camelCase
-  var fToUpper = function(all, match) {
+  function toUpper(all, match) {
     return match.toUpperCase();
-  };
+  }
 
   // camel case string
   String.prototype.camelCase = function() {
-    return this.replace(rSepAlpha, fToUpper);
+    return this.replace(separatorAlphaPattern, toUpper);
   };
 
   // find max value within array
@@ -53,28 +53,6 @@ define(['jquery'], function($) {
     return this.splice(i, 1);
   };
 
-  // core Ambrose object containing utility methods
-  return {
-    isNull: function(v) { return v == null; },
-    notNull: function(v) { return v != null; },
-
-    /**
-     * @param array values to join.
-     * @return string containing array values delimited by ', '.
-     */
-    commaDelimit: function(array) {
-      if (array == null) return '';
-      return array.join(', ');
-    },
-
-    /**
-     * @param totalTasks total number of tasks.
-     * @param taskProgress number in [0, 1].
-     * @return formatted message.
-     */
-    taskProgressMessage: function(totalTasks, taskProgress) {
-      if (totalTasks == null || taskProgress == null) return '';
-      return totalTasks + ' (' + Math.round(Number(taskProgress) * 100, 0) + '%)';
-    },
-  };
+  // core Ambrose object
+  return {};
 });

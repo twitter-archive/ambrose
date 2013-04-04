@@ -2,14 +2,10 @@ package com.twitter.ambrose.pig;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * Class that represents information about a data input to a job.
  */
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
 public class InputInfo {
   private String name;
   private String location;
