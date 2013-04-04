@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import com.google.common.collect.Maps;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,9 +60,8 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   private static final String DUMP_DAG_FILE_PARAM = "ambrose.write.dag.file";
   private static final String DUMP_EVENTS_FILE_PARAM = "ambrose.write.events.file";
 
-  private Map<String, DAGNode<Job>> dagNodeNameMap = new HashMap<String, DAGNode<Job>>();
-  private SortedMap<Integer, Event> eventMap =
-    new ConcurrentSkipListMap<Integer, Event>();
+  private Map<String, DAGNode<Job>> dagNodeNameMap = Maps.newHashMap();
+  private SortedMap<Integer, Event> eventMap = new ConcurrentSkipListMap<Integer, Event>();
 
   private Writer dagWriter = null;
   private Writer eventsWriter = null;
@@ -115,14 +116,13 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
 
   private void writeJsonDagNodenameMapToDisk(Map<String, DAGNode<Job>> dagNodeNameMap) throws IOException {
     if (dagWriter != null && dagNodeNameMap != null) {
-      Collection<DAGNode<Job>> nodes = dagNodeNameMap.values();
-      JSONUtil.writeJson(dagWriter, nodes.toArray(new DAGNode[dagNodeNameMap.size()]));
+      JSONUtil.writeJson(dagWriter, dagNodeNameMap.values());
     }
   }
 
   private void writeJsonEventToDisk(Event event) throws IOException {
     if (eventsWriter != null && event != null) {
-      eventsWriter.append(!eventWritten ? "[ " : ", ");
+      eventsWriter.write(!eventWritten ? "[ " : ", ");
       JSONUtil.writeJson(eventsWriter, event);
       eventsWriter.flush();
       eventWritten = true;
@@ -130,11 +130,9 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   public void flushJsonToDisk() throws IOException {
-
     if (dagWriter != null) { dagWriter.close(); }
-
     if (eventsWriter != null) {
-      if (eventWritten) { eventsWriter.append("]\n"); }
+      if (eventWritten) { eventsWriter.write(" ]\n"); }
       eventsWriter.close();
     }
   }

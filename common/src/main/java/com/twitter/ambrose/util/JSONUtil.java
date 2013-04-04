@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,14 +38,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author billg
  */
 public class JSONUtil {
-  private static final ObjectMapper mapper = new ObjectMapper();
-  static {
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    mapper.enable(SerializationFeature.INDENT_OUTPUT);
-    mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-  }
-
   /**
    * Writes object to the writer as JSON using Jackson and adds a new-line before flushing.
    *
@@ -54,12 +47,15 @@ public class JSONUtil {
    */
   public static void writeJson(Writer writer, Object object) throws IOException {
     mapper.writeValue(writer, object);
-    writer.write("\n");
-    writer.flush();
   }
 
   public static void writeJson(String fileName, Object object) throws IOException {
-    JSONUtil.writeJson(new PrintWriter(fileName), object);
+    Writer writer = new PrintWriter(fileName);
+    try {
+      JSONUtil.writeJson(writer, object);
+    } finally {
+      writer.close();
+    }
   }
 
   public static Object readJson(String json, TypeReference<?> type) throws IOException {
@@ -75,5 +71,18 @@ public class JSONUtil {
     } finally {
       stream.close();
     }
+  }
+
+  private static final ObjectMapper mapper = new ObjectMapper();
+
+  static {
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+    mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_JSON_CONTENT, false);
+    mapper.disable(SerializationFeature.FLUSH_AFTER_WRITE_VALUE);
+    mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
+    mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
 }

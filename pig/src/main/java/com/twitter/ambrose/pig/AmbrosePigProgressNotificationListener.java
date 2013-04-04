@@ -46,6 +46,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 /**
  * PigProgressNotificationListener that collects plan and job information from within a Pig runtime,
  * builds Ambrose model objects, and passes the objects to an Ambrose StatsWriteService object. This
@@ -63,10 +67,10 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
   private String workflowVersion;
   private List<Job> jobs = new ArrayList<Job>();
-  private Map<String, DAGNode<PigJob>> dagNodeNameMap = new TreeMap<String, DAGNode<PigJob>>();
-  private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = new TreeMap<String, DAGNode<PigJob>>();
+  private Map<String, DAGNode<PigJob>> dagNodeNameMap = Maps.newTreeMap();
+  private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = Maps.newTreeMap();
 
-  private HashSet<String> completedJobIds = new HashSet<String>();
+  private HashSet<String> completedJobIds = Sets.newHashSet();
 
   protected static enum JobProgressField {
     jobId, jobName, trackingUrl, isComplete, isSuccessful,
@@ -112,7 +116,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     // second pass connects the edges
     for (Map.Entry<OperatorKey, MapReduceOper> entry : planKeys.entrySet()) {
       DAGNode node = this.dagNodeNameMap.get(entry.getKey().toString());
-      List<DAGNode> successorNodeList = new ArrayList<DAGNode>();
+      List<DAGNode> successorNodeList = Lists.newArrayList();
       List<MapReduceOper> successors = plan.getSuccessors(entry.getValue());
 
       if (successors != null) {
@@ -230,7 +234,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   public void progressUpdatedNotification(String scriptId, int progress) {
 
     // first we report the scripts progress
-    Map<Event.WorkflowProgressField, String> eventData = new HashMap<Event.WorkflowProgressField, String>();
+    Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
     eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
     pushEvent(scriptId, new Event.WorkflowProgressEvent(eventData));
 
@@ -301,7 +305,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   }
 
   @SuppressWarnings("deprecation")
-  private void addMapReduceJobState(PigJob pigJob)  {
+  private void addMapReduceJobState(PigJob pigJob) {
     JobClient jobClient = PigStats.get().getJobClient();
 
     try {
