@@ -23,6 +23,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -42,29 +43,21 @@ import com.twitter.ambrose.util.JSONUtil;
 public class DAGNode<T extends Job> {
   private String name;
   private T job;
-
-  private Collection<DAGNode> successors;
+  private Collection<DAGNode<? extends Job>> successors;
   private Collection<String> successorNames;
-
-  public DAGNode(String name, T job) {
-    this.name = name;
-    this.job = job;
-  }
 
   @JsonCreator
   public DAGNode(@JsonProperty("name") String name,
-                 @JsonProperty("job") T job,
-                 @JsonProperty("successorNames") Collection<String> successorNames) {
+                 @JsonProperty("job") T job) {
     this.name = name;
-    this.successorNames = successorNames;
+    this.job = job;
   }
 
   public String getName() { return name; }
   public T getJob() { return job; }
 
-  @JsonIgnore
-  public synchronized Collection<DAGNode> getSuccessors() { return successors;}
-  public synchronized void setSuccessors(Collection<DAGNode> successors) {
+  public synchronized Collection<DAGNode<? extends Job>> getSuccessors() { return successors; }
+  public synchronized void setSuccessors(Collection<DAGNode<? extends Job>> successors) {
     Collection<String> successorNames = new HashSet<String>();
     if (successors != null) {
       for(DAGNode node : successors) {
@@ -76,6 +69,14 @@ public class DAGNode<T extends Job> {
   }
 
   public synchronized Collection<String> getSuccessorNames() { return successorNames; }
+
+  public String toJson() throws IOException {
+    return JSONUtil.toJson(this);
+  }
+
+  public static DAGNode<? extends Job> fromJson(String json) throws IOException {
+    return JSONUtil.toObject(json, new TypeReference<DAGNode<? extends Job>>() { });
+  }
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {

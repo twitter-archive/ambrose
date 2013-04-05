@@ -15,10 +15,16 @@ limitations under the License.
 */
 package com.twitter.ambrose.model;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.twitter.ambrose.util.JSONUtil;
+
+import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -29,23 +35,22 @@ import java.util.Properties;
  *
  * @author billg
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "runtime")
+@JsonTypeName("default")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
+})
 public class Job {
-
   private String id;
-  private String runtime;
   private Properties configuration;
   private Map<String, Number> metrics;
 
-  public Job(String runtime) {
-    this(runtime, null, null, null);
-  }
+  protected Job() { }
 
   @JsonCreator
-  public Job(@JsonProperty("runtime") String runtime,
-             @JsonProperty("id") String id,
+  public Job(@JsonProperty("id") String id,
              @JsonProperty("metrics") Map<String, Number> metrics,
              @JsonProperty("configuration") Properties configuration) {
-    this.runtime = runtime;
     this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;
@@ -54,11 +59,17 @@ public class Job {
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
 
-  public String getRuntime() { return runtime; }
-
   public Properties getConfiguration() { return configuration; }
   public void setConfiguration(Properties configuration) { this.configuration = configuration; }
 
   public Map<String, Number> getMetrics() { return metrics; }
   protected void setMetrics(Map<String, Number> metrics) { this.metrics = metrics; }
+
+  public String toJson() throws IOException {
+    return JSONUtil.toJson(this);
+  }
+
+  public static Job fromJson(String json) throws IOException {
+    return JSONUtil.toObject(json, new TypeReference<Job>() { });
+  }
 }

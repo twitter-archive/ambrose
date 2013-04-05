@@ -40,12 +40,10 @@ import org.apache.pig.tools.pigstats.ScriptState;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -81,7 +79,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   }
 
   /**
-   * Intialize this class with an instance of StatsWriteService to push stats to.
+   * Initialize this class with an instance of StatsWriteService to push stats to.
    *
    * @param statsWriteService
    */
@@ -119,12 +117,13 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     // second pass connects the edges
     for (Map.Entry<OperatorKey, MapReduceOper> entry : planKeys.entrySet()) {
       DAGNode node = this.dagNodeNameMap.get(entry.getKey().toString());
-      List<DAGNode> successorNodeList = Lists.newArrayList();
+      List<DAGNode<? extends Job>> successorNodeList = Lists.newArrayList();
       List<MapReduceOper> successors = plan.getSuccessors(entry.getValue());
 
       if (successors != null) {
         for (MapReduceOper successor : successors) {
-          DAGNode successorNode = this.dagNodeNameMap.get(successor.getOperatorKey().toString());
+          DAGNode<? extends Job> successorNode =
+              this.dagNodeNameMap.get(successor.getOperatorKey().toString());
           successorNodeList.add(successorNode);
         }
       }

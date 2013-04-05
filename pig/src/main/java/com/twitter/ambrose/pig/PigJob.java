@@ -19,13 +19,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import com.twitter.ambrose.util.JSONUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
@@ -39,8 +45,9 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
  *
  * @author billg
  */
+@JsonTypeName("pig")
 public class PigJob extends Job {
-  private static final String RUNTIME = "pig";
+  protected static Log LOG = LogFactory.getLog(PigJob.class);
 
   private String[] aliases;
   private String[] features;
@@ -51,7 +58,7 @@ public class PigJob extends Job {
   private Map<String, CounterGroup> counterGroupMap;
 
   public PigJob(String[] aliases, String[] features) {
-    super(RUNTIME);
+    super();
     this.aliases = aliases;
     this.features = features;
   }
@@ -61,14 +68,10 @@ public class PigJob extends Job {
                 @JsonProperty("aliases") String[] aliases,
                 @JsonProperty("features") String[] features,
                 @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-                @JsonProperty("metrics") Map<String, Number> metrics,
-                @JsonProperty("configuration") Properties configuration,
                 @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
                 @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
                 @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    super(RUNTIME, id, metrics, configuration);
-    this.aliases = aliases;
-    this.features = features;
+    this(aliases, features);
     this.mapReduceJobState = mapReduceJobState;
     this.counterGroupMap = counterGroupMap;
     this.inputInfoList = inputInfoList;
@@ -88,6 +91,7 @@ public class PigJob extends Job {
     return counterGroupMap == null ? null : counterGroupMap.get(name);
   }
 
+  @JsonIgnore
   public void setJobStats(JobStats stats) {
     this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
     this.inputInfoList = inputInfoList(stats.getInputs());
@@ -164,4 +168,22 @@ public class PigJob extends Job {
             outputStats.getAlias());
     }
   }
+
+  /**
+   * This is a hack to get around how the json library requires subtype info to be defined on the
+   * super-class, which doesn't always have access to the subclasses at compile time. Since the
+   * mixinAnnotations method replaces the existing annotation, this means that an action like this
+   * will need to be taken once upon app startup to register all known types. If this action
+   * happens multiple times, calls will override each other.
+   */
+  public static void mixinJsonAnnotations() {
+    LOG.info("Mixing in JSON annotations for PigJob and Job into Job");
+    JSONUtil.mixinAnnotatons(Job.class, AnnotationMixinClass.class);
+  }
+
+  @JsonSubTypes({
+      @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
+      @JsonSubTypes.Type(value=com.twitter.ambrose.pig.PigJob.class, name="pig")
+  })
+  private static class AnnotationMixinClass { }
 }
