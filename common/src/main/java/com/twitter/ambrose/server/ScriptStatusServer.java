@@ -28,24 +28,39 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.service.StatsReadService;
+import com.twitter.ambrose.service.WorkflowIndexReadService;
 
 /**
  * Light weight application server that serves both the JSON API and the Ambrose web pages powered
- * from the JSON. The port defaults to {@value #PORT_DEFAULT} but can be overridden with the
- * {@value #PORT_PARAM} system property. For a random port to be used, set {@value #PORT_PARAM} to
- * zero or {@value #PORT_RANDOM}.
+ * from the JSON. The port defaults to {@value #PORT_DEFAULT} but can be overridden with the {@value
+ * #PORT_PARAM} system property. For a random port to be used, set {@value #PORT_PARAM} to zero or
+ * {@value #PORT_RANDOM}.
  * <p/>
  * The JSON API supports the following URIs:
- * <ul>
- * <li><code>/jobs</code> returns the workflow jobs.</li>
- * <li><code>/events</code> returns all events since the start of the workflow. Optionally the
- * <code>sinceEventId</code> query parameter can be used to return only events after a given event.</li>
- * </ul>
- *
- * @author billg
+ * <pre>
+ *   <ul>
+ *     <li><code>/workflows</code> - Returns workflow summaries.</li>
+ *     <li><code>/jobs</code> - Returns a workflow's jobs.</li>
+ *     <li><code>/events</code> - Returns all workflow events.</li>
+ *   </ul>
+ * </pre>
  */
 public class ScriptStatusServer implements Runnable {
+  private static int getConfiguredPort() {
+    String port = System.getProperty(PORT_PARAM, PORT_DEFAULT);
+    if (PORT_RANDOM.equalsIgnoreCase(port)) {
+      port = "0";
+    }
+    try {
+      return Integer.parseInt(port);
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException(String.format(
+          "Parameter '%s' value '%s' is not a valid port number", PORT_PARAM, port), e);
+    }
+  }
+
   /**
    * Name of system property used to configure port on which to bind HTTP server.
    */
@@ -61,33 +76,22 @@ public class ScriptStatusServer implements Runnable {
   private static final Logger LOG = LoggerFactory.getLogger(ScriptStatusServer.class);
   private static final String SLASH = "/";
   private static final String ROOT_PATH = "web";
-
-  private static int getConfiguredPort() {
-    String port = System.getProperty(PORT_PARAM, PORT_DEFAULT);
-    if (PORT_RANDOM.equalsIgnoreCase(port)) {
-      port = "0";
-    }
-    try {
-      return Integer.parseInt(port);
-    } catch (NumberFormatException e) {
-      throw new IllegalArgumentException(String.format(
-          "Parameter '%s' value '%s' is not a valid port number", PORT_PARAM, port), e);
-    }
-  }
-
-  private final StatsReadService statsReadService;
+  private final WorkflowIndexReadService workflowIndexReadService;
+  private final StatsReadService<Job> statsReadService;
   private final int port;
   private Server server;
   private Thread serverThread;
 
-  public ScriptStatusServer(StatsReadService statsReadService) {
+  public ScriptStatusServer(WorkflowIndexReadService workflowIndexReadService,
+      StatsReadService<Job> statsReadService) {
+    this.workflowIndexReadService = workflowIndexReadService;
     this.statsReadService = statsReadService;
     this.port = getConfiguredPort();
   }
 
   public int getPort() {
     return port;
-  };
+  }
 
   /**
    * Starts the server in it's own daemon thread.
@@ -111,7 +115,8 @@ public class ScriptStatusServer implements Runnable {
     // override newServerSocket to log local port once bound
     Connector connector = new SocketConnector() {
       @Override
-      protected ServerSocket newServerSocket(String host, int port, int backlog) throws IOException {
+      protected ServerSocket newServerSocket(String host, int port, int backlog)
+          throws IOException {
         ServerSocket ss = super.newServerSocket(host, port, backlog);
         int localPort = ss.getLocalPort();
         LOG.info("Ambrose web server listening on port {}", localPort);
@@ -121,13 +126,15 @@ public class ScriptStatusServer implements Runnable {
     };
     connector.setPort(port);
     server = new Server();
-    server.setConnectors(new Connector[] { connector });
+    server.setConnectors(new Connector[]{connector});
 
     // this needs to be loaded via the jar'ed resources, not the relative dir
     URL resourcesUrl = this.getClass().getClassLoader().getResource(ROOT_PATH);
     HandlerList handler = new HandlerList();
-    handler.setHandlers(new Handler[] { new APIHandler(statsReadService),
-        new WebAppContext(resourcesUrl.toExternalForm(), SLASH) });
+    handler.setHandlers(new Handler[]{
+        new APIHandler(workflowIndexReadService, statsReadService),
+        new WebAppContext(resourcesUrl.toExternalForm(), SLASH)
+    });
     server.setHandler(handler);
     server.setStopAtShutdown(false);
 

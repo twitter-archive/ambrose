@@ -67,6 +67,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
       System.getProperty("user.name", "unknown"), "unknown", null, 0);
   private final PaginatedList<WorkflowSummary> summaries =
       new PaginatedList<WorkflowSummary>(ImmutableList.of(summary));
+  private boolean jobFailed = false;
   private Map<String, DAGNode<Job>> dagNodeNameMap = Maps.newHashMap();
   private SortedMap<Integer, Event> eventMap = new ConcurrentSkipListMap<Integer, Event>();
   private Writer workflowWriter;
@@ -107,11 +108,23 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   @Override
   public synchronized void pushEvent(String workflowId, Event event) throws IOException {
     eventMap.put(event.getId(), event);
-    if (event.getType() == Event.Type.WORKFLOW_PROGRESS) {
-      Event.WorkflowProgressEvent workflowProgressEvent = (Event.WorkflowProgressEvent) event;
-      String progressString =
-          workflowProgressEvent.getPayload().get(Event.WorkflowProgressField.workflowProgress);
-      summary.setProgress(Integer.parseInt(progressString));
+    switch (event.getType()) {
+      case WORKFLOW_PROGRESS:
+        Event.WorkflowProgressEvent workflowProgressEvent = (Event.WorkflowProgressEvent) event;
+        String progressString =
+            workflowProgressEvent.getPayload().get(Event.WorkflowProgressField.workflowProgress);
+        int progress = Integer.parseInt(progressString);
+        summary.setProgress(progress);
+        if (progress == 100) {
+          summary.setStatus(jobFailed
+              ? WorkflowSummary.Status.FAILED
+              : WorkflowSummary.Status.SUCCEEDED);
+        }
+        break;
+      case JOB_FAILED:
+        jobFailed = true;
+      default:
+        // nothing
     }
     writeJsonEventToDisk(event);
   }
