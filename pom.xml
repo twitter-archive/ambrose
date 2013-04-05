@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -11,7 +9,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.2.0-T1-hackweek-SNAPSHOT</version>
+  <version>0.2.0-T1-hackweek</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
@@ -59,7 +57,7 @@
     <connection>scm:git:https://github.com/twitter/ambrose.git</connection>
     <developerConnection>scm:git:git@github.com:twitter/ambrose.git</developerConnection>
     <url>https://github.com/twitter/ambrose</url>
-    <tag>HEAD</tag>
+    <tag>ambrose-0.2.0-T1-hackweek</tag>
   </scm>
 
   <properties>
