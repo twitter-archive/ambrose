@@ -264,7 +264,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
       // success handler
       var handleSuccess = function(data, textStatus) {
         if (data == null) {
-          handleError(textStatus, 'Data is null');
+          handleError(textStatus, 'data is null');
           return;
         }
 
@@ -275,9 +275,9 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
         var eventCount = 0;
         $.each(data, function(i, event) {
           // validate event data
-          var id = event.eventId;
-          var type = event.eventType;
-          var data = event.eventData;
+          var id = event.id;
+          var type = event.type;
+          var data = event.payload;
           if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
             return;
