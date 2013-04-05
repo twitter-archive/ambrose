@@ -184,7 +184,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
       };
 
       // initiate request
-      return this.client.getJobs()
+      return this.client.getJobs(self.id)
         .error(function(jqXHR, textStatus, errorThrown) {
           handleError(textStatus, errorThrown);
         })
