@@ -157,7 +157,10 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
           var mrState = job.mapReduceJobState || {};
           return mrState.trackingURL || 'javascript:void(0);';
         })
-        .text(function(job) { return job.id || 'pending'; });
+        .text(function(job) {
+          var mrState = job.mapReduceJobState || {};
+          return mrState.jobId || 'pending';
+        });
       tr.selectAll('td.job-status')
         .text(function (job) { return job.status || ''; });
       tr.selectAll('td.job-aliases')
