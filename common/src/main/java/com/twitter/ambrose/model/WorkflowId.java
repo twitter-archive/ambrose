@@ -20,7 +20,7 @@ public final class WorkflowId {
   private long timestamp;
   private String flowId;
 
-  private WorkflowId(String cluster, String userId, String appId,
+  public WorkflowId(String cluster, String userId, String appId,
       long runId, long timestamp, String flowId) {
     this.cluster = cluster;
     this.userId = userId;
@@ -32,6 +32,18 @@ public final class WorkflowId {
 
   public String getCluster() {
     return cluster;
+  }
+
+  public String getUserId() {
+    return userId;
+  }
+
+  public String getAppId() {
+    return appId;
+  }
+
+  public long getRunId() {
+    return runId;
   }
 
   public long getTimestamp() {
