@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.twitter.ambrose.pig;
 
+import com.google.common.base.Joiner;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
@@ -63,6 +64,8 @@ import com.google.common.collect.Sets;
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
   protected Log log = LogFactory.getLog(getClass());
 
+  private static final Joiner COMMA_JOINER = Joiner.on(',');
+
   private StatsWriteService statsWriteService;
 
   private String workflowVersion;
@@ -109,8 +112,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
       // this shows how we can get the basic info about all nameless jobs before any execute.
       // we can traverse the plan to build a DAG of this info
-      log.info("initialPlanNotification: aliases: " + aliases + ", name: " + node.getName() +
-          ", features: " + features);
+      log.info("initialPlanNotification: aliases: " + COMMA_JOINER.join(aliases) +
+          ", name: " + node.getName() + ", features: " + COMMA_JOINER.join(features));
     }
 
     // second pass connects the edges
@@ -331,14 +334,5 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
   private static String[] toArray(String string) {
     return string == null ? new String[0] : string.trim().split(",");
-  }
-
-  private static String toString(String[] array) {
-    StringBuilder sb = new StringBuilder();
-    for (String string : array) {
-      if (sb.length() > 0) { sb.append(","); }
-      sb.append(string);
-    }
-    return sb.toString();
   }
 }
