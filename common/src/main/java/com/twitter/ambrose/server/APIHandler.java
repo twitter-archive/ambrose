@@ -86,7 +86,7 @@ public class APIHandler extends AbstractHandler {
       String startRowParam = request.getParameter(QUERY_PARAM_START_KEY);
       byte[] startRow = null;
       if (startRowParam != null && !startRowParam.isEmpty()) {
-        startRow = BaseEncoding.base64Url().decode(startRowParam);
+        startRow = BaseEncoding.base64().decode(startRowParam);
       }
 
       LOG.info("Submitted request for cluster={}, user={}, status={}, startRow={}", cluster, user,
