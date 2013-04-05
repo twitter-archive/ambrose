@@ -81,7 +81,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
       var self = this;
       return $.getJSON(new URI(this.workflowsUri).addSearch({
         cluster: cluster,
-        userId: user,
+        user: user,
         status: status,
         startKey: startKey
       }).unicode())
