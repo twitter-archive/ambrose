@@ -54,7 +54,6 @@ public class Event<T> {
   }
 
   private int id;
-  @JsonIgnore
   private Type type;
   private long timestamp;
   private T payload;
@@ -86,8 +85,8 @@ public class Event<T> {
   }
 
   /**
-   * Helper method to create instances of the proper event. It is the reposibility of the caller to
-   * assure that their types are aligned with
+   * Helper method to create instances of the proper event. It is the responsibility of the caller
+   * to assure that their types are aligned with the object passed.
    * @param type
    * @param data
    * @return
