@@ -15,19 +15,19 @@ limitations under the License.
 */
 package com.twitter.ambrose.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.twitter.ambrose.util.JSONUtil;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
+
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Class that represents a Event of a given Type. Each one of these created will have
@@ -37,44 +37,44 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * @author billg
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonTypeName("default")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Event.class, name="default"),
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Event.JobStartedEvent.class, name="job_started"),
+    @JsonSubTypes.Type(value=Event.WorkflowProgressEvent.class, name="WORKFLOW_PROGRESS"),
+    @JsonSubTypes.Type(value=Event.JobStartedEvent.class, name="JOB_STARTED"),
+    @JsonSubTypes.Type(value=Event.JobProgressEvent.class, name="JOB_PROGRESS"),
+    @JsonSubTypes.Type(value=Event.JobFinishedEvent.class, name="JOB_FINISHED"),
+    @JsonSubTypes.Type(value=Event.JobFailedEvent.class, name="JOB_FAILED")
 })
 public class Event<T> {
   private static AtomicInteger NEXT_ID = new AtomicInteger();
 
-  public static enum Type { JOB_STARTED, JOB_FINISHED, JOB_FAILED, JOB_PROGRESS, WORKFLOW_PROGRESS};
+  public static enum Type { JOB_STARTED, JOB_FINISHED, JOB_FAILED, JOB_PROGRESS, WORKFLOW_PROGRESS }
 
   public static enum WorkflowProgressField {
-    workflowProgress;
+    workflowProgress
   }
 
-  private long timestamp;
   private int id;
+  @JsonIgnore
   private Type type;
+  private long timestamp;
   private T payload;
 
-  protected Event(Type type) { this.type = type; }
+  public Event(int eventId, Type type, long timestamp, T payload) {
+    this.id = eventId;
+    this.type = type;
+    this.timestamp = timestamp;
+    this.payload = payload;
+  }
 
   private Event(Type type, T payload) {
-    this.id = NEXT_ID.incrementAndGet();
-    this.timestamp = System.currentTimeMillis();
-    this.type = type;
-    this.payload = payload;
+    this(NEXT_ID.incrementAndGet(), type, System.currentTimeMillis(), payload);
   }
 
-  public Event(int eventId, long timestamp, Type type, T payload) {
-    this.id = eventId;
-    this.timestamp = timestamp;
-    this.type = type;
-    this.payload = payload;
-  }
+  public Event() {}
 
-  public long getTimestamp() { return timestamp; }
   public int getId() { return id; }
   public Type getType() { return type; }
+  public long getTimestamp() { return timestamp; }
   public T getPayload() { return payload; }
 
   public String toJson() throws IOException {
@@ -82,7 +82,7 @@ public class Event<T> {
   }
 
   public static Event<?> fromJson(String json) throws IOException {
-    return JSONUtil.toObject(json, new TypeReference<Event<?>>() { });
+    return JSONUtil.toObject(json, new TypeReference<Event<?>>() {});
   }
 
   /**
@@ -111,43 +111,41 @@ public class Event<T> {
     }
   }
 
-  @JsonTypeName("job_started")
   public static class JobStartedEvent extends Event<DAGNode<? extends Job>> {
     @JsonCreator
-    public JobStartedEvent() { super(Type.JOB_STARTED); }
-
-    public JobStartedEvent(DAGNode<? extends Job> eventData) {
-      super(Type.JOB_STARTED, eventData);
+    public JobStartedEvent(@JsonProperty("payload") DAGNode<? extends Job> payload) {
+      super(Type.JOB_STARTED, payload);
     }
   }
 
   public static class JobProgressEvent extends Event<DAGNode<? extends Job>> {
-
-
-    public JobProgressEvent(@JsonProperty("payload") DAGNode<? extends Job> eventData) {
-      super(Type.JOB_PROGRESS, eventData);
+    @JsonCreator
+    public JobProgressEvent(@JsonProperty("payload") DAGNode<? extends Job> payload) {
+      super(Type.JOB_PROGRESS, payload);
     }
   }
 
   public static class JobFinishedEvent extends Event<DAGNode<? extends Job>> {
-    public JobFinishedEvent(DAGNode<? extends Job> eventData) {
-      super(Type.JOB_FINISHED, eventData);
+    @JsonCreator
+    public JobFinishedEvent(@JsonProperty("payload") DAGNode<? extends Job> payload) {
+      super(Type.JOB_FINISHED, payload);
     }
   }
 
   public static class JobFailedEvent extends Event<DAGNode<? extends Job>> {
-    public JobFailedEvent(DAGNode<? extends Job> eventData) {
-      super(Type.JOB_FAILED, eventData);
+    @JsonCreator
+    public JobFailedEvent(@JsonProperty("payload") DAGNode<? extends Job> payload) {
+      super(Type.JOB_FAILED, payload);
     }
   }
 
   public static class WorkflowProgressEvent extends Event<Map<WorkflowProgressField, String>> {
-    public WorkflowProgressEvent(Map<WorkflowProgressField, String> eventData) {
-      super(Type.WORKFLOW_PROGRESS, eventData);
+    @JsonCreator
+    public WorkflowProgressEvent(@JsonProperty("payload") Map<WorkflowProgressField, String> payload) {
+      super(Type.WORKFLOW_PROGRESS, payload);
     }
   }
 
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {
     String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
     List<Event> events = JSONUtil.toObject(json, new TypeReference<List<Event>>() { });

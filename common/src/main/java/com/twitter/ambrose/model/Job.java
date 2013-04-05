@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Objects;
+
 import com.twitter.ambrose.util.JSONUtil;
 
 import java.io.IOException;
@@ -36,9 +38,8 @@ import java.util.Properties;
  * @author billg
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "runtime")
-@JsonTypeName("default")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
+    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default")
 })
 public class Job {
   private String id;
@@ -49,8 +50,8 @@ public class Job {
 
   @JsonCreator
   public Job(@JsonProperty("id") String id,
-             @JsonProperty("metrics") Map<String, Number> metrics,
-             @JsonProperty("configuration") Properties configuration) {
+      @JsonProperty("configuration") Properties configuration,
+      @JsonProperty("metrics") Map<String, Number> metrics) {
     this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;
@@ -64,6 +65,28 @@ public class Job {
 
   public Map<String, Number> getMetrics() { return metrics; }
   protected void setMetrics(Map<String, Number> metrics) { this.metrics = metrics; }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id, configuration, metrics);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (obj == this) {
+      return true;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    Job that = (Job) obj;
+    return Objects.equal(id, that.id)
+        && Objects.equal(configuration, that.configuration)
+        && Objects.equal(metrics, that.metrics);
+  }
 
   public String toJson() throws IOException {
     return JSONUtil.toJson(this);

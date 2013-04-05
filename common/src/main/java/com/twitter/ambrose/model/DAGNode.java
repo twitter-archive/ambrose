@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Objects;
 
 import com.twitter.ambrose.util.JSONUtil;
 
@@ -69,6 +70,28 @@ public class DAGNode<T extends Job> {
   }
 
   public synchronized Collection<String> getSuccessorNames() { return successorNames; }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(name, job, successorNames);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (obj == this) {
+      return true;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    DAGNode<?> that = (DAGNode<?>) obj;
+    return Objects.equal(name, that.name)
+        && Objects.equal(job, that.job)
+        && Objects.equal(successorNames, that.successorNames);
+  }
 
   public String toJson() throws IOException {
     return JSONUtil.toJson(this);

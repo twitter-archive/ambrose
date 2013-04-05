@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -82,6 +83,10 @@ public class JSONUtil {
    * @throws IOException
    */
   public static <T> T toObject(String json, TypeReference<T> type) throws IOException {
+    return mapper.readValue(json, type);
+  }
+
+  public static <T> T toObject(String json, JavaType type) throws IOException {
     return mapper.readValue(json, type);
   }
 

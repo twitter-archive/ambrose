@@ -89,7 +89,6 @@ public class InMemoryStatsServiceTest {
 
   private void assertEqualWorkflows(Event expected, Event found) {
     assertEquals("Wrong eventId found", expected.getId(), found.getId());
-    assertEquals("Wrong eventType found", expected.getType(), found.getType());
     assertEquals("Wrong eventData found", expected.getPayload(), found.getPayload());
   }
 }
