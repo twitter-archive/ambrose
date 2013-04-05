@@ -8,6 +8,8 @@ Demo pig script for use with pig-ambrose. Reads some data and does some stuff.
 %default INPUT_PATH 'file://$BASEDIR/demo/data.tsv';
 %default OUTPUT_PATH 'file://$BASEDIR/demo/output';
 
+SET job.name 'Ambrose Pig demo script';
+
 user = LOAD '$INPUT_PATH' AS (
   user_id: long, name: chararray, friends: {(user_id: long)}, enemies: {(user_id: long)}
 );
