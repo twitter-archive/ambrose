@@ -15,6 +15,11 @@ limitations under the License.
 */
 package com.twitter.ambrose.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.util.JSONUtil;
 
 import java.io.IOException;
@@ -31,6 +36,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
  *
  * @author billg
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeName("default")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Event.class, name="default"),
+    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Event.JobStartedEvent.class, name="job_started"),
+})
 public class Event<T> {
   private static AtomicInteger NEXT_ID = new AtomicInteger();
 
@@ -44,6 +55,8 @@ public class Event<T> {
   private int id;
   private Type type;
   private T payload;
+
+  protected Event(Type type) { this.type = type; }
 
   private Event(Type type, T payload) {
     this.id = NEXT_ID.incrementAndGet();
@@ -62,16 +75,14 @@ public class Event<T> {
   public long getTimestamp() { return timestamp; }
   public int getId() { return id; }
   public Type getType() { return type; }
-  public Object getPayload() { return payload; }
+  public T getPayload() { return payload; }
 
-  @SuppressWarnings("unchecked")
-  public static void main(String[] args) throws IOException {
-    String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
-    List<Event> events = JSONUtil.toObject(json, new TypeReference<List<Event>>() { });
-    for (Event event : events) {
-      // useful if we need to read a file, add a field, output and re-generate
-    }
-    JSONUtil.writeJson("pig/src/main/resources/web/data/small-events.json2", events);
+  public String toJson() throws IOException {
+    return JSONUtil.toJson(this);
+  }
+
+  public static Event<?> fromJson(String json) throws IOException {
+    return JSONUtil.toObject(json, new TypeReference<Event<?>>() { });
   }
 
   /**
@@ -100,14 +111,20 @@ public class Event<T> {
     }
   }
 
+  @JsonTypeName("job_started")
   public static class JobStartedEvent extends Event<DAGNode<? extends Job>> {
+    @JsonCreator
+    public JobStartedEvent() { super(Type.JOB_STARTED); }
+
     public JobStartedEvent(DAGNode<? extends Job> eventData) {
       super(Type.JOB_STARTED, eventData);
     }
   }
 
   public static class JobProgressEvent extends Event<DAGNode<? extends Job>> {
-    public JobProgressEvent(DAGNode<? extends Job> eventData) {
+
+
+    public JobProgressEvent(@JsonProperty("payload") DAGNode<? extends Job> eventData) {
       super(Type.JOB_PROGRESS, eventData);
     }
   }
@@ -128,5 +145,15 @@ public class Event<T> {
     public WorkflowProgressEvent(Map<WorkflowProgressField, String> eventData) {
       super(Type.WORKFLOW_PROGRESS, eventData);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void main(String[] args) throws IOException {
+    String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
+    List<Event> events = JSONUtil.toObject(json, new TypeReference<List<Event>>() { });
+    for (Event event : events) {
+      // useful if we need to read a file, add a field, output and re-generate
+    }
+    JSONUtil.writeJson("pig/src/main/resources/web/data/small-events.json2", events);
   }
 }
