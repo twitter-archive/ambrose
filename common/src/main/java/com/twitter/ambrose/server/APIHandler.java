@@ -8,8 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import com.google.common.io.BaseEncoding;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
@@ -87,13 +86,7 @@ public class APIHandler extends AbstractHandler {
       String startRowParam = request.getParameter(QUERY_PARAM_START_KEY);
       byte[] startRow = null;
       if (startRowParam != null && !startRowParam.isEmpty()) {
-        try {
-          startRow = Base64.decode(startRowParam);
-        } catch (Base64DecodingException e) {
-          throw new IOException(String.format(
-              "Failed to decode '%s' parameter value '%s'",
-              QUERY_PARAM_START_KEY, startRowParam), e);
-        }
+        startRow = BaseEncoding.base64Url().decode(startRowParam);
       }
 
       LOG.info("Submitted request for cluster={}, user={}, status={}, startRow={}", cluster, user,
