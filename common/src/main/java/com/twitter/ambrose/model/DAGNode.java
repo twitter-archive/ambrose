@@ -43,17 +43,14 @@ import com.twitter.ambrose.util.JSONUtil;
 public class DAGNode<T extends Job> {
   private String name;
   private T job;
-  @JsonIgnore
   private Collection<DAGNode<? extends Job>> successors;
   private Collection<String> successorNames;
 
-  public DAGNode(String name, T job) {
+  @JsonCreator
+  public DAGNode(@JsonProperty("name") String name,
+                 @JsonProperty("job") T job) {
     this.name = name;
     this.job = job;
-  }
-
-  public DAGNode() {
-    this(null, null);
   }
 
   public String getName() { return name; }
@@ -72,6 +69,14 @@ public class DAGNode<T extends Job> {
   }
 
   public synchronized Collection<String> getSuccessorNames() { return successorNames; }
+
+  public String toJson() throws IOException {
+    return JSONUtil.toJson(this);
+  }
+
+  public static DAGNode<? extends Job> fromJson(String json) throws IOException {
+    return JSONUtil.toObject(json, new TypeReference<DAGNode<? extends Job>>() { });
+  }
 
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {

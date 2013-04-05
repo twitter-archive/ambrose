@@ -1,5 +1,6 @@
 package com.twitter.ambrose.model.hadoop;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 
@@ -18,6 +19,9 @@ public class MapReduceJobState {
   private float reduceProgress;
   private int totalMappers;
   private int totalReducers;
+
+  @JsonCreator
+  public MapReduceJobState() { }
 
   @SuppressWarnings("deprecation")
   public MapReduceJobState(RunningJob runningJob,
@@ -38,35 +42,71 @@ public class MapReduceJobState {
     return jobId;
   }
 
+  public void setJobId(String jobId) {
+    this.jobId = jobId;
+  }
+
   public String getJobName() {
     return jobName;
+  }
+
+  public void setJobName(String jobName) {
+    this.jobName = jobName;
   }
 
   public String getTrackingURL() {
     return trackingURL;
   }
 
+  public void setTrackingURL(String trackingURL) {
+    this.trackingURL = trackingURL;
+  }
+
   public boolean isComplete() {
     return isComplete;
+  }
+
+  public void setComplete(boolean complete) {
+    isComplete = complete;
   }
 
   public boolean isSuccessful() {
     return isSuccessful;
   }
 
+  public void setSuccessful(boolean successful) {
+    isSuccessful = successful;
+  }
+
   public float getMapProgress() {
     return mapProgress;
+  }
+
+  public void setMapProgress(float mapProgress) {
+    this.mapProgress = mapProgress;
   }
 
   public float getReduceProgress() {
     return reduceProgress;
   }
 
+  public void setReduceProgress(float reduceProgress) {
+    this.reduceProgress = reduceProgress;
+  }
+
   public int getTotalMappers() {
     return totalMappers;
   }
 
+  public void setTotalMappers(int totalMappers) {
+    this.totalMappers = totalMappers;
+  }
+
   public int getTotalReducers() {
     return totalReducers;
+  }
+
+  public void setTotalReducers(int totalReducers) {
+    this.totalReducers = totalReducers;
   }
 }

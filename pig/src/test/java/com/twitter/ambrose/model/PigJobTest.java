@@ -1,8 +1,7 @@
 package com.twitter.ambrose.model;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.twitter.ambrose.pig.PigJob;
-import com.twitter.ambrose.util.JSONUtil;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,24 +11,60 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link com.twitter.ambrose.model.PigJobTest}.
  */
 public class PigJobTest {
-  private String toJson(Job job) throws IOException {
-    return JSONUtil.toJson(job);
+  static {
+    PigJob.mixinJsonAnnotations();
   }
 
-  private PigJob toJob(String json) throws IOException {
-    return JSONUtil.toObject(json, new TypeReference<PigJob>() { });
+  PigJob pigJob;
+
+  @Before
+  public void setUp() throws Exception {
+    Map<String, Number> metrics = new HashMap<String, Number>();
+    metrics.put("somemetric", 6);
+    Properties properties = new Properties();
+    properties.setProperty("someprop", "propvalue");
+    String[] aliases = new String[] { "alias1" };
+    String[] features = new String[] { "feature1" };
+    pigJob = new PigJob(aliases, features);
   }
 
-  private void testRoundTrip(PigJob expected) throws IOException {
-    String asJson = toJson(expected);
-    System.out.println("asJson: " + asJson);
-    PigJob asJobAgain = toJob(asJson);
-    assertJobEquals(expected, asJobAgain);
+  @Test
+  public void testPigJobRoundTrip() throws IOException {
+    doTestRoundTrip(pigJob);
+  }
+
+  private void doTestRoundTrip(PigJob expected) throws IOException {
+    String asJson = expected.toJson();
+    Job asJobAgain = Job.fromJson(asJson);
+
+    // assert that if we get a PigJob without having to ask for it explicitly
+    assertTrue(asJobAgain instanceof PigJob);
+    assertJobEquals(expected, (PigJob) asJobAgain);
+  }
+
+  @Test
+  public void testDAGNodePigJobRoundTrip() throws IOException {
+    DAGNode<PigJob> node = new DAGNode<PigJob>("dag name", pigJob);
+    doTestRoundTrip(node);
+  }
+
+  private void doTestRoundTrip(DAGNode<PigJob> expected) throws IOException {
+    String asJson = expected.toJson();
+    DAGNode asDAGNodeAgain = DAGNode.fromJson(asJson);
+    assertEquals(expected.getName(), asDAGNodeAgain.getName());
+    assertNotNull(asDAGNodeAgain.getJob());
+
+    // assert that it's an instance of PigJob
+    assertNotNull(asDAGNodeAgain.getJob() instanceof PigJob);
+
+    assertJobEquals(expected.getJob(), (PigJob)asDAGNodeAgain.getJob());
   }
 
   public static void assertJobEquals(PigJob expected, PigJob found) {
@@ -38,18 +73,5 @@ public class PigJobTest {
     assertArrayEquals(expected.getFeatures(), found.getFeatures());
     assertEquals(expected.getMetrics(), found.getMetrics());
     assertEquals(expected.getConfiguration(), found.getConfiguration());
-  }
-
-  @Test
-  public void testRoundTrip() throws IOException {
-    Map<String, Number> metrics = new HashMap<String, Number>();
-    metrics.put("somemetric", 6);
-    Properties properties = new Properties();
-    properties.setProperty("someprop", "propvalue");
-    String[] aliases = new String[] { "alias1" };
-    String[] features = new String[] { "feature1" };
-    PigJob job = new PigJob(aliases, features);
-
-    testRoundTrip(job);
   }
 }

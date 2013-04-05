@@ -18,9 +18,13 @@ package com.twitter.ambrose.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.twitter.ambrose.util.JSONUtil;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,18 +37,20 @@ import java.util.Properties;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "runtime")
 @JsonTypeName("default")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
+})
 public class Job {
   private String id;
   private Properties configuration;
   private Map<String, Number> metrics;
 
-  public Job() {
-    this(null, null, null);
-  }
+  protected Job() { }
 
-  public Job(String id,
-             Map<String, Number> metrics,
-             Properties configuration) {
+  @JsonCreator
+  public Job(@JsonProperty("id") String id,
+             @JsonProperty("metrics") Map<String, Number> metrics,
+             @JsonProperty("configuration") Properties configuration) {
     this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;
@@ -58,4 +64,12 @@ public class Job {
 
   public Map<String, Number> getMetrics() { return metrics; }
   protected void setMetrics(Map<String, Number> metrics) { this.metrics = metrics; }
+
+  public String toJson() throws IOException {
+    return JSONUtil.toJson(this);
+  }
+
+  public static Job fromJson(String json) throws IOException {
+    return JSONUtil.toObject(json, new TypeReference<Job>() { });
+  }
 }

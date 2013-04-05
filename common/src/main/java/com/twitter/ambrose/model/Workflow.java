@@ -18,16 +18,15 @@ package com.twitter.ambrose.model;
 import java.io.IOException;
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Class that represents the runtime stats for a given workflow. A workflow consists of 1 or more
- * jobs with dependancies that are run to produce a result. Basically a workflow is a collection of
- * jobs aranged to for a DAG. A Pig script or a Cascading flow are both examples of a workflow.
+ * jobs with dependencies that are run to produce a result. Basically a workflow is a collection of
+ * jobs arranged to for a DAG. A Pig script or a Cascading flow are both examples of a workflow.
  *
  * @author billg
  */
@@ -68,9 +67,7 @@ public class Workflow {
    * @throws IOException
    */
   public static String toJSON(Workflow workflow) throws IOException {
-    ObjectMapper om = new ObjectMapper();
-    om.getSerializationConfig().set(SerializationConfig.Feature.INDENT_OUTPUT, true);
-    return om.writeValueAsString(workflow);
+    return JSONUtil.toJson(workflow);
   }
 
   /**
@@ -82,8 +79,6 @@ public class Workflow {
    * @throws IOException
    */
   public static Workflow fromJSON(String workflowInfoJson) throws IOException {
-    ObjectMapper om = new ObjectMapper();
-    om.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return om.readValue(workflowInfoJson, Workflow.class);
+    return JSONUtil.toObject(workflowInfoJson, new TypeReference<Workflow>() {});
   }
 }
