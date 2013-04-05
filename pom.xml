@@ -11,7 +11,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.2.0-hackweek-T1-SNAPSHOT</version>
+  <version>0.2.0-T1-hackweek-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
