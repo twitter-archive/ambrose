@@ -1,7 +1,7 @@
 requirejs.config({
   shim: {
-    'uri': { deps: ['jquery'], exports: 'URI' },
     'bootstrap': { deps: ['jquery'], exports: 'bootstrap' },
+    'uri': { deps: ['jquery'], exports: 'URI' },
     'd3': { deps: ['jquery'], exports: 'd3' },
     'colorbrewer': { deps: [], exports: 'colorbrewer' },
   }

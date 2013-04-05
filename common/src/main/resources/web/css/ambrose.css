@@ -1,9 +1,17 @@
 /* Page dimensions */
 body { position: relative; padding-top: 40px; }
+@media (max-width: 979px) { body { padding-top: 0px; } }
 #diagrams > div { height: 350px; margin: 0; }
 #ambrose-view-progress-bar {}
 #ambrose-view-chord {}
 #ambrose-view-graph {}
+
+/* Typography */
+h2 { margin: 1em 0px; }
+
+/* Workflows table */
+.ambrose-dashboard .progress,
+.ambrose-dashboard .bar { margin: 0px; }
 
 /* Progress Bar view */
 .ambrose-view-progress-bar { position: relative; margin: 20px 0px; }

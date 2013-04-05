@@ -54,6 +54,7 @@ public class Event<T> {
   }
 
   private int id;
+  @JsonIgnore
   private Type type;
   private long timestamp;
   private T payload;

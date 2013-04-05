@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Ambrose Workflow</title>
+    <title>Ambrose Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Data workflow visualization and monitoring">
     <meta name="author" content="Twitter">
@@ -34,8 +34,20 @@
           <a class="brand" href="#">Ambrose</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="dashboard.html">Dashboard</a></li>
+              <li class="active"><a href="dashboard.html">Dashboard</a></li>
+              <li class="dropdown">
+                <a id="cluster-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown">Cluster <b class="caret"></b></a>
+                <ul id="cluster-menu" class="dropdown-menu" role="menu" aria-labelledby="cluster-dropdown"></ul>
+              </li>
+              <li class="dropdown">
+                <a id="status-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown">Status <b class="caret"></b></a>
+                <ul id="status-menu" class="dropdown-menu" role="menu" aria-labelledby="status-dropdown"></ul>
+              </li>
             </ul>
+            <form id="user-form" class="navbar-form pull-left">
+              <input id="user-field" type="text" class="span2" placeholder="User" />
+              <button id="user-form-btn" type="submit" class="btn">Filter</button>
+            </form>
             <ul class="nav pull-right">
               <li><a target="_blank" href="https://github.com/twitter/ambrose">About</a></li>
             </ul>
@@ -46,30 +58,47 @@
 
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span12" id="ambrose-view-progress-bar"></div>
-      </div>
-
-      <div class="row-fluid" id="diagrams">
-        <div class="span12" id="ambrose-view-graph"></div>
+        <div class="span12">
+          <h2>Workflows</h2>
+          <table class="table table-hover ambrose-dashboard">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>User</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Progress</th>
+            </tr>
+            </thead>
+            <tbody id="workflows"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="row-fluid">
-        <div class="span12" id="ambrose-view-table"></div>
+        <div class="span12">
+          <div class="pagination pagination-large pagination-centered">
+            <ul>
+              <li><a href="#" id="page-prev-link">&laquo;</a></li>
+              <li><a href="#" id="page-next-link">&raquo;</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <hr>
       <footer>
         <p>&copy; Twitter 2013</p>
       </footer>
-    </div> <!-- /container-fluid -->
+    </div>
 
     <script type="text/javascript">
       var require = {
         waitSeconds: 15,
-        urlArgs : "bust=" + new Date().getTime(),
+        //urlArgs : "bust=" + new Date().getTime(),
       };
     </script>
-    <script data-main="js/workflow-main" src="js/require-jquery.js"></script>
+    <script data-main="js/dashboard-main" src="js/require-jquery.js"></script>
 
   </body>
 </html>

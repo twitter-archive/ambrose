@@ -1,0 +1,22 @@
+{
+  "nextPageStart": 1,
+  "results": [ {
+    "id" : "foobar",
+    "userId" : "joe",
+    "name" : "unknown",
+    "progress" : 23,
+    "status" : "RUNNING"
+  }, {
+    "id" : "barfoo",
+    "userId" : "mary",
+    "name" : "unknown",
+    "progress" : 100,
+    "status" : "SUCCEEDED"
+  }, {
+    "id" : "foobar",
+    "userId" : "joe",
+    "name" : "unknown",
+    "progress" : 100,
+    "status" : "FAILED"
+  } ]
+}

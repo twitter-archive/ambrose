@@ -37,6 +37,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
      */
     init: function(baseUri) {
       // default endpoint paths
+      var workflowsUri = 'workflows';
       var jobsUri = 'dag';
       var eventsUri = 'events';
 
@@ -45,6 +46,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
         var uri = new URI(window.location.href);
         var params = uri.search(true);
         if (params.localdata) {
+          workflowsUri = 'data/workflows.json';
           if (params.localdata == 'small') {
             jobsUri = 'data/small-dag.json';
             eventsUri = 'data/small-events.json';
@@ -56,12 +58,39 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
       } else {
         // resolve relative paths given base uri
         var uri = new URI(baseUri);
+        workflowsUri = new URI(workflowsUri).absoluteTo(uri);
         jobsUri = new URI(jobsUri).absoluteTo(uri);
         eventsUri = new URI(eventsUri).absoluteTo(uri);
       }
 
+      this.workflowsUri = new URI(workflowsUri);
       this.jobsUri = new URI(jobsUri);
       this.eventsUri = new URI(eventsUri);
+    },
+
+    /**
+     * Submits asynchronous request for workflow summaries from server.
+     *
+     * @param cluster
+     * @param user
+     * @param status
+     * @param startKey
+     * @return a jQuery Promise on which success and error callbacks may be registered.
+     */
+    getWorkflows: function(cluster, user, status, startKey) {
+      var self = this;
+      return $.getJSON(new URI(this.workflowsUri).addSearch({
+        cluster: cluster,
+        user: user,
+        status: status,
+        startKey: startKey
+      }).unicode())
+        .error(function(jqXHR, textStatus, errorThrown) {
+          console.error('Failed to get workflows:', self, textStatus, errorThrown);
+        })
+        .success(function(data, textStatus, jqXHR) {
+          console.debug('Succeeded to get workflows:', textStatus, data);
+        });
     },
 
     /**
