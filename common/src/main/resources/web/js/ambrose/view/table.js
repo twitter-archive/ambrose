@@ -158,8 +158,7 @@ define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
           return mrState.trackingURL || 'javascript:void(0);';
         })
         .text(function(job) {
-          var mrState = job.mapReduceJobState || {};
-          return mrState.jobId || 'pending';
+          return job.id || 'pending';
         });
       tr.selectAll('td.job-status')
         .text(function (job) { return job.status || ''; });
