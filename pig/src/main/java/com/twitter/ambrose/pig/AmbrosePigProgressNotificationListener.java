@@ -124,9 +124,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       node.setSuccessors(successorNodeList);
     }
 
-    //TODO: upgrade to trunk pig which has scriptId and pass it here
     try {
-      statsWriteService.sendDagNodeNameMap(null, this.dagNodeNameMap);
+      statsWriteService.sendDagNodeNameMap(scriptId, this.dagNodeNameMap);
     } catch (IOException e) {
       log.error("Couldn't send dag to StatsWriteService", e);
     }
