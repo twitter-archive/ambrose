@@ -26,8 +26,6 @@ import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.WorkflowIndexReadService;
 import com.twitter.ambrose.util.JSONUtil;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Handler for the API data responses.
  *
@@ -45,6 +43,48 @@ public class APIHandler extends AbstractHandler {
     Request base_request = (request instanceof Request) ?
         (Request) request : HttpConnection.getCurrentConnection().getRequest();
     base_request.setHandled(true);
+  }
+
+  private static String normalize(String value) {
+    if (value != null) {
+      value = value.trim();
+      if (value.isEmpty()) {
+        value = null;
+      }
+    }
+    return value;
+  }
+
+  private static <T extends Enum<T>> T getEnum(String value, Class<T> enumClass, T defaultValue) {
+    T out = defaultValue;
+    if (value != null) {
+      try {
+        out = Enum.valueOf(enumClass, value);
+      } catch (IllegalArgumentException e) {
+        // ignore
+      }
+    }
+    return out;
+  }
+
+  private static byte[] getBytes(String value, byte[] defaultValue) {
+    byte[] out = defaultValue;
+    if (value != null) {
+      out = BaseEncoding.base64().decode(value);
+    }
+    return out;
+  }
+
+  private static int getInt(String value, int defaultValue) {
+    int out = defaultValue;
+    if (value != null) {
+      try {
+        out = Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        // ignore
+      }
+    }
+    return out;
   }
 
   private static final Logger LOG = LoggerFactory.getLogger(APIHandler.class);
@@ -72,22 +112,12 @@ public class APIHandler extends AbstractHandler {
       int dispatch) throws IOException, ServletException {
 
     if (target.endsWith("/workflows")) {
-      String cluster = checkNotNull(request.getParameter(QUERY_PARAM_CLUSTER)).trim();
-      String user = request.getParameter(QUERY_PARAM_USER);
-
-      if (user != null) {
-        user = user.trim();
-        if (user.isEmpty()) {
-          user = null;
-        }
-      }
-
-      Status status = Status.valueOf(checkNotNull(request.getParameter(QUERY_PARAM_STATUS).trim()));
-      String startRowParam = request.getParameter(QUERY_PARAM_START_KEY);
-      byte[] startRow = null;
-      if (startRowParam != null && !startRowParam.isEmpty()) {
-        startRow = BaseEncoding.base64().decode(startRowParam);
-      }
+      String cluster = normalize(request.getParameter(QUERY_PARAM_CLUSTER));
+      String user = normalize(request.getParameter(QUERY_PARAM_USER));
+      String statusParam = normalize(request.getParameter(QUERY_PARAM_STATUS));
+      Status status = getEnum(statusParam, Status.class, null);
+      String startRowParam = normalize(request.getParameter(QUERY_PARAM_START_KEY));
+      byte[] startRow = getBytes(startRowParam, null);
 
       LOG.info("Submitted request for cluster={}, user={}, status={}, startRow={}", cluster, user,
           status, startRowParam);
@@ -99,7 +129,7 @@ public class APIHandler extends AbstractHandler {
       sendJson(request, response, workflows);
 
     } else if (target.endsWith("/dag")) {
-      String workflowId = checkNotNull(request.getParameter(QUERY_PARAM_WORKFLOW_ID));
+      String workflowId = normalize(request.getParameter(QUERY_PARAM_WORKFLOW_ID));
 
       LOG.info("Submitted request for workflowId={}", workflowId);
       Map<String, DAGNode<Job>> dagNodeNameMap =
@@ -111,8 +141,8 @@ public class APIHandler extends AbstractHandler {
       sendJson(request, response, nodes.toArray(new DAGNode[nodes.size()]));
 
     } else if (target.endsWith("/events")) {
-      Integer lastEventId = request.getParameter(QUERY_PARAM_LAST_EVENT_ID) != null ?
-          Integer.parseInt(request.getParameter(QUERY_PARAM_LAST_EVENT_ID)) : -1;
+      String lastEventIdParam = normalize(request.getParameter(QUERY_PARAM_LAST_EVENT_ID));
+      Integer lastEventId = getInt(lastEventIdParam, -1);
 
       LOG.info("Submitted request for lastEventId={}", lastEventId);
       Collection<Event> events = statsReadService
