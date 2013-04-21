@@ -55,7 +55,7 @@
       <directory>src/main/demo</directory>
       <outputDirectory>demo</outputDirectory>
       <includes>
-        <include>*</include>
+        <include>**/*</include>
       </includes>
     </fileSet>
 

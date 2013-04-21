@@ -47,13 +47,8 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
         var params = uri.search(true);
         if (params.localdata) {
           workflowsUri = 'data/workflows.json';
-          if (params.localdata == 'small') {
-            jobsUri = 'data/small-dag.json';
-            eventsUri = 'data/small-events.json';
-          } else {
-            jobsUri = 'data/large-dag.json';
-            eventsUri = 'data/large-events.json';
-          }
+          jobsUri = 'data/jobs.json';
+          eventsUri = 'data/events.json';
         }
       } else {
         // resolve relative paths given base uri
