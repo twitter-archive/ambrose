@@ -44,6 +44,7 @@ import com.twitter.ambrose.util.JSONUtil;
 public class DAGNode<T extends Job> {
   private String name;
   private T job;
+  @JsonIgnore
   private Collection<DAGNode<? extends Job>> successors;
   private Collection<String> successorNames;
 
