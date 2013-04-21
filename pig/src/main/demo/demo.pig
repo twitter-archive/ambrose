@@ -2,11 +2,40 @@
 
 Demo pig script for use with pig-ambrose. Reads some data and does some stuff.
 
+To run in local mode and capture jobs and events json data:
+
+{{{
+
+cd /path/to/ambrose-pig
+./bin/pig-ambrose -x local -F -f ./demo/demo.pig
+
+}}}
+
+To run in mapreduce mode, copy demo folder to hdfs:
+
+{{{
+
+cd /path/to/ambrose-pig
+hadoop fs -put demo .
+./bin/pig-ambrose -x mapreduce -F -f ./demo/demo.pig
+
+}}}
+
+To store jobs and events json data, update PIG_OPTS before invoking pig-ambrose:
+
+{{{
+
+export PIG_OPTS="\
+-Dambrose.write.dag.file=jobs.json \
+-Dambrose.write.events.file=events.json"
+
+}}}
+
 */
 
-%default BASEDIR `pwd`;
-%default INPUT_PATH 'file://$BASEDIR/demo/input';
-%default OUTPUT_PATH 'file://$BASEDIR/demo/output';
+%default DEMO_DIR 'demo';
+%default INPUT_PATH '$DEMO_DIR/input';
+%default OUTPUT_PATH '$DEMO_DIR/output';
 
 SET job.name 'Ambrose Pig demo script';
 
