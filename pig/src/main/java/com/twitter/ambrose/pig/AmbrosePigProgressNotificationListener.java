@@ -44,6 +44,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -60,23 +61,15 @@ import com.google.common.collect.Sets;
  */
 @SuppressWarnings("deprecation")
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
-  protected Log log = LogFactory.getLog(getClass());
 
   private static final Joiner COMMA_JOINER = Joiner.on(',');
-
+  protected Log log = LogFactory.getLog(getClass());
   private StatsWriteService statsWriteService;
-
   private String workflowVersion;
   private List<Job> jobs = new ArrayList<Job>();
   private Map<String, DAGNode<PigJob>> dagNodeNameMap = Maps.newTreeMap();
   private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = Maps.newTreeMap();
-
-  private HashSet<String> completedJobIds = Sets.newHashSet();
-
-  protected static enum JobProgressField {
-    jobId, jobName, trackingUrl, isComplete, isSuccessful,
-    mapProgress, reduceProgress, totalMappers, totalReducers;
-  }
+  private Set<String> completedJobIds = Sets.newHashSet();
 
   /**
    * Initialize this class with an instance of StatsWriteService to push stats to.
