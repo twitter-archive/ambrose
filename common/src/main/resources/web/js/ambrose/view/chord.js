@@ -109,7 +109,7 @@ define(['jquery', 'd3', '../core', './core'], function(
       workflow.on('jobsLoaded', function(event, jobs) {
         self.handleJobsLoaded(jobs);
       });
-      workflow.on('jobStarted jobProgress jobCompleted jobFailed', function(event, job) {
+      workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
         self.handleJobUpdated(350);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
