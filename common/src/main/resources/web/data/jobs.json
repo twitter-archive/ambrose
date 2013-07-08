@@ -1,0 +1,81 @@
+[ {
+  "name" : "scope-378",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-451", "friend", "user_friends" ],
+    "features" : [ "GROUP_BY" ]
+  },
+  "successorNames" : [ "scope-382" ]
+}, {
+  "name" : "scope-382",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-453", "user" ],
+    "features" : [ "HASH_JOIN" ]
+  },
+  "successorNames" : [ "scope-391" ]
+}, {
+  "name" : "scope-387",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-452", "enemy", "user_enemies" ],
+    "features" : [ "GROUP_BY" ]
+  },
+  "successorNames" : [ "scope-391" ]
+}, {
+  "name" : "scope-391",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-454", "masochists", "narcissists", "user", "user_enemy" ],
+    "features" : [ "HASH_JOIN", "MULTI_QUERY" ]
+  },
+  "successorNames" : [ "scope-430", "scope-395", "scope-412", "scope-422" ]
+}, {
+  "name" : "scope-395",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-455", "1-456", "enemies_users_histogram", "friends_users_histogram", "user_counts" ],
+    "features" : [ "MULTI_QUERY", "COMBINER" ]
+  },
+  "successorNames" : [ ]
+}, {
+  "name" : "scope-412",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-457", "user_enemy2", "user_enemy_enemy" ],
+    "features" : [ "HASH_JOIN" ]
+  },
+  "successorNames" : [ "scope-416" ]
+}, {
+  "name" : "scope-416",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-458", "1-459", "1-460", "frienemies", "name" ],
+    "features" : [ "GROUP_BY", "DISTINCT" ]
+  },
+  "successorNames" : [ ]
+}, {
+  "name" : "scope-422",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-461", "tokens", "tweet", "user_mention", "user_mention_name", "user_mention_raw", "user_name", "user_token" ],
+    "features" : [ "HASH_JOIN" ]
+  },
+  "successorNames" : [ "scope-426" ]
+}, {
+  "name" : "scope-426",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-462", "user_mentions" ],
+    "features" : [ "GROUP_BY" ]
+  },
+  "successorNames" : [ "scope-430" ]
+}, {
+  "name" : "scope-430",
+  "job" : {
+    "runtime" : "pig",
+    "aliases" : [ "1-463", "user" ],
+    "features" : [ "HASH_JOIN" ]
+  },
+  "successorNames" : [ ]
+} ]

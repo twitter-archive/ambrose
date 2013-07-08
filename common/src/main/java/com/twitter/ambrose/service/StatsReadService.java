@@ -15,6 +15,10 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -26,14 +30,14 @@ import java.util.Map;
  *
  * @author billg
  */
-public interface StatsReadService {
+public interface StatsReadService<T extends Job> {
 
   /**
    * Get a map of all DAGNodes in the workflow.
    * @param workflowId the id of the workflow being fetched
    * @return a Map of DAGNodes where the key is the DAGNode name
    */
-  public Map<String, DAGNode> getDagNodeNameMap(String workflowId) throws IOException;
+  public Map<String, DAGNode<T>> getDagNodeNameMap(String workflowId) throws IOException;
 
   /**
    * Get all events for a given workflow since eventId. To get the entire list of events, pass a
@@ -43,5 +47,5 @@ public interface StatsReadService {
    * @param eventId the eventId that all returned events will be greater than
    * @return a Collection of WorkflowEvents, ordered by eventId ascending
    */
-  public Collection<WorkflowEvent> getEventsSinceId(String workflowId, int eventId) throws IOException;
+  public Collection<Event> getEventsSinceId(String workflowId, int eventId) throws IOException;
 }

@@ -19,9 +19,11 @@ limitations under the License.
  */
 define([
   'ambrose/core',
+  'ambrose/graph',
   'ambrose/client',
+  'ambrose/dashboard',
   'ambrose/workflow',
-  'ambrose/views',
+  'ambrose/view',
 ], function(Ambrose) {
   return Ambrose;
 });

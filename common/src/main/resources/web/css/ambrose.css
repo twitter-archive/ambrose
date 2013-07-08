@@ -1,14 +1,34 @@
 /* Page dimensions */
-body { padding-top: 60px; padding-bottom: 40px; }
+body { position: relative; padding-top: 40px; }
+@media (max-width: 979px) { body { padding-top: 0px; } }
 #diagrams > div { height: 350px; margin: 0; }
-#ambrose-views-chord {}
-#ambrose-views-graph {}
+#ambrose-view-progress-bar {}
+#ambrose-view-chord {}
+#ambrose-view-graph {}
+
+/* Typography */
+h2 { margin: 1em 0px; }
+
+/* Workflows table */
+.ambrose-dashboard .progress,
+.ambrose-dashboard .bar { margin: 0px; }
+
+/* Progress Bar view */
+.ambrose-view-progress-bar { position: relative; margin: 20px 0px; }
+.ambrose-view-progress-bar .number { position: absolute; top: 0px; right: 10px; font-size: 50px; opacity: 0.1; }
+.ambrose-view-progress-bar .progress {}
 
 /* Table view */
-.ambrose-views-table td.job-mappers, .ambrose-views-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table td.job-mappers,
+.ambrose-view-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table a,
+.ambrose-view-table a:link,
+.ambrose-view-table a:visited,
+.ambrose-view-table a:hover,
+.ambrose-view-table a:active { color: #000; text-decoration: none; }
 
 /* Chord view */
-.ambrose-views-chord {}
+.ambrose-view-chord {}
 
 /* Graph view */
-.ambrose-views-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
+.ambrose-view-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
