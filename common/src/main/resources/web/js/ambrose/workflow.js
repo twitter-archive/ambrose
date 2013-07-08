@@ -119,14 +119,18 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
         }
 
         // reset job indices
-        var jobs = self.jobs = data;
+        var jobs = self.jobs = [];
         var jobsByName = self.jobsByName = {};
         var jobsById = self.jobsById = {};
 
         // initialize job indices
-        $.each(jobs, function(i, job) {
+        $.each(data, function(i, node) {
+          // retrieve job from node
+          var job = node.job;
+          jobs.push(job);
+
           // index job by name
-          var name = job.name;
+          var name = job.name = node.name;
           if (name in jobsByName) {
             console.error("Multiple jobs found with name '" + name + "':", self);
             return;
@@ -134,9 +138,8 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
           jobsByName[name] = job;
 
           // index job by id (if defined)
-          if (job.jobId) {
-            var id = job.id = job.jobId;
-            delete job.jobId;
+          if (job.id) {
+            var id = job.id;
             if (id in jobsById) {
               console.error("Multiple jobs found with id '" + id + "':", self);
               return;
@@ -145,13 +148,20 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
           }
         });
 
-        // initialize parent links
-        $.each(jobs, function(i, job) {
+        // initialize parent-child references
+        $.each(data, function(i, node) {
+          var job = node.job;
           var name = job.name;
-          $.each(job.successorNames, function(i, childName) {
+          if (!job.parentNames) job.parentNames = [];
+          // TODO(Andy Schlaikjer): Rename node.successorNames to childNames
+          $.each(job.childNames = node.successorNames, function(i, childName) {
             var child = jobsByName[childName];
-            var predecessorNames = child.predecessorNames || (child.predecessorNames = []);
-            predecessorNames.push(name);
+            if (!child) {
+              console.error("No job with name '" + childName + "' exists", self);
+              return;
+            }
+            var parentNames = child.parentNames || (child.parentNames = []);
+            parentNames.push(name);
           });
         });
 
@@ -159,7 +169,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
         var graph = self.graph = Graph({
           data: jobs,
           getId: function(d) { return d.name; },
-          getParentIds: function(d) { return d.predecessorNames; },
+          getParentIds: function(d) { return d.parentNames; },
         });
         graph.sort();
         graph.addPseudoNodes();
@@ -174,7 +184,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
       };
 
       // initiate request
-      return this.client.getJobs()
+      return this.client.getJobs(self.id)
         .error(function(jqXHR, textStatus, errorThrown) {
           handleError(textStatus, errorThrown);
         })
@@ -254,7 +264,7 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
       // success handler
       var handleSuccess = function(data, textStatus) {
         if (data == null) {
-          handleError(textStatus, 'Data is null');
+          handleError(textStatus, 'data is null');
           return;
         }
 
@@ -265,10 +275,10 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
         var eventCount = 0;
         $.each(data, function(i, event) {
           // validate event data
-          var id = event.eventId;
-          var type = event.eventType;
-          var job = event.eventData;
-          if (!id || !type || !job) {
+          var id = event.id;
+          var type = event.type;
+          var data = event.payload;
+          if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
             return;
           }
@@ -281,18 +291,14 @@ define(['jquery', 'uri', './core', './client', './graph'], function(
 
           // check for workflow event
           if (type == 'WORKFLOW_PROGRESS') {
-            self.setProgress(job.workflowProgress);
+            self.setProgress(data.workflowProgress);
             return;
           }
 
-          // collect job data; JOB_FINISHED and JOB_FAILED events contain job.jobData
-          if (job.jobId == null && job.jobData != null && job.jobData.jobId != null) {
-            var jobData = job.jobData;
-            delete job.jobData;
-            $.extend(true, job, jobData);
-          }
-          job.id = job.jobId;
-          delete job.jobId;
+          // collect job data
+          var node = data;
+          var job = node.job;
+          job.name = node.name;
 
           // retrieve and update job with new data
           job = self.updateJob(job);

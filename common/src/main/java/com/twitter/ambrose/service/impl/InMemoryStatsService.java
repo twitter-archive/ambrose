@@ -15,64 +15,74 @@ limitations under the License.
 */
 package com.twitter.ambrose.service.impl;
 
-import com.twitter.ambrose.service.DAGNode;
-import com.twitter.ambrose.service.StatsReadService;
-import com.twitter.ambrose.service.StatsWriteService;
-import com.twitter.ambrose.service.WorkflowEvent;
-import com.twitter.ambrose.util.JSONUtil;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
+import com.twitter.ambrose.model.PaginatedList;
+import com.twitter.ambrose.model.WorkflowSummary;
+import com.twitter.ambrose.service.StatsReadService;
+import com.twitter.ambrose.service.StatsWriteService;
+import com.twitter.ambrose.service.WorkflowIndexReadService;
+import com.twitter.ambrose.util.JSONUtil;
+
 /**
  * In-memory implementation of both StatsReadService and StatsWriteService. Used when stats
- * collection and stats serving are happening within the same VM. This class is intended to run in
- * a VM that only handles a single workflow. Hence it ignores workflowId.
- * <P>
+ * collection and stats serving are happening within the same VM. This class is intended to run in a
+ * VM that only handles a single workflow. Hence it ignores workflowId.
+ * <p/>
  * Upon job completion this class can optionally write all json data to disk. This is useful for
  * debugging. The written files can also be replayed in the Ambrose UI without re-running the Job
- * via the <pre>bin/demo</pre> script. To write all json data to disk, set the following values
- * as system properties using <pre>-D</pre>:
- * <ul>
- *   <li><pre>ambrose.write.dag.file</pre> file to write the dag data to</li>
- *   <li><pre>ambrose.write.events.file</pre> file to write the events data to</li>
- * </ul>
- * </P>
- *
- * @author billg
+ * via the <code>bin/demo</code> script. To write all json data to disk, set the following values as
+ * system properties using <code>-D</code>:
+ * <pre>
+ *   <ul>
+ *     <li><code>{@value #DUMP_WORKFLOW_FILE_PARAM}</code> - file in which to write the workflow
+ * json.</li>
+ *     <li><code>{@value #DUMP_EVENTS_FILE_PARAM}</code> - file in which to write the events
+ * json.</li>
+ *   </ul>
+ * </pre>
  */
-public class InMemoryStatsService implements StatsReadService, StatsWriteService {
+public class InMemoryStatsService implements StatsReadService, StatsWriteService<Job>,
+    WorkflowIndexReadService {
   private static final Logger LOG = LoggerFactory.getLogger(InMemoryStatsService.class);
-
-  private static final String DUMP_DAG_FILE_PARAM = "ambrose.write.dag.file";
+  private static final String DUMP_WORKFLOW_FILE_PARAM = "ambrose.write.dag.file";
   private static final String DUMP_EVENTS_FILE_PARAM = "ambrose.write.events.file";
-
-  private Map<String, DAGNode> dagNodeNameMap = new HashMap<String, DAGNode>();
-  private SortedMap<Integer, WorkflowEvent> eventMap =
-    new ConcurrentSkipListMap<Integer, WorkflowEvent>();
-
-  private Writer dagWriter = null;
-  private Writer eventsWriter = null;
+  private final WorkflowSummary summary = new WorkflowSummary(null,
+      System.getProperty("user.name", "unknown"), "unknown", null, 0);
+  private final PaginatedList<WorkflowSummary> summaries =
+      new PaginatedList<WorkflowSummary>(ImmutableList.of(summary));
+  private boolean jobFailed = false;
+  private Map<String, DAGNode<Job>> dagNodeNameMap = Maps.newHashMap();
+  private SortedMap<Integer, Event> eventMap = new ConcurrentSkipListMap<Integer, Event>();
+  private Writer workflowWriter;
+  private Writer eventsWriter;
+  private boolean eventWritten = false;
 
   public InMemoryStatsService() {
-    String dumpDagFileName = System.getProperty(DUMP_DAG_FILE_PARAM);
+    String dumpWorkflowFileName = System.getProperty(DUMP_WORKFLOW_FILE_PARAM);
     String dumpEventsFileName = System.getProperty(DUMP_EVENTS_FILE_PARAM);
 
-    if (dumpDagFileName != null) {
+    if (dumpWorkflowFileName != null) {
       try {
-        dagWriter = new PrintWriter(dumpDagFileName);
+        workflowWriter = new PrintWriter(dumpWorkflowFileName);
       } catch (FileNotFoundException e) {
-        LOG.error("Could not create dag PrintWriter at " + dumpDagFileName, e);
+        LOG.error("Could not create dag PrintWriter at " + dumpWorkflowFileName, e);
       }
     }
 
@@ -86,39 +96,81 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public synchronized void sendDagNodeNameMap(String workflowId, Map<String, DAGNode> dagNodeNameMap) {
+  public synchronized void sendDagNodeNameMap(String workflowId,
+      Map<String, DAGNode<Job>> dagNodeNameMap) throws IOException {
+    this.summary.setId(workflowId);
+    this.summary.setStatus(WorkflowSummary.Status.RUNNING);
+    this.summary.setProgress(0);
     this.dagNodeNameMap = dagNodeNameMap;
+    writeJsonDagNodenameMapToDisk(dagNodeNameMap);
   }
 
   @Override
-  public synchronized Map<String, DAGNode> getDagNodeNameMap(String workflowId) {
+  public synchronized void pushEvent(String workflowId, Event event) throws IOException {
+    eventMap.put(event.getId(), event);
+    switch (event.getType()) {
+      case WORKFLOW_PROGRESS:
+        Event.WorkflowProgressEvent workflowProgressEvent = (Event.WorkflowProgressEvent) event;
+        String progressString =
+            workflowProgressEvent.getPayload().get(Event.WorkflowProgressField.workflowProgress);
+        int progress = Integer.parseInt(progressString);
+        summary.setProgress(progress);
+        if (progress == 100) {
+          summary.setStatus(jobFailed
+              ? WorkflowSummary.Status.FAILED
+              : WorkflowSummary.Status.SUCCEEDED);
+        }
+        break;
+      case JOB_FAILED:
+        jobFailed = true;
+      default:
+        // nothing
+    }
+    writeJsonEventToDisk(event);
+  }
+
+  @Override
+  public synchronized Map<String, DAGNode<Job>> getDagNodeNameMap(String workflowId) {
     return dagNodeNameMap;
   }
 
   @Override
-  public synchronized Collection<WorkflowEvent> getEventsSinceId(String workflowId, int sinceId) {
+  public synchronized Collection<Event> getEventsSinceId(String workflowId, int sinceId) {
     int minId = sinceId >= 0 ? sinceId + 1 : sinceId;
-
-    SortedMap<Integer, WorkflowEvent> tailMap = eventMap.tailMap(minId);
-    return tailMap.values();
+    return eventMap.tailMap(minId).values();
   }
 
   @Override
-  public synchronized void pushEvent(String workflowId, WorkflowEvent event) {
-    eventMap.put(event.getEventId(), event);
+  public synchronized PaginatedList<WorkflowSummary> getWorkflows(String cluster,
+      WorkflowSummary.Status status, String userId, int numResults, byte[] startKey)
+      throws IOException {
+    return summaries;
   }
 
-  public void writeJsonToDisk() throws IOException {
-
-    if (dagWriter != null && dagNodeNameMap != null) {
-      Collection<DAGNode> nodes = getDagNodeNameMap(null).values();
-      JSONUtil.writeJson(dagWriter, nodes.toArray(new DAGNode[dagNodeNameMap.size()]));
-      dagWriter.close();
+  private void writeJsonDagNodenameMapToDisk(Map<String, DAGNode<Job>> dagNodeNameMap)
+      throws IOException {
+    if (workflowWriter != null && dagNodeNameMap != null) {
+      JSONUtil.writeJson(workflowWriter, dagNodeNameMap.values());
     }
+  }
 
-    if (eventsWriter != null && eventMap != null) {
-      Collection<WorkflowEvent> events = getEventsSinceId(null, -1);
-      JSONUtil.writeJson(eventsWriter, events.toArray(new WorkflowEvent[events.size()]));
+  private void writeJsonEventToDisk(Event event) throws IOException {
+    if (eventsWriter != null && event != null) {
+      eventsWriter.write(!eventWritten ? "[ " : ", ");
+      JSONUtil.writeJson(eventsWriter, event);
+      eventsWriter.flush();
+      eventWritten = true;
+    }
+  }
+
+  public void flushJsonToDisk() throws IOException {
+    if (workflowWriter != null) {
+      workflowWriter.close();
+    }
+    if (eventsWriter != null) {
+      if (eventWritten) {
+        eventsWriter.write(" ]\n");
+      }
       eventsWriter.close();
     }
   }

@@ -34,14 +34,14 @@ define(['jquery', '../core', './core'], function($, Ambrose, View) {
      * @param container the DOM element in which to render the view.
      */
     init: function(workflow, container) {
-      this.workflow = workflow;
-      this.container = $(container).empty();
-      this.bar = $('<div class="bar">')
-        .appendTo($('<div class="progress">').appendTo(this.container))
-        .css('width', '0');
-      var self = this;
+      container = $(container).empty().addClass('ambrose-view-progress-bar');
+      var number = $('<div class="number">').appendTo(container).text('0%');
+      var progress = $('<div class="progress">').appendTo(container);
+      var bar = $('<div class="bar">').appendTo(progress).css('width', '0');
       workflow.on('workflowProgress', function(event, data) {
-        self.bar.css('width', data + '%');
+        var text = data + '%';
+        bar.css('width', text);
+        number.text(text);
       });
     },
   };

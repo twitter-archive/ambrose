@@ -13,25 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.twitter.ambrose.service;
+package com.twitter.ambrose.model;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Objects;
 
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Class that represents a Job node in the DAG. The job name must not be null. At DAG creation time
  * the jobID will probably be null. Ideally this will be set on the node when the job is started,
- * and the node will be sent as a <pre>WorkflowEvent.EVENT_TYPE.JOB_STARTED</pre> event.
+ * and the node will be sent as a <pre>Event.Type.JOB_STARTED</pre> event.
  *
  * This class can be converted to JSON as-is by doing something like this:
  *
@@ -39,51 +41,25 @@ import com.twitter.ambrose.util.JSONUtil;
  * om.getSerializationConfig().set(SerializationConfig.Feature.INDENT_OUTPUT, true);
  * String json = om.writeValueAsString(dagNode);
  */
-@JsonSerialize(
-  include=JsonSerialize.Inclusion.NON_NULL
-)
-public class DAGNode {
+public class DAGNode<T extends Job> {
   private String name;
-  private String[] aliases;
-  private String[] features;
-  private String jobId;
-  private Collection<DAGNode> successors;
+  private T job;
+  @JsonIgnore
+  private Collection<DAGNode<? extends Job>> successors;
   private Collection<String> successorNames;
-  private String runtime;
-
-  public DAGNode(String name, String[] aliases, String[] features, String runtime) {
-    this.name = name;
-    this.aliases = aliases;
-    this.features = features;
-    this.runtime = runtime;
-  }
 
   @JsonCreator
   public DAGNode(@JsonProperty("name") String name,
-                 @JsonProperty("aliases") String[] aliases,
-                 @JsonProperty("features") String[] features,
-                 @JsonProperty("jobId") String jobId,
-                 @JsonProperty("successorNames") Collection<String> successorNames,
-                 @JsonProperty("runtime") String runtime) {
+                 @JsonProperty("job") T job) {
     this.name = name;
-    this.aliases = aliases;
-    this.features = features;
-    this.jobId = jobId;
-    this.successorNames = successorNames;
-    this.runtime = runtime;
+    this.job = job;
   }
 
   public String getName() { return name; }
-  public String[] getAliases() { return aliases == null ? new String[0] : aliases; }
-  public String[] getFeatures() { return features == null ? new String[0] : features; }
-  public String getRuntime() { return runtime; }
+  public T getJob() { return job; }
 
-  public String getJobId() { return jobId; }
-  public void setJobId(String jobId) { this.jobId = jobId; }
-
-  @JsonIgnore
-  public synchronized Collection<DAGNode> getSuccessors() { return successors;}
-  public synchronized void setSuccessors(Collection<DAGNode> successors) {
+  public synchronized Collection<DAGNode<? extends Job>> getSuccessors() { return successors; }
+  public synchronized void setSuccessors(Collection<DAGNode<? extends Job>> successors) {
     Collection<String> successorNames = new HashSet<String>();
     if (successors != null) {
       for(DAGNode node : successors) {
@@ -96,13 +72,41 @@ public class DAGNode {
 
   public synchronized Collection<String> getSuccessorNames() { return successorNames; }
 
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(name, job, successorNames);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (obj == this) {
+      return true;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    DAGNode<?> that = (DAGNode<?>) obj;
+    return Objects.equal(name, that.name)
+        && Objects.equal(job, that.job)
+        && Objects.equal(successorNames, that.successorNames);
+  }
+
+  public String toJson() throws IOException {
+    return JSONUtil.toJson(this);
+  }
+
+  public static DAGNode<? extends Job> fromJson(String json) throws IOException {
+    return JSONUtil.toObject(json, new TypeReference<DAGNode<? extends Job>>() { });
+  }
+
   @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {
     String sourceFile = "pig/src/main/resources/web/data/large-dag.json";
     String json = JSONUtil.readFile(sourceFile);
-    List<DAGNode> nodes =
-      (List<DAGNode>)JSONUtil.readJson(json, new TypeReference<List<DAGNode>>() { });
-
+    List<DAGNode> nodes = JSONUtil.toObject(json, new TypeReference<List<DAGNode>>() { });
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
 }

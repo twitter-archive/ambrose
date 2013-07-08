@@ -15,14 +15,14 @@ limitations under the License.
 */
 
 /**
- * Depends on all built-in view modules and returns Views object.
+ * Depends on all built-in view modules and returns View object.
  */
 define([
-  './views/core',
-  './views/progress-bar',
-  './views/table',
-  './views/chord',
-  './views/graph',
-], function(Views) {
-  return Views;
+  './view/core',
+  './view/progress-bar',
+  './view/table',
+  './view/chord',
+  './view/graph',
+], function(View) {
+  return View;
 });

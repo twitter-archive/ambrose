@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.model.DAGNode;
+
 import java.util.Collection;
 
 /**
