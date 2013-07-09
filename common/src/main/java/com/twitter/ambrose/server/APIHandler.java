@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 
 import org.mortbay.jetty.HttpConnection;
@@ -111,7 +112,10 @@ public class APIHandler extends AbstractHandler {
       HttpServletResponse response,
       int dispatch) throws IOException, ServletException {
 
-    if (target.endsWith("/workflows")) {
+    if (target.endsWith("/clusters")) {
+      sendJson(request, response, workflowIndexReadService.getClusters());
+
+    } else if (target.endsWith("/workflows")) {
       String cluster = normalize(request.getParameter(QUERY_PARAM_CLUSTER));
       String user = normalize(request.getParameter(QUERY_PARAM_USER));
       String statusParam = normalize(request.getParameter(QUERY_PARAM_STATUS));

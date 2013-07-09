@@ -36,4 +36,4 @@ define(['jquery', '../core', 'd3', 'colorbrewer'], function(
       },
     }
   };
-})
+});

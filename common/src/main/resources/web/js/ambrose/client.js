@@ -37,6 +37,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
      */
     init: function(baseUri) {
       // default endpoint paths
+      var clustersUri = 'clusters';
       var workflowsUri = 'workflows';
       var jobsUri = 'dag';
       var eventsUri = 'events';
@@ -46,6 +47,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
         var uri = new URI(window.location.href);
         var params = uri.search(true);
         if (params.localdata) {
+          clustersUri = 'data/clusters.json';
           workflowsUri = 'data/workflows.json';
           jobsUri = 'data/jobs.json';
           eventsUri = 'data/events.json';
@@ -53,14 +55,37 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
       } else {
         // resolve relative paths given base uri
         var uri = new URI(baseUri);
+        clustersUri = new URI(clustersUri).absoluteTo(uri);
         workflowsUri = new URI(workflowsUri).absoluteTo(uri);
         jobsUri = new URI(jobsUri).absoluteTo(uri);
         eventsUri = new URI(eventsUri).absoluteTo(uri);
       }
 
+      this.clustersUri = new URI(clustersUri);
       this.workflowsUri = new URI(workflowsUri);
       this.jobsUri = new URI(jobsUri);
       this.eventsUri = new URI(eventsUri);
+    },
+
+    /**
+     * Sends asynch request to server.
+     */
+    sendRequest: function(uri, params) {
+      var self = this;
+      return $.getJSON(new URI(uri).addSearch(params).unicode())
+        .error(function(jqXHR, textStatus, errorThrown) {
+          console.error('Request failed:', self, textStatus, errorThrown);
+        })
+        .success(function(data, textStatus, jqXHR) {
+          console.debug('Request succeeded:', textStatus, data);
+        });
+    },
+
+    /**
+     * Retrieves cluster configuration from server.
+     */
+    getClusters: function() {
+      return this.sendRequest(this.clustersUri, {});
     },
 
     /**
@@ -73,19 +98,12 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
      * @return a jQuery Promise on which success and error callbacks may be registered.
      */
     getWorkflows: function(cluster, user, status, startKey) {
-      var self = this;
-      return $.getJSON(new URI(this.workflowsUri).addSearch({
+      return this.sendRequest(this.workflowsUri, {
         cluster: cluster,
         user: user,
         status: status,
         startKey: startKey
-      }).unicode())
-        .error(function(jqXHR, textStatus, errorThrown) {
-          console.error('Failed to get workflows:', self, textStatus, errorThrown);
-        })
-        .success(function(data, textStatus, jqXHR) {
-          console.debug('Succeeded to get workflows:', textStatus, data);
-        });
+      });
     },
 
     /**
@@ -95,16 +113,7 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
      * @return a jQuery Promise on which success and error callbacks may be registered.
      */
     getJobs: function(workflowId) {
-      var self = this;
-      return $.getJSON(new URI(this.jobsUri).addSearch({
-        workflowId: workflowId
-      }).unicode())
-        .error(function(jqXHR, textStatus, errorThrown) {
-          console.error('Failed to get jobs:', self, textStatus, errorThrown);
-        })
-        .success(function(data, textStatus, jqXHR) {
-          console.debug('Succeeded to get jobs:', textStatus, data);
-        });
+      return this.sendRequest(this.jobsUri, { workflowId: workflowId });
     },
 
     /**
@@ -116,18 +125,11 @@ define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
      * @return a jQuery Promise on which success and error callbacks may be registered.
      */
     getEvents: function(workflowId, lastEventId) {
-      var self = this;
       if (lastEventId == null) lastEventId = -1;
-      return $.getJSON(new URI(this.eventsUri).addSearch({
+      return this.sendRequest(this.eventsUri, {
         workflowId: workflowId,
         lastEventId: lastEventId,
-      }).unicode())
-        .error(function(jqXHR, textStatus, errorThrown) {
-          console.error('Failed to get events:', self, textStatus, errorThrown);
-        })
-        .success(function(data, textStatus, jqXHR) {
-          console.debug('Succeeded to get events:', textStatus, data[0]);
-        });
+      });
     },
   };
 
