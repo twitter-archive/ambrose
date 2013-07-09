@@ -1,6 +1,7 @@
 package com.twitter.ambrose.service;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.twitter.ambrose.model.PaginatedList;
 import com.twitter.ambrose.model.WorkflowSummary;
@@ -9,6 +10,14 @@ import com.twitter.ambrose.model.WorkflowSummary;
  * Interface to fetch paginated lists of WorkflowSummaries.
  */
 public interface WorkflowIndexReadService {
+  /**
+   * Returns map of cluster id to name.
+   *
+   * @return map of cluster id to name.
+   * @throws IOException
+   */
+  Map<String, String> getClusters() throws IOException;
+
   /**
    * Returns workflow summaries for a given status and optional userId filter.
    *

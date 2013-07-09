@@ -9,6 +9,6 @@ requirejs.config({
 
 require(['jquery', 'ambrose', 'bootstrap'], function ($, Ambrose) {
   $(document).ready(function() {
-    Ambrose.Dashboard().loadFlows();
+    Ambrose.Dashboard();
   });
 });

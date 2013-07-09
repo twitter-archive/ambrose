@@ -41,6 +41,7 @@ import com.twitter.ambrose.service.WorkflowIndexReadService;
  * The JSON API supports the following URIs:
  * <pre>
  *   <ul>
+ *     <li><code>/clusters</code> - Returns map from cluster id to name.</li>
  *     <li><code>/workflows</code> - Returns workflow summaries.</li>
  *     <li><code>/jobs</code> - Returns a workflow's jobs.</li>
  *     <li><code>/events</code> - Returns all workflow events.</li>

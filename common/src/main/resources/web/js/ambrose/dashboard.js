@@ -18,11 +18,6 @@ limitations under the License.
  * Ambrose dashboard module.
  */
 define(['jquery', './core', './client'], function($, Ambrose, Client) {
-  var clusterMap = {
-    'dw_smf1': 'dw@smf1',
-    'test_smf1': 'test@smf1'
-  };
-
   var statusSet = [
     'RUNNING',
     'SUCCEEDED',
@@ -52,17 +47,12 @@ define(['jquery', './core', './client'], function($, Ambrose, Client) {
       self.nextStartKey = '';
       self.prevStartKeys = [];
 
-      // build cluster menu
-      $.each(clusterMap, function(id, name) {
-        $('<a>').appendTo($('<li>').appendTo($('#cluster-menu'))
-          .attr('id', 'cluster_' + id).addClass('cluster')).text(name)
-          .click(function() { self.setCluster(id); self.loadFlows(); });
-      });
-
       // build status menu
       $.each(statusSet, function(index, id) {
-        $('<a>').appendTo($('<li>').appendTo($('#status-menu'))
-          .attr('id', 'status_' + id).addClass('status')).text(id.capitalize())
+        $('<a>').appendTo(
+          $('<li>').appendTo($('#status-menu'))
+            .attr('id', 'status_' + id).addClass('status'))
+          .text(id.capitalize())
           .click(function() { self.setStatus(id); self.loadFlows(); });
       });
 
@@ -74,17 +64,48 @@ define(['jquery', './core', './client'], function($, Ambrose, Client) {
       $('#page-next-link').click(function() { self.nextPage(); });
 
       // set default values
-      self.setCluster('dw_smf1');
       self.setStatus('RUNNING');
       self.setUser('');
-    },
 
-    getClusterMap: function() {
-      return clusterMap;
+      // request clusters
+      self.client.getClusters()
+        .fail(function() {
+          $('#cluster-dropdown').popover({
+            placement: 'bottom',
+            trigger: 'manual',
+            title: 'Warning',
+            content: 'Failed to retrieve clusters from backend.',
+            container: 'body',
+          }).popover('show').addClass('text-error');
+          self.initClusters({ undefined: 'undefined' });
+        })
+        .done(function(clusters) {
+          self.initClusters(clusters);
+          self.loadFlows();
+        }).fail();
     },
 
     getStatusSet: function() {
       return statusSet;
+    },
+
+    initClusters: function(clusters) {
+      self = this;
+      self.clusters = clusters;
+      var defaultCluster;
+
+      // build clusters menu
+      $.each(clusters, function(id, name) {
+        if (!defaultCluster) defaultCluster = id;
+        $('<a>').appendTo(
+          $('<li>').appendTo($('#cluster-menu'))
+            .attr('id', 'cluster_' + id).addClass('cluster'))
+          .text(name)
+          .click(function() { self.setCluster(id); self.loadFlows(); });
+      });
+
+      // set default cluster
+      self.setCluster(defaultCluster);
     },
 
     setCluster: function(cluster) {
@@ -121,7 +142,7 @@ define(['jquery', './core', './client'], function($, Ambrose, Client) {
 
     loadFlows: function() {
       var self = this;
-      self.client.getWorkflows(clusterMap[self.cluster], self.user, self.status, self.currentStartKey)
+      self.client.getWorkflows(self.clusters[self.cluster], self.user, self.status, self.currentStartKey)
         .success(function(data) {
           self.nextStartKey = data.nextPageStart;
           self.renderFlows(data);

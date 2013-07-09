@@ -20,11 +20,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.slf4j.Logger;
@@ -138,6 +140,11 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   public synchronized Collection<Event> getEventsSinceId(String workflowId, int sinceId) {
     int minId = sinceId >= 0 ? sinceId + 1 : sinceId;
     return eventMap.tailMap(minId).values();
+  }
+
+  @Override
+  public Map<String, String> getClusters() throws IOException {
+    return ImmutableMap.of("default", "default");
   }
 
   @Override
