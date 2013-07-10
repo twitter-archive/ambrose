@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the ProgressBar view which generates a progress bar for Workflow progress.
  */
-define(['jquery', '../core', './core'], function($, Ambrose, View) {
+define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
   // ProgressBar ctor
   var ProgressBar = View.ProgressBar = function(workflow, container) {
     return new View.ProgressBar.fn.init(workflow, container);

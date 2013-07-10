@@ -19,7 +19,7 @@ limitations under the License.
  * graphs. Graph nodes may be created from arbitrary javascript objects, provided a suitable 'getId'
  * and 'getParentIds' functions are defined.
  */
-define(['jquery', './core'], function($, Ambrose) {
+define(['lib/jquery', './core'], function($, Ambrose) {
   /**
    * Creates graph nodes from data and initializes indices for node access.
    */

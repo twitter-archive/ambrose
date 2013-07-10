@@ -19,7 +19,7 @@ limitations under the License.
  * events from an Ambrose server. The Workflow acts as a controller and owner of job
  * state. Callbacks may be bound to events triggered on the Workflow to react to state changes.
  */
-define(['jquery', 'uri', './core', './client', './graph'], function(
+define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
   $, URI, Ambrose, Client, Graph
 ) {
   // Maximum number of consecutive client failures before event polling is stopped.
