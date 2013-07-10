@@ -9,7 +9,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.2.1</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
@@ -57,7 +57,7 @@
     <connection>scm:git:https://github.com/twitter/ambrose.git</connection>
     <developerConnection>scm:git:git@github.com:twitter/ambrose.git</developerConnection>
     <url>https://github.com/twitter/ambrose</url>
-    <tag>HEAD</tag>
+    <tag>ambrose-0.2.1</tag>
   </scm>
 
   <properties>
