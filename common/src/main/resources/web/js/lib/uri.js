@@ -1,5 +1,4 @@
 /*! URI.js v1.7.2 http://medialize.github.com/URI.js/ */
-console.log('Loading URI module');
 /* build contains: IPv6.js, punycode.js, SecondLevelDomains.js, URI.js, URITemplate.js, jquery.URI.js */
 (function(){("undefined"!==typeof module&&module.exports?module.exports:window).IPv6={best:function(d){var d=d.toLowerCase().split(":"),i=d.length,k=8;""===d[0]&&""===d[1]&&""===d[2]?(d.shift(),d.shift()):""===d[0]&&""===d[1]?d.shift():""===d[i-1]&&""===d[i-2]&&d.pop();i=d.length;-1!==d[i-1].indexOf(".")&&(k=7);var j;for(j=0;j<i&&""!==d[j];j++);if(j<k)for(d.splice(j,1,"0000");d.length<k;)d.splice(j,0,"0000");for(j=0;j<k;j++){for(var i=d[j].split(""),f=0;3>f;f++)if("0"===i[0]&&1<i.length)i.splice(0,
 1);else break;d[j]=i.join("")}var i=-1,t=f=0,u=-1,h=!1;for(j=0;j<k;j++)h?"0"===d[j]?t+=1:(h=!1,t>f&&(i=u,f=t)):"0"==d[j]&&(h=!0,u=j,t=1);t>f&&(i=u,f=t);1<f&&d.splice(i,f,"");i=d.length;k="";""===d[0]&&(beststr=":");for(j=0;j<i;j++){k+=d[j];if(j===i-1)break;k+=":"}""===d[i-1]&&(k+=":");return k}}})();
