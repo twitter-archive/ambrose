@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * Ambrose dashboard module.
  */
-define(['jquery', './core', './client'], function($, Ambrose, Client) {
+define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
   var statusSet = [
     'RUNNING',
     'SUCCEEDED',

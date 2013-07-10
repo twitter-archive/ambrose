@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the core Ambrose object and utility methods. Submodules add functionality.
  */
-define(['jquery'], function($) {
+define(['lib/jquery'], function($) {
   // capitalize string
   String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();

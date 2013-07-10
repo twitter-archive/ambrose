@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['jquery', 'd3', '../core', './core'], function(
+define(['lib/jquery', 'lib/d3', '../core', './core'], function(
   $, d3, Ambrose, View
 ) {
   // utility functions
