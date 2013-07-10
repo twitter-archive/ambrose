@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * This module defines the Ambrose.View namespace in which other view modules are registered.
  */
-define(['jquery', '../core', 'd3', 'colorbrewer'], function(
-  $, Ambrose, d3, colorbrewer
+define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
+  $, d3, colorbrewer, Ambrose
 ) {
   return Ambrose.View = {
     Theme: {

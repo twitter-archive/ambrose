@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * Ambrose module "chord" provides a chord diagram of the job graph.
  */
-define(['jquery', 'd3', '../core', './core'], function(
+define(['lib/jquery', 'lib/d3', '../core', './core'], function(
   $, d3, Ambrose, View
 ) {
   // Chord ctor

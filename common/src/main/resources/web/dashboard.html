@@ -13,7 +13,7 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="js/html5shiv.js"></script>
+      <script src="js/lib/html5shiv.js"></script>
     <![endif]-->
 
     <!-- fav and touch icons -->
@@ -94,13 +94,9 @@
       </footer>
     </div>
 
-    <script type="text/javascript">
-      var require = {
-        waitSeconds: 15,
-        //urlArgs : "bust=" + new Date().getTime(),
-      };
-    </script>
-    <script data-main="js/dashboard-main" src="js/require-jquery.js"></script>
+    <script src="js/lib/require.js"></script>
+    <script src="js/require-config.js"></script>
+    <script src="js/dashboard.js"></script>
 
   </body>
 </html>

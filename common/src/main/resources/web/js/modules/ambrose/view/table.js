@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the Table view which generates a dynamic tabular view of a Workflow's jobs.
  */
-define(['jquery', 'd3', '../core', './core'], function($, d3, Ambrose, View) {
+define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, View) {
   // Table ctor
   var Table = View.Table = function(workflow, container) {
     return new View.Table.fn.init(workflow, container);

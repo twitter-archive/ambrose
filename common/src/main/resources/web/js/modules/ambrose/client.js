@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the Client class, simplifying interaction with Ambrose http server endpoints.
  */
-define(['jquery', 'uri', './core'], function($, URI, Ambrose) {
+define(['lib/jquery', 'lib/uri', './core'], function($, URI, Ambrose) {
   // Client ctor
   var Client = Ambrose.Client = function(baseUri) {
     return new Ambrose.Client.fn.init(baseUri);
