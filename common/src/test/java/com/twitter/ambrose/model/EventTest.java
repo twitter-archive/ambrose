@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -35,5 +36,27 @@ public class EventTest {
     Job job = new Job("scope-123", properties, metrics);
     DAGNode<Job> node = new DAGNode<Job>("dag name", job);
     testRoundTrip(new Event.JobStartedEvent(node));
+  }
+
+  @Test
+  public void testFromJson() throws IOException {
+    String json =  "{\n" +
+                   "  \"type\" : \"JOB_STARTED\",\n" +
+                   "  \"payload\" : {\n" +
+                   "    \"name\" : \"scope-29\",\n" +
+                   "    \"job\" : {\n" +
+                   "      \"runtime\" : \"default\",\n" +
+                   "      \"id\" : \"job_local_0001\",\n" +
+                   "      \"aliases\" : [ \"A\", \"AA\", \"B\", \"C\" ],\n" +
+                   "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ]\n" +
+                   "    },\n" +
+                   "    \"successorNames\" : [ ]\n" +
+                   "  },\n" +
+                   "  \"id\" : 1,\n" +
+                   "  \"timestamp\" : 1373560988033\n" +
+                   "}";
+    Event event = Event.fromJson(json);
+    Job job = ((DAGNode<Job>)event.getPayload()).getJob();
+    assertEquals("job_local_0001", job.getId());
   }
 }

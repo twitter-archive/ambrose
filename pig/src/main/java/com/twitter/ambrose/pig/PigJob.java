@@ -72,6 +72,7 @@ public class PigJob extends Job {
                 @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
                 @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
     this(aliases, features);
+    setId(id);
     this.mapReduceJobState = mapReduceJobState;
     this.counterGroupMap = counterGroupMap;
     this.inputInfoList = inputInfoList;
