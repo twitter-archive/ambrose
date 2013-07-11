@@ -55,6 +55,30 @@ public class PigJobTest {
     doTestRoundTrip(node);
   }
 
+  @Test
+  public void testFromJson() throws IOException {
+    String json =  "{\n" +
+                   "  \"type\" : \"JOB_STARTED\",\n" +
+                   "  \"payload\" : {\n" +
+                   "    \"name\" : \"scope-29\",\n" +
+                   "    \"job\" : {\n" +
+                   "      \"runtime\" : \"pig\",\n" +
+                   "      \"id\" : \"job_local_0001\",\n" +
+                   "      \"aliases\" : [ \"A\", \"AA\", \"B\", \"C\" ],\n" +
+                   "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ]\n" +
+                   "    },\n" +
+                   "    \"successorNames\" : [ ]\n" +
+                   "  },\n" +
+                   "  \"id\" : 1,\n" +
+                   "  \"timestamp\" : 1373560988033\n" +
+                   "}";
+    Event event = Event.fromJson(json);
+    PigJob job = ((DAGNode<PigJob>)event.getPayload()).getJob();
+    assertEquals("job_local_0001", job.getId());
+    assertArrayEquals(new String[] {"A", "AA", "B", "C"}, job.getAliases());
+    assertArrayEquals(new String[] {"GROUP_BY", "COMBINER", "MAP_PARTIALAGG"}, job.getFeatures());
+  }
+
   private void doTestRoundTrip(DAGNode<PigJob> expected) throws IOException {
     String asJson = expected.toJson();
     DAGNode asDAGNodeAgain = DAGNode.fromJson(asJson);
