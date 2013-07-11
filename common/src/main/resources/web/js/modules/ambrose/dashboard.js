@@ -162,6 +162,8 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
           });
         $('<td>').text(pageOffset + i + 1).appendTo($tr);
         $('<td>').text(workflow.userId).appendTo($tr);
+        var createdAt = workflow.createdAt ? new Date(workflow.createdAt).toUTCString() : 'unknown';
+        $('<td>').text(createdAt).appendTo($tr);
         $('<td>').text(workflow.name).appendTo($tr);
         $('<td>').text(workflow.status).appendTo($tr);
         $('<div class="bar">').width(workflow.progress + '%').appendTo(

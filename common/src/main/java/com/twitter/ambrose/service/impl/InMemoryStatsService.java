@@ -19,10 +19,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.google.common.collect.ImmutableList;
@@ -66,7 +68,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   private static final String DUMP_WORKFLOW_FILE_PARAM = "ambrose.write.dag.file";
   private static final String DUMP_EVENTS_FILE_PARAM = "ambrose.write.events.file";
   private final WorkflowSummary summary = new WorkflowSummary(null,
-      System.getProperty("user.name", "unknown"), "unknown", null, 0);
+      System.getProperty("user.name", "unknown"), "unknown", null, 0, System.currentTimeMillis());
   private final PaginatedList<WorkflowSummary> summaries =
       new PaginatedList<WorkflowSummary>(ImmutableList.of(summary));
   private boolean jobFailed = false;
