@@ -89,7 +89,7 @@ export AMBROSE_PORT=4567
 
 ## Maven repository
 
-Ambrose release can be found on Maven as [com.twitter.ambrose](http://repo1.maven.org/maven2/com/twitter/ambrose).
+Ambrose releases can be found on Maven under [com.twitter.ambrose](http://repo1.maven.org/maven2/com/twitter/ambrose).
 
 ## How to contribute
 
