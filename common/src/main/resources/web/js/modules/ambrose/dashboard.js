@@ -24,6 +24,26 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
     'FAILED'
   ];
 
+  function pad(number) {
+    var r = String(number);
+    if (r.length === 1) r = '0' + r;
+    return r;
+  }
+
+  function formatTimestamp(timestamp) {
+    var date = new Date(timestamp);
+    var timezoneOffsetHours = date.getTimezoneOffset() / 60;
+    var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
+    timezoneOffsetHours = Math.abs(timezoneOffsetHours);
+    return date.getFullYear() + '-'
+      + pad(date.getMonth() + 1) + '-'
+      + pad(date.getDate()) + ' '
+      + pad(date.getHours()) + ':'
+      + pad(date.getMinutes()) + ':'
+      + pad(date.getSeconds())
+      + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
+  }
+
   // Dashboard ctor
   var Dashboard = Ambrose.Dashboard = function(client) {
     return new Ambrose.Dashboard.fn.init(client);
@@ -162,7 +182,7 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
           });
         $('<td>').text(pageOffset + i + 1).appendTo($tr);
         $('<td>').text(workflow.userId).appendTo($tr);
-        var createdAt = workflow.createdAt ? new Date(workflow.createdAt).toUTCString() : 'unknown';
+        var createdAt = workflow.createdAt ? formatTimestamp(workflow.createdAt) : 'unknown';
         $('<td>').text(createdAt).appendTo($tr);
         $('<td>').text(workflow.name).appendTo($tr);
         $('<td>').text(workflow.status).appendTo($tr);
