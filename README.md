@@ -89,7 +89,7 @@ export AMBROSE_PORT=4567
 
 ## Maven repository
 
-An initial Ambrose release will be pushed to Maven Central soon.
+Ambrose release can be found on Maven as [com.twitter.ambrose](http://repo1.maven.org/maven2/com/twitter/ambrose).
 
 ## How to contribute
 
@@ -122,6 +122,7 @@ For more information on semantic versioning, please visit http://semver.org/.
 
 * Bill Graham ([@billgraham](https://twitter.com/billgraham))
 * Andy Schlaikjer ([@sagemintblue](https://twitter.com/sagemintblue))
+* Gary Helmling ([@gario](https://twitter.com/gario))
 * Nicolas Belmonte ([@philogb](https://twitter.com/philogb))
 
 ## License
