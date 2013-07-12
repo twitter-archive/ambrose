@@ -83,8 +83,8 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
           node: {
             radius: 8,
             progress: {
-              map: { radius: 11 },
-              reduce: { radius: 14 },
+              map: { radius: 12 },
+              reduce: { radius: 16 },
             },
             magnitude: {
               radius: {
@@ -337,7 +337,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         var status = job.status || '';
         if (job.mouseover) return colors.mouseover;
         if (job.selected) return colors.selected;
-        return colors[status.toLowerCase()] || '#555';
+        return colors[status.toLowerCase()] || colors.pending;
       }
 
       var s = g.selectAll('g.node circle.anchor');
