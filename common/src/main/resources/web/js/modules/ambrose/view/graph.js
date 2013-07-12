@@ -87,8 +87,8 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
             },
             magnitude: {
               radius: {
-                min: 12,
-                max: 32,
+                min: 16,
+                max: 64,
               },
             },
           },
@@ -98,8 +98,13 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       }, View.Theme, params);
       self.resetView();
 
-      // create arc generators
       var dim = self.params.dimensions;
+
+      self.magnitudeScale = d3.scale.log()
+        .domain([1, 10000])
+        .range([dim.node.magnitude.radius.min, dim.node.magnitude.radius.max]);
+
+      // create arc generators
       self.progressArc = d3.svg.arc()
         .innerRadius(0).outerRadius(dim.node.progress.radius)
         .startAngle(0).endAngle(function(a) { return a; });
@@ -252,6 +257,11 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       var real = g.filter(isReal);
 
       // create translucent circle depicting relative size of each node
+      real.append('svg:circle')
+        .attr('class', 'magnitude')
+        .attr('cx', cx)
+        .attr('cy', cy);
+
 
       // create arcs depicting MR task completion
       var progress = real.append('svg:g')
@@ -293,6 +303,17 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       self.updateNodeGroupsFill(g, duration);
       g.selectAll('g.node path.map').transition().duration(duration).attrTween("d", getArcTween(progress.map, 1.0));
       g.selectAll('g.node path.reduce').transition().duration(duration).attrTween("d", getArcTween(progress.reduce, -1.0));
+      
+      g.selectAll('g.node circle.magnitude')
+      .attr('r', function(node) { 
+          if(node.data.hasOwnProperty('mapReduceJobState')) {
+            var jobState = node.data.mapReduceJobState;
+            console.log(jobState)
+            return self.magnitudeScale(jobState.totalMappers + jobState.totalReducers);
+          } else {
+            return 0;
+          }
+        })
     },
 
     updateNodeGroupsFill: function(g, duration) {
