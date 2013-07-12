@@ -24,7 +24,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
   // utility functions
   function isPseudo(node) { return node.pseudo; }
   function isReal(node) { return !(node.pseudo); }
-  var progressToAngle = d3.interpolate(0, Math.PI);
+  var progressToAngle = d3.interpolate(0, 2.0 * Math.PI);
 
   // generates an accessor for the given job state property
   function genJobStateAccessor(property) {
@@ -83,12 +83,13 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
           node: {
             radius: 8,
             progress: {
-              radius: 12,
+              map: { radius: 11 },
+              reduce: { radius: 14 },
             },
             magnitude: {
               radius: {
-                min: 12,
-                max: 32,
+                min: 14,
+                max: 64,
               },
             },
           },
@@ -100,9 +101,16 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
 
       // create arc generators
       var dim = self.params.dimensions;
-      self.progressArc = d3.svg.arc()
-        .innerRadius(0).outerRadius(dim.node.progress.radius)
-        .startAngle(0).endAngle(function(a) { return a; });
+      self.arc = {
+        progress: {
+          map: d3.svg.arc()
+            .innerRadius(0).outerRadius(dim.node.progress.map.radius)
+            .startAngle(0).endAngle(function(a) { return a; }),
+          reduce: d3.svg.arc()
+            .innerRadius(0).outerRadius(dim.node.progress.reduce.radius)
+            .startAngle(0).endAngle(function(a) { return a; }),
+        },
+      };
 
       // ensure we resize appropriately
       $(window).resize(function() {
@@ -135,8 +143,8 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         .attr('class', 'ambrose-view-graph')
         .attr('width', width)
         .attr('height', height);
-      var xs = this.xs = d3.scale.linear().range([0, width]);
-      var ys = this.ys = d3.scale.linear().range([0, height]);
+      var xs = this.xs = d3.interpolate(0, width);
+      var ys = this.ys = d3.interpolate(0, height);
       this.projection = function(d) { return [xs(d.x), ys(d.y)]; };
     },
 
@@ -257,12 +265,12 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       var progress = real.append('svg:g')
         .attr('class', 'progress')
         .attr('transform', function(d) {
-          return 'translate(' + xs(d.x) + ',' + ys(d.y) + ') rotate(-90)';
+          return 'translate(' + xs(d.x) + ',' + ys(d.y) + ')';
         });
       progress.append('svg:path')
-        .attr('class', 'progress map');
-      progress.append('svg:path')
         .attr('class', 'progress reduce');
+      progress.append('svg:path')
+        .attr('class', 'progress map');
 
       // create smaller circle and bind event handlers
       real.append('svg:circle')
@@ -279,20 +287,20 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       var self = this;
       var duration = 750;
 
-      function getArcTween(progress, scale) {
+      function getArcTween(progress, arc) {
         return function(d) {
           var b = progress.angle(d);
-          var e = progress.angle(d, progressToAngle(scale * progress.value(d)));
+          var e = progress.angle(d, progressToAngle(progress.value(d)));
           var i = d3.interpolate(b, e);
           return function(t) {
-            return self.progressArc(i(t));
+            return arc(i(t));
           };
         };
       }
 
       self.updateNodeGroupsFill(g, duration);
-      g.selectAll('g.node path.map').transition().duration(duration).attrTween("d", getArcTween(progress.map, 1.0));
-      g.selectAll('g.node path.reduce').transition().duration(duration).attrTween("d", getArcTween(progress.reduce, -1.0));
+      g.selectAll('g.node path.map').transition().duration(duration).attrTween("d", getArcTween(progress.map, self.arc.progress.map));
+      g.selectAll('g.node path.reduce').transition().duration(duration).attrTween("d", getArcTween(progress.reduce, self.arc.progress.reduce));
     },
 
     updateNodeGroupsFill: function(g, duration) {

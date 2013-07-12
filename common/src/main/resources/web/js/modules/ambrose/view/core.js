@@ -24,7 +24,7 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
     Theme: {
       colors: {
         running: d3.rgb(98, 196, 98).brighter(),
-        complete: d3.rgb(98, 196, 98),
+        complete: d3.rgb(196, 196, 196),
         failed: d3.rgb(196, 98, 98),
         mouseover: d3.rgb(98, 98, 196).brighter().brighter(),
         selected: d3.rgb(98, 98, 196).brighter(),
