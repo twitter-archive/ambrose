@@ -229,9 +229,6 @@ define(['lib/jquery', './core'], function($, Ambrose) {
       for (var g = 2; g < groups.length; g++) {
         var group = groups[g];
         $.each(group, function(i, node) {
-          if (node.id == 'scope-815') {
-            console.log('we found it');
-          }
           $.each(node.parents.concat(), function(j, parent) {
             _createPseudoNodes.call(graph, node, parent);
           });

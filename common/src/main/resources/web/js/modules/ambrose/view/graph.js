@@ -22,7 +22,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
 ) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
-  function isReal(node) { return !(node.pseudo); };
+  function isReal(node) { return !(node.pseudo); }
 
   // Graph ctor
   var Graph = View.Graph = function(workflow, container, params) {
@@ -92,12 +92,41 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       var groupOffset = groupDelta / 2;
       $.each(groups, function(i, group) {
         var x = i * groupDelta + groupOffset;
+
+        // determine number of real and pseudo nodes in group
+        var realNodes = group.filter(isReal);
+        var pseudoNodes = group.filter(isPseudo);
+        var realNodeCount = realNodes.length;
+        var pseudoNodeCount = pseudoNodes.length;
         var nodeCount = group.length;
-        var nodeDelta = 1 / nodeCount;
-        var nodeOffset = nodeDelta / 2;
+
+        // count number of real and psuedo intervals between nodes
+        var realIntervals = 1; // padding
+        var pseudoIntervals = 0;
+        for (var j = 0; j < group.length - 1; j++) {
+          var n1 = group[j];
+          var n2 = group[j+1];
+          if (isReal(n1) || isReal(n2)) {
+            realIntervals++;
+          } else {
+            pseudoIntervals++;
+          }
+        }
+
+        // compute real and pseudo intervals
+        var pseudoToRealIntervalRatio = 5.0;
+        var pseudoIntervalDelta =
+          1.0 / (
+            (realIntervals * pseudoToRealIntervalRatio) + pseudoIntervals
+          );
+        var realIntervalDelta = pseudoIntervalDelta * pseudoToRealIntervalRatio;
+        var offset = realIntervalDelta / 2.0;
+
+        // assign vertical offsets to nodes; create edges
         $.each(group, function(j, node) {
           node.x = x;
-          node.y = j * nodeDelta + nodeOffset;
+          node.y = offset;
+          offset += isReal(node) ? realIntervalDelta : pseudoIntervalDelta;
           var edges = node.edges = [];
           $.each(node.parents || [], function(p, parent) {
             edges.push({ source: node, target: parent });
