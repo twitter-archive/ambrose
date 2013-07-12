@@ -131,11 +131,11 @@ public class ScriptStatusServer implements Runnable {
     server.setConnectors(new Connector[]{connector});
 
     // this needs to be loaded via the jar'ed resources, not the relative dir
-    URL resourcesUrl = checkNotNull(
+    URL resourceUrl = checkNotNull(
         APIHandler.class.getClassLoader().getResource("web"), "Failed to find resource 'web'");
     ResourceHandler resourceHandler = new ResourceHandler();
     resourceHandler.setWelcomeFiles(new String[]{ "workflow.html" });
-    resourceHandler.setResourceBase(resourcesUrl.toExternalForm());
+    resourceHandler.setResourceBase(resourceUrl.toExternalForm());
     HandlerList handler = new HandlerList();
     handler.setHandlers(new Handler[] {
         resourceHandler,
