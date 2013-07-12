@@ -29,7 +29,7 @@
     "aliases" : [ "1-454", "masochists", "narcissists", "user", "user_enemy" ],
     "features" : [ "HASH_JOIN", "MULTI_QUERY" ]
   },
-  "successorNames" : [ "scope-430", "scope-395", "scope-412", "scope-422", "scope-430-1", "scope-430-2", "scope-430-3" ]
+  "successorNames" : [ "scope-430", "scope-395", "scope-412", "scope-422" ]
 }, {
   "name" : "scope-395",
   "job" : {
@@ -78,28 +78,4 @@
     "features" : [ "HASH_JOIN" ]
   },
   "successorNames" : [ ]
-}, {
-  "name" : "scope-430-1",
-  "job" : {
-    "runtime" : "pig",
-    "aliases" : [ ],
-    "features" : [ ]
-  },
-  "successorNames" : [ "scope-430" ]
-}, {
-  "name" : "scope-430-2",
-  "job" : {
-    "runtime" : "pig",
-    "aliases" : [ ],
-    "features" : [ ]
-  },
-  "successorNames" : [ "scope-430" ]
-}, {
-  "name" : "scope-430-3",
-  "job" : {
-    "runtime" : "pig",
-    "aliases" : [ ],
-    "features" : [ ]
-  },
-  "successorNames" : [ "scope-430" ]
 } ]
