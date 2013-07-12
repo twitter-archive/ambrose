@@ -28,8 +28,6 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
         failed: d3.rgb(196, 98, 98),
         mouseover: d3.rgb(98, 98, 196).brighter().brighter(),
         selected: d3.rgb(98, 98, 196).brighter(),
-        map: d3.rgb(0, 0, 0),
-        reduce: d3.rgb(0, 0, 0),
       },
       palettes: {
         queued: colorbrewer.Greys,
