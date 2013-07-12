@@ -20,9 +20,43 @@ limitations under the License.
 define(['lib/jquery', 'lib/d3', '../core', './core'], function(
   $, d3, Ambrose, View
 ) {
+
   // utility functions
   function isPseudo(node) { return node.pseudo; }
   function isReal(node) { return !(node.pseudo); }
+  var progressToAngle = d3.interpolate(0, 2.0 * Math.PI);
+
+  // generates an accessor for the given job state property
+  function genJobStateAccessor(property) {
+    return function(d) {
+      return (d && d.data && d.data.mapReduceJobState && d.data.mapReduceJobState[property])
+        ? d.data.mapReduceJobState[property]
+        : null;
+    };
+  }
+
+  // generates a getter for map / reduce progress property
+  function genProgressValue(type) {
+    return genJobStateAccessor(type + 'Progress');
+  }
+
+  // generates a [gs]etter for map / reduce progress angle property
+  function genProgressAngle(type) {
+    var property = type + 'ProgressAngle';
+    return function(d, value) {
+      if (value != null) d[property] = value;
+      return d[property] || 0.0;
+    };
+  }
+
+  // generate (map / reduce) progress (value / angle) getters
+  var progress = {};
+  ['map', 'reduce'].map(function(type) {
+    progress[type] = {
+      value: genProgressValue(type),
+      angle: genProgressAngle(type),
+    };
+  });
 
   // Graph ctor
   var Graph = View.Graph = function(workflow, container, params) {
@@ -42,10 +76,48 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
      */
     init: function(workflow, container, params) {
       var self = this;
-      this.workflow = workflow;
-      this.container = container = $(container);
-      this.params = $.extend(true, {}, View.Theme, params);
-      this.resetView();
+      self.workflow = workflow;
+      self.container = container = $(container);
+      self.params = $.extend(true, {
+        dimensions: {
+          node: {
+            radius: 8,
+            progress: {
+              map: { radius: 12 },
+              reduce: { radius: 16 },
+            },
+            magnitude: {
+              radius: {
+                min: 16,
+                max: 64,
+              },
+            },
+          },
+          edge: {
+          },
+        },
+      }, View.Theme, params);
+      self.resetView();
+
+      // shortcut to dimensions
+      var dim = self.params.dimensions;
+
+      // create arc generators
+      self.arc = {
+        progress: {
+          map: d3.svg.arc()
+            .innerRadius(0).outerRadius(dim.node.progress.map.radius)
+            .startAngle(0).endAngle(function(a) { return a; }),
+          reduce: d3.svg.arc()
+            .innerRadius(0).outerRadius(dim.node.progress.reduce.radius)
+            .startAngle(0).endAngle(function(a) { return a; }),
+        },
+      };
+
+      // create scale for magnitude
+      self.magnitudeScale = d3.scale.log()
+        .domain([1, 10000])
+        .range([dim.node.magnitude.radius.min, dim.node.magnitude.radius.max]);
 
       // ensure we resize appropriately
       $(window).resize(function() {
@@ -58,10 +130,10 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         self.handleJobsLoaded();
       });
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
-        self.handleJobsUpdated([job], 350);
+        self.handleJobsUpdated([job]);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
-        self.handleJobsUpdated($.grep([prev, job], function(j) { return j != null; }));
+        self.handleMouseInteraction($.grep([prev, job], function(j) { return j != null; }));
       });
     },
 
@@ -78,8 +150,8 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         .attr('class', 'ambrose-view-graph')
         .attr('width', width)
         .attr('height', height);
-      var xs = this.xs = d3.scale.linear().range([0, width]);
-      var ys = this.ys = d3.scale.linear().range([0, height]);
+      var xs = this.xs = d3.interpolate(0, width);
+      var ys = this.ys = d3.interpolate(0, height);
       this.projection = function(d) { return [xs(d.x), ys(d.y)]; };
     },
 
@@ -145,9 +217,14 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       this.updateNodeGroups(g);
     },
 
-    handleJobsUpdated: function(jobs, duration) {
-      var nodes = $.map(jobs, function(job) { return job.node; });
-      this.updateNodeGroups(this.selectNodeGroups(nodes), duration);
+    handleJobsUpdated: function(jobs) {
+      var nodes = jobs.map(function(j) { return j.node; });
+      this.updateNodeGroups(this.selectNodeGroups(nodes));
+    },
+
+    handleMouseInteraction: function(jobs) {
+      var nodes = jobs.map(function(j) { return j.node; });
+      this.updateNodeGroupsFill(this.selectNodeGroups(nodes));
     },
 
     selectNodeGroups: function(nodes) {
@@ -160,16 +237,23 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
 
     createNodeGroups: function(g) {
       var self = this;
-      var xs = this.xs;
-      var ys = this.ys;
-      var projection = this.projection;
-      g = g.enter().append('svg:g').attr('class', function(node) {
-        return node.pseudo ? 'pseudo' : 'node';
-      });
+      var xs = self.xs;
+      var ys = self.ys;
+      var projection = self.projection;
+      var cx = function(d) { return xs(d.x); };
+      var cy = function(d) { return ys(d.y); };
+
+      // create node group elements
+      g = g.enter().append('svg:g')
+        .attr('class', function(node) {
+          return node.pseudo ? 'pseudo' : 'node';
+        });
+
+      // create out-bound edges from each node
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges).enter()
           .append('svg:path').attr('class', 'edge')
-          .attr('d', function diagonal(edge, i) {
+          .attr('d', function(edge, i) {
             var p0 = edge.source,
             p3 = edge.target,
             m = (p0.x + p3.x) / 2,
@@ -178,25 +262,87 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
             return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
           });
       });
-      var c = g.filter(isReal).append('svg:circle')
-        .attr('cx', function(d) { return xs(d.x); })
-        .attr('cy', function(d) { return ys(d.y); })
-        .attr('r', 8)
+
+      // filter down to real nodes
+      var real = g.filter(isReal);
+
+      // create translucent circle depicting relative size of each node
+      real.append('svg:circle')
+        .attr('class', 'magnitude')
+        .attr('cx', cx)
+        .attr('cy', cy);
+
+
+      // create arcs depicting MR task completion
+      var progress = real.append('svg:g')
+        .attr('class', 'progress')
+        .attr('transform', function(d) {
+          return 'translate(' + xs(d.x) + ',' + ys(d.y) + ')';
+        });
+      progress.append('svg:path')
+        .attr('class', 'progress reduce');
+      progress.append('svg:path')
+        .attr('class', 'progress map');
+
+      // create smaller circle and bind event handlers
+      real.append('svg:circle')
+        .attr('class', 'anchor')
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr('r', self.params.dimensions.node.radius)
         .on('mouseover', function(node) { self.workflow.mouseOverJob(node.data); })
         .on('mouseout', function(node) { self.workflow.mouseOverJob(null); })
         .on('click', function(node) { self.workflow.selectJob(node.data); });
     },
 
-    updateNodeGroups: function(g, duration) {
-      var colors = this.params.colors;
-      var fill = function(node) {
+    updateNodeGroups: function(g) {
+      var self = this;
+      var duration = 750;
+
+      function getArcTween(progress, arc) {
+        return function(d) {
+          var b = progress.angle(d);
+          var e = progress.angle(d, progressToAngle(progress.value(d)));
+          var i = d3.interpolate(b, e);
+          return function(t) {
+            return arc(i(t));
+          };
+        };
+      }
+
+      // udpate node fills
+      self.updateNodeGroupsFill(g, duration);
+
+      // update map, reduce progress arcs
+      g.selectAll('g.node path.map').transition().duration(duration).attrTween("d", getArcTween(progress.map, self.arc.progress.map));
+      g.selectAll('g.node path.reduce').transition().duration(duration).attrTween("d", getArcTween(progress.reduce, self.arc.progress.reduce));
+
+      // update magnitude radius
+      g.selectAll('g.node circle.magnitude').transition().duration(duration)
+        .attr('r', function(node) {
+          if (node.data.hasOwnProperty('mapReduceJobState')) {
+            var jobState = node.data.mapReduceJobState;
+            return self.magnitudeScale(jobState.totalMappers + jobState.totalReducers);
+          }
+          return 0;
+        });
+    },
+
+    updateNodeGroupsFill: function(g, duration) {
+      var self = this;
+      var colors = self.params.colors;
+
+      function fill(node) {
         var job = node.data;
         var status = job.status || '';
         if (job.mouseover) return colors.mouseover;
         if (job.selected) return colors.selected;
-        return colors[status.toLowerCase()] || '#555';
-      };
-      g.selectAll('g.node circle').attr('fill', fill);
+        return colors[status.toLowerCase()] || colors.pending;
+      }
+
+      var s = g.selectAll('g.node circle.anchor');
+      if (duration > 0) s = s.transition().duration(duration);
+      s.attr('fill', fill);
     },
   };
 

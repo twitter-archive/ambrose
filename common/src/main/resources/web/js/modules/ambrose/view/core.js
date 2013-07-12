@@ -20,14 +20,22 @@ limitations under the License.
 define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
   $, d3, colorbrewer, Ambrose
 ) {
+  var pending = d3.rgb(0, 0, 0);
+  var running = d3.rgb(98, 196, 98).brighter();
+  var complete = d3.rgb('#eee');
+  var failed = d3.rgb(196, 98, 98);
+  var selected = d3.rgb(98, 98, 196).brighter();
+  var mouseover = selected.brighter();
+
   return Ambrose.View = {
     Theme: {
       colors: {
-        running: d3.rgb(98, 196, 98).brighter(),
-        complete: d3.rgb(98, 196, 98),
-        failed: d3.rgb(196, 98, 98),
-        mouseover: d3.rgb(98, 98, 196).brighter().brighter(),
-        selected: d3.rgb(98, 98, 196).brighter(),
+        pending: pending,
+        running: running,
+        complete: complete,
+        failed: failed,
+        selected: selected,
+        mouseover: mouseover,
       },
       palettes: {
         queued: colorbrewer.Greys,
