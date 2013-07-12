@@ -23,14 +23,17 @@ import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.jetty.handler.ResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.service.StatsReadService;
 import com.twitter.ambrose.service.WorkflowIndexReadService;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Light weight application server that serves both the JSON API and the Ambrose web pages powered
@@ -75,8 +78,6 @@ public class ScriptStatusServer implements Runnable {
    */
   public static final String PORT_RANDOM = "random";
   private static final Logger LOG = LoggerFactory.getLogger(ScriptStatusServer.class);
-  private static final String SLASH = "/";
-  private static final String ROOT_PATH = "web";
   private final WorkflowIndexReadService workflowIndexReadService;
   private final StatsReadService<Job> statsReadService;
   private final int port;
@@ -121,7 +122,7 @@ public class ScriptStatusServer implements Runnable {
         ServerSocket ss = super.newServerSocket(host, port, backlog);
         int localPort = ss.getLocalPort();
         LOG.info("Ambrose web server listening on port {}", localPort);
-        LOG.info("Browse to http://localhost:{}/web/workflow.html to see job progress", localPort);
+        LOG.info("Browse to http://localhost:{}/ to see job progress", localPort);
         return ss;
       }
     };
@@ -130,12 +131,18 @@ public class ScriptStatusServer implements Runnable {
     server.setConnectors(new Connector[]{connector});
 
     // this needs to be loaded via the jar'ed resources, not the relative dir
-    URL resourcesUrl = this.getClass().getClassLoader().getResource(ROOT_PATH);
+    URL workflowResourcesUrl = checkNotNull(
+        APIHandler.class.getClassLoader().getResource("web"), "Failed to find resource 'web'");
+    ResourceHandler workflowResourceHandler = new ResourceHandler();
+    workflowResourceHandler.setWelcomeFiles(new String[]{ "workflow.html" });
+    workflowResourceHandler.setResourceBase(workflowResourcesUrl.toExternalForm());
     HandlerList handler = new HandlerList();
-    handler.setHandlers(new Handler[]{
+    handler.setHandlers(new Handler[] {
+        workflowResourceHandler,
         new APIHandler(workflowIndexReadService, statsReadService),
-        new WebAppContext(resourcesUrl.toExternalForm(), SLASH)
+        new DefaultHandler()
     });
+
     server.setHandler(handler);
     server.setStopAtShutdown(false);
 
