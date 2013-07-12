@@ -1,8 +1,8 @@
 var REQUIREJS_CONFIG = {
-  baseUrl: '/js/modules',
+  baseUrl: '/web/js/modules',
   urlArgs: 'bust=' + new Date().getTime(),
   paths: {
-    lib: '/js/lib',
+    lib: '/web/js/lib',
   },
   shim: {
     'lib/jquery': { exports: 'jQuery' },
