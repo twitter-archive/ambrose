@@ -126,6 +126,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         $.each(group, function(j, node) {
           node.x = x;
           node.y = offset;
+          // TODO(Andy Schlaikjer): Fix to support mixed ordering of real / pseudo nodes
           offset += isReal(node) ? realIntervalDelta : pseudoIntervalDelta;
           var edges = node.edges = [];
           $.each(node.parents || [], function(p, parent) {
