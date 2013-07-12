@@ -32,3 +32,7 @@ h2 { margin: 1em 0px; }
 
 /* Graph view */
 .ambrose-view-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
+.ambrose-view-graph path.progress {}
+.ambrose-view-graph path.map { fill: #0e90d2; }
+.ambrose-view-graph path.reduce { fill: #FF7800; }
+.ambrose-view-graph circle.magnitude { fill: rgba(28, 231, 231, 0.25); }
