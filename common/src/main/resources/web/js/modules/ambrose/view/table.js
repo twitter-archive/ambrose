@@ -147,7 +147,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
       }
 
       function taskProgressMessage(totalTasks, taskProgress) {
-        if (totalTasks == null || taskProgress == null) return '';
+        if (totalTasks == null || taskProgress == null) return 'N/A';
         return totalTasks + ' (' + Math.round(Number(taskProgress) * 100, 0) + '%)';
       }
 
@@ -157,11 +157,9 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
           var mrState = job.mapReduceJobState || {};
           return mrState.trackingURL || 'javascript:void(0);';
         })
-        .text(function(job) {
-          return job.id || 'pending';
-        });
+        .text(function(job) { return job.id || 'N/A'; });
       tr.selectAll('td.job-status')
-        .text(function (job) { return job.status || ''; });
+        .text(function (job) { return job.status || 'PENDING'; });
       tr.selectAll('td.job-aliases')
         .text(function (job) { return commaDelimit(job.aliases); });
       tr.selectAll('td.job-features')
