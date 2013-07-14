@@ -36,3 +36,4 @@ h2 { margin: 1em 0px; }
 .ambrose-view-graph path.map { fill: #0e90d2; }
 .ambrose-view-graph path.reduce { fill: #FF7800; }
 .ambrose-view-graph circle.magnitude { fill: rgba(28, 231, 231, 0.25); }
+.ambrose-view-graph circle.tic { fill: none; stroke: rgba(28, 231, 231, 0.25); stroke-width: 1px; }
