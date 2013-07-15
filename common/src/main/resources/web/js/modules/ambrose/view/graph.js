@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/d3', '../core', './core'], function(
-  $, d3, Ambrose, View
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function(
+  $, _, d3, Ambrose, View
 ) {
 
   // utility functions
@@ -89,7 +89,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
             magnitude: {
               radius: {
                 min: 16,
-                max: 64,
+                max: 128,
               },
             },
           },
@@ -115,9 +115,12 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       };
 
       // create scale for magnitude
-      self.magnitudeScale = d3.scale.log()
-        .domain([1, 10000])
-        .range([dim.node.magnitude.radius.min, dim.node.magnitude.radius.max]);
+      var magDomain = [10, 100, 1000, 10000];
+      var magRadiusMin = dim.node.magnitude.radius.min;
+      var magRadiusMax = dim.node.magnitude.radius.max;
+      var magRadiusDelta = (magRadiusMax - magRadiusMin) / (magDomain.length + 1);
+      var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
+      self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
       // ensure we resize appropriately
       $(window).resize(function() {
@@ -272,7 +275,6 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         .attr('cx', cx)
         .attr('cy', cy);
 
-
       // create arcs depicting MR task completion
       var progress = real.append('svg:g')
         .attr('class', 'progress')
@@ -310,25 +312,61 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         };
       }
 
+      // initiate transition
+      t = g.transition().duration(duration);
+
       // udpate node fills
-      self.updateNodeGroupsFill(g, duration);
+      self.updateNodeGroupsFill(t);
 
       // update map, reduce progress arcs
-      g.selectAll('g.node path.map').transition().duration(duration).attrTween("d", getArcTween(progress.map, self.arc.progress.map));
-      g.selectAll('g.node path.reduce').transition().duration(duration).attrTween("d", getArcTween(progress.reduce, self.arc.progress.reduce));
+      t.selectAll('g.node path.map').attrTween("d", getArcTween(progress.map, self.arc.progress.map));
+      t.selectAll('g.node path.reduce').attrTween("d", getArcTween(progress.reduce, self.arc.progress.reduce));
 
       // update magnitude radius
-      g.selectAll('g.node circle.magnitude').transition().duration(duration)
+      t.selectAll('g.node circle.magnitude')
         .attr('r', function(node) {
-          if (node.data.hasOwnProperty('mapReduceJobState')) {
+          var radius = 0;
+          if (node && node.data && node.data.mapReduceJobState) {
+            // compute current radius
             var jobState = node.data.mapReduceJobState;
-            return self.magnitudeScale(jobState.totalMappers + jobState.totalReducers);
+            var totalTasks = jobState.totalMappers + jobState.totalReducers;
+            radius = self.magnitudeScale(totalTasks);
+
+            // fetch previous radius
+            var circle = $(this);
+            var radiusPrev = circle.attr('r') || 0;
+            var radiusDelta = radius - radiusPrev;
+            if (radiusDelta != 0) {
+              // radius changed; remove all tics immediately
+              var $group = circle.parent();
+              $group.find('circle.tic').remove();
+              var group = d3.select($group[0]);
+
+              // add all tics
+              var cx = circle.attr('cx');
+              var cy = circle.attr('cy');
+              var factor = totalTasks;
+              while (factor >= 10) {
+                var radiusTic = self.magnitudeScale(factor);
+                var tic = group.insert('svg:circle', 'g.progress')
+                  .attr('class', 'tic')
+                  .attr('cx', cx).attr('cy', cy)
+                  .attr('r', radiusTic);
+                if (radiusTic > radiusPrev) {
+                  // new tic; animate opacity
+                  tic.attr('opacity', 0)
+                    .transition().delay(duration).delay(500)
+                    .attr('opacity', 1);
+                }
+                factor /= 10;
+              }
+            }
           }
-          return 0;
+          return radius;
         });
     },
 
-    updateNodeGroupsFill: function(g, duration) {
+    updateNodeGroupsFill: function(g) {
       var self = this;
       var colors = self.params.colors;
 
@@ -340,9 +378,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
         return colors[status.toLowerCase()] || colors.pending;
       }
 
-      var s = g.selectAll('g.node circle.anchor');
-      if (duration > 0) s = s.transition().duration(duration);
-      s.attr('fill', fill);
+      g.selectAll('g.node circle.anchor').attr('fill', fill);
     },
   };
 
