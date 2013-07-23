@@ -1,0 +1,9 @@
+#Eclipse specific files#
+.classpath
+.project
+.settings/
+target/
+
+#NetBeans specific files#
+nbactions.xml
+nb-configuration.xml
