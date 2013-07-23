@@ -65,11 +65,11 @@
     <slf4j.version>1.7.5</slf4j.version>
     <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
     <apache.pig.version>0.11.1</apache.pig.version>
+    <apache.hive.version>0.11.0</apache.hive.version>
     <apache.hadoop.version>0.22.0</apache.hadoop.version>
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
 
@@ -82,6 +82,11 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ambrose-pig</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-hive</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -181,7 +186,23 @@
         <artifactId>pig</artifactId>
         <version>${apache.pig.version}</version>
       </dependency>
-
+      
+      <!-- hive -->
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-common</artifactId>
+        <version>${apache.hive.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-exec</artifactId>
+        <version>${apache.hive.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-cli</artifactId>
+        <version>${apache.hive.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -324,5 +345,6 @@
   <modules>
     <module>common</module>
     <module>pig</module>
+    <module>hive</module>
   </modules>
 </project>
