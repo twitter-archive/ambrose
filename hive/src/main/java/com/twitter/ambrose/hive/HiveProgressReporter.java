@@ -57,18 +57,6 @@ public enum HiveProgressReporter {
     /** internal eventMap field unfolded from from InMemoryStatsService */
     private SortedMap<Integer, Event<?>> _eventMap;
     
-    static enum JobProgressField {
-        jobId,
-        jobName, 
-        trackingUrl, 
-        isComplete, 
-        isSuccessful, 
-        mapProgress, 
-        reduceProgress, 
-        totalMappers, 
-        totalReducers;
-    }
-
     @SuppressWarnings("unchecked")
     private HiveProgressReporter() {
         service = new InMemoryStatsService();

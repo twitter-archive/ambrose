@@ -23,7 +23,7 @@ import com.twitter.ambrose.model.Workflow;
 /**
  * Hook invoked when a workflow succeeds.
  * If the last statement (workflow) of the script was executed, it waits for 
- * <tt>ambrose.post.script.sleep.seconds</tt> seconds before exiting otherwise
+ * <code>{@value #POST_SCRIPT_SLEEP_SECS_PARAM}</code> seconds before exiting otherwise
  * returns and the processing moves on to the next workflow.
  * <br>
  * Called by the main thread
@@ -147,7 +147,7 @@ public class AmbroseHiveFinishHook implements HiveDriverRunHook {
         String lastLine = null;
         while (scanner.hasNext()) {
             String line = StringUtils.trim(scanner.next().replaceAll("\\n", ""));
-            if (!line.startsWith("--") && !StringUtils.isEmpty(line)) {
+            if (line.length() != 0 && !line.startsWith("--")) {
                 lastLine = line;
             }
         }

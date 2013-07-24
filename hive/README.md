@@ -34,7 +34,7 @@ cd hive/target/ambrose-hive-$VERSION-bin/ambrose-hive-$VERSION
 
 Note that this command delegates to the `hive` script present in your local installation of Hive, so
 make sure `$HIVE_HOME/bin` is in your path. Now, browse to
-[http://localhost:8080/web/workflow.html](http://localhost:8080/web/workflow.html) to see the
+[http://localhost:8080/workflow.html](http://localhost:8080/workflow.html) to see the
 progress of your script using the Ambrose UI. To override the default port, export `AMBROSE_PORT`
 before invoking `hive-ambrose`:
 

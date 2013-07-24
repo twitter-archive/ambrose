@@ -30,9 +30,6 @@
               <include>org.mortbay.jetty:jetty</include>
               <include>org.mortbay.jetty:jetty-util</include>
               <include>org.mortbay.jetty:servlet-api</include>
-              <include>org.apache.hive:hive-common</include>
-              <include>org.apache.hive:hive-exec</include>
-              <include>org.apache.hive:hive-cli</include>
             </includes>
             <useTransitiveDependencies>false</useTransitiveDependencies>
           </dependencySet>
