@@ -21,7 +21,7 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 
 /**
  * Hook invoked when a job fails.
- * Updates job event to 'FAILED' and waits for <tt>ambrose.post.script.sleep.seconds</tt> seconds
+ * Updates job event to 'FAILED' and waits for <code>{@value #POST_SCRIPT_SLEEP_SECS_PARAM}</code> seconds
  * before exiting.
  * <br>
  * Called by the main thread
