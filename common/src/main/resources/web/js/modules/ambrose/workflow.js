@@ -197,20 +197,21 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
      * Starts event polling if not already started.
      *
      * @param frequency poll events at this frequency (ms). Defaults to 1000.
-     * @param maxEvents max number of events to process on each request. Defaults to 1.
+     * @param maxEvents max number of events to process on each request. Defaults to -1 (no limit).
      * @return this.
      */
     startEventPolling: function(frequency, maxEvents) {
-      if (this.eventPollingIntervalId != null) return;
-      if (frequency == null) frequency = 1000;
-      if (maxEvents == null) maxEvents = 1;
-      console.info('Starting event polling');
-      this.clientFailureCount = 0;
       var self = this;
-      this.eventPollingIntervalId = setInterval(function() {
-        self.pollEvents(maxEvents);
-      }, frequency);
-      this.trigger('eventPollingStarted');
+      if (self.eventPollingIntervalId != null) return;
+      if (frequency == null) frequency = 1000;
+      if (maxEvents == null) maxEvents = -1;
+      console.info('Starting event polling');
+      self.clientFailureCount = 0;
+      var pollEvents = function() { self.pollEvents(maxEvents); };
+      self.eventPollingIntervalId = setInterval(pollEvents, frequency);
+      self.trigger('eventPollingStarted');
+      // poll once right now to kick things off
+      pollEvents();
       return this;
     },
 
@@ -236,11 +237,13 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
      * sequentially, triggering events in set {'workflowProgress', 'jobStarted', 'jobProgress',
      * 'jobComplete', 'jobFailed'}.
      *
-     * @param maxEvents max number of events to process. Defaults to 1.
+     * @param maxEvents max number of events to process. Defaults to -1.
      * @return Promise configured with error and success callbacks which update state of this
      * Workflow and trigger events.
      */
     pollEvents: function(maxEvents) {
+      if (maxEvents == null) maxEvents = -1;
+
       // stop polling if all jobs are done
       if (this.isComplete()) {
         console.info('Workflow complete');
@@ -248,9 +251,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         this.trigger('workflowComplete');
         return;
       }
-
-      // TODO Integer.MAX_VALUE
-      if (maxEvents == null) maxEvents = 999999;
 
       // error handler
       var self = this;
@@ -287,7 +287,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           if (id <= self.lastEventId) return;
 
           // don't process more than specified number of events
-          if (eventCount > maxEvents) return;
+          if (maxEvents > 0 && eventCount >= maxEvents) return;
 
           // check for workflow event
           if (type == 'WORKFLOW_PROGRESS') {
@@ -464,9 +464,30 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       if (job === prev) job = null;
       else if (job != null) job.selected = true;
       this.current.selected = job;
-      //console.debug('Job selected:', job, prev);
       this.trigger('jobSelected', [job, prev]);
       return job;
+    },
+
+    /**
+     * Reload jobs and poll for events at limited rate.
+     */
+    replay: function() {
+      var self = this;
+      self.stopEventPolling();
+      self.loadJobs().done(function() {
+        self.startEventPolling(1000, 1);
+      });
+    },
+
+    /**
+     * Reload jobs and poll for as many events as possible.
+     */
+    jumpToEnd: function() {
+      var self = this;
+      self.stopEventPolling();
+      self.loadJobs().done(function() {
+        self.startEventPolling(1000, -1);
+      });
     },
   };
 

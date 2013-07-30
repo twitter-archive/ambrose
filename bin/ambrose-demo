@@ -23,7 +23,7 @@ cd "$WEBROOT" || die "Failed to cd to WEBROOT '$WEBROOT'"
 
 log "Starting web server on port '$PORT'"
 log "Browse to the following URLs to see Ambrose demo:"
-log "  http://localhost:$PORT/workflow.html?localdata=true"
+log "  http://localhost:$PORT/workflow.html?localdata=true&replay=true"
 log "Hit ctrl-c to stop the web server"
 
 exec python -m SimpleHTTPServer "$PORT"
