@@ -19,96 +19,81 @@ import com.twitter.ambrose.hive.HiveJob;
  * Unit tests for {@link com.twitter.ambrose.model.HiveJobTest}.
  */
 public class HiveJobTest {
-    static {
-        HiveJob.mixinJsonAnnotations();
-    }
+  static {
+    HiveJob.mixinJsonAnnotations();
+  }
 
-    private HiveJob hiveJob;
+  private HiveJob hiveJob;
 
-    @Before
-    public void setUp() throws Exception {
-        Map<String, Number> metrics = new HashMap<String, Number>();
-        metrics.put("somemetric", 6);
-        Properties properties = new Properties();
-        properties.setProperty("someprop", "propvalue");
-        String[] aliases = new String[] { "alias1" };
-        String[] features = new String[] { "feature1" };
-        hiveJob = new HiveJob(aliases, features);
-    }
+  @Before
+  public void setUp() throws Exception {
+    Map<String, Number> metrics = new HashMap<String, Number>();
+    metrics.put("somemetric", 6);
+    Properties properties = new Properties();
+    properties.setProperty("someprop", "propvalue");
+    String[] aliases = new String[] { "alias1" };
+    String[] features = new String[] { "feature1" };
+    hiveJob = new HiveJob(aliases, features);
+  }
 
-    @Test
-    public void testHiveJobRoundTrip() throws IOException {
-        doTestRoundTrip(hiveJob);
-    }
+  @Test
+  public void testHiveJobRoundTrip() throws IOException {
+    doTestRoundTrip(hiveJob);
+  }
 
-    private void doTestRoundTrip(HiveJob expected) throws IOException {
-        String asJson = expected.toJson();
-        Job asJobAgain = Job.fromJson(asJson);
+  private void doTestRoundTrip(HiveJob expected) throws IOException {
+    String asJson = expected.toJson();
+    Job asJobAgain = Job.fromJson(asJson);
 
-        // assert that if we get a HiveJob without having to ask for it
-        // explicitly
-        assertTrue(asJobAgain instanceof HiveJob);
-        assertJobEquals(expected, (HiveJob) asJobAgain);
-    }
+    // assert that if we get a HiveJob without having to ask for it
+    // explicitly
+    assertTrue(asJobAgain instanceof HiveJob);
+    assertJobEquals(expected, (HiveJob) asJobAgain);
+  }
 
-    @Test
-    public void testDAGNodeHiveJobRoundTrip() throws IOException {
-        DAGNode<HiveJob> node = new DAGNode<HiveJob>("dag name", hiveJob);
-        doTestRoundTrip(node);
-    }
+  @Test
+  public void testDAGNodeHiveJobRoundTrip() throws IOException {
+    DAGNode<HiveJob> node = new DAGNode<HiveJob>("dag name", hiveJob);
+    doTestRoundTrip(node);
+  }
 
-    @Test
-    public void testFromJson() throws IOException {
-        String json = 
-        "{" +
-        "  \"type\" : \"JOB_STARTED\"," +
-        "  \"payload\" : {" +
-        "    \"name\" : \"Stage-1_user_20130723105858_3f0d530c-34a6-4bb9-8964-22c4ea289895\"," +
-        "    \"job\" : {" +
-        "      \"runtime\" : \"hive\"," +
-        "      \"id\" : \"job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)\"," +
-        "      \"aliases\" : [ \"src\" ]," +
-        "      \"features\" : [ \"SELECT\", \"FILTER\" ]" +
-        "    }," +
-        "    \"successorNames\" : [ ]" +
-        "  }," +
-        "  \"id\" : 1," +
-        "  \"timestamp\" : 1374569908714" +
-        "}, {" +
-        "  \"type\" : \"WORKFLOW_PROGRESS\"," +
-        "  \"payload\" : {" +
-        "    \"workflowProgress\" : \"0\"" +
-        "  }," +
-        "  \"id\" : 2," +
-        "  \"timestamp\" : 1374569908754" +
-        "}";
-      
-        Event<?> event = Event.fromJson(json);
-        @SuppressWarnings("unchecked")
-        HiveJob job = ((DAGNode<HiveJob>) event.getPayload()).getJob();
-        assertEquals("job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)", job.getId());
-        assertArrayEquals(new String[] { "src" }, job.getAliases());
-        assertArrayEquals(new String[] { "SELECT", "FILTER" },
-                job.getFeatures());
-    }
+  @Test
+  public void testFromJson() throws IOException {
+    String json = "{" + "  \"type\" : \"JOB_STARTED\"," + "  \"payload\" : {"
+        + "    \"name\" : \"Stage-1_user_20130723105858_3f0d530c-34a6-4bb9-8964-22c4ea289895\","
+        + "    \"job\" : {" + "      \"runtime\" : \"hive\","
+        + "      \"id\" : \"job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)\","
+        + "      \"aliases\" : [ \"src\" ]," + "      \"features\" : [ \"SELECT\", \"FILTER\" ]"
+        + "    }," + "    \"successorNames\" : [ ]" + "  }," + "  \"id\" : 1,"
+        + "  \"timestamp\" : 1374569908714" + "}, {" + "  \"type\" : \"WORKFLOW_PROGRESS\","
+        + "  \"payload\" : {" + "    \"workflowProgress\" : \"0\"" + "  }," + "  \"id\" : 2,"
+        + "  \"timestamp\" : 1374569908754" + "}";
 
-    private void doTestRoundTrip(DAGNode<HiveJob> expected) throws IOException {
-        String asJson = expected.toJson();
-        DAGNode<? extends Job> asDAGNodeAgain = DAGNode.fromJson(asJson);
-        assertEquals(expected.getName(), asDAGNodeAgain.getName());
-        assertNotNull(asDAGNodeAgain.getJob());
+    Event<?> event = Event.fromJson(json);
+    @SuppressWarnings("unchecked")
+    HiveJob job = ((DAGNode<HiveJob>) event.getPayload()).getJob();
+    assertEquals("job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)", job.getId());
+    assertArrayEquals(new String[] { "src" }, job.getAliases());
+    assertArrayEquals(new String[] { "SELECT", "FILTER" }, job.getFeatures());
+  }
 
-        // assert that it's an instance of HiveJob
-        assertNotNull(asDAGNodeAgain.getJob() instanceof HiveJob);
+  private void doTestRoundTrip(DAGNode<HiveJob> expected) throws IOException {
+    String asJson = expected.toJson();
+    DAGNode<? extends Job> asDAGNodeAgain = DAGNode.fromJson(asJson);
+    assertEquals(expected.getName(), asDAGNodeAgain.getName());
+    assertNotNull(asDAGNodeAgain.getJob());
 
-        assertJobEquals(expected.getJob(), (HiveJob) asDAGNodeAgain.getJob());
-    }
+    // assert that it's an instance of HiveJob
+    assertNotNull(asDAGNodeAgain.getJob() instanceof HiveJob);
 
-    public static void assertJobEquals(HiveJob expected, HiveJob found) {
-        assertEquals(expected.getId(), found.getId());
-        assertArrayEquals(expected.getAliases(), found.getAliases());
-        assertArrayEquals(expected.getFeatures(), found.getFeatures());
-        assertEquals(expected.getMetrics(), found.getMetrics());
-        assertEquals(expected.getConfiguration(), found.getConfiguration());
-    }
+    assertJobEquals(expected.getJob(), (HiveJob) asDAGNodeAgain.getJob());
+  }
+
+  public static void assertJobEquals(HiveJob expected, HiveJob found) {
+    assertEquals(expected.getId(), found.getId());
+    assertArrayEquals(expected.getAliases(), found.getAliases());
+    assertArrayEquals(expected.getFeatures(), found.getFeatures());
+    assertEquals(expected.getMetrics(), found.getMetrics());
+    assertEquals(expected.getConfiguration(), found.getConfiguration());
+  }
 }

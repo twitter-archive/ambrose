@@ -3,7 +3,7 @@
 ## Implementation
 
 Ambrose integrates with Hive 0.11.0+ via Hive's Hook interface.
-The `./bin/hive-ambrose` script launches Hive with the Ambrose implementation of Hive hooks. This
+The `$AMBROSE_HOME/hive/src/main/scripts/hive-ambrose` script launches Hive with the Ambrose implementation of Hive hooks. This
 implementation starts an embedded [Jetty](http://jetty.codehaus.org/jetty/) server that exposes job
 runtime information to the Ambrose web UI.
 

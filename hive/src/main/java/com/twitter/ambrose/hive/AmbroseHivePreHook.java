@@ -1,5 +1,7 @@
 package com.twitter.ambrose.hive;
 
+import static com.twitter.ambrose.hive.reporter.AmbroseHiveReporterFactory.getEmbeddedProgressReporter;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.hooks.ExecuteWithHookContext;
 import org.apache.hadoop.hive.ql.hooks.HookContext;
 
+import com.twitter.ambrose.hive.reporter.EmbeddedAmbroseHiveProgressReporter;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Event.WorkflowProgressField;
@@ -35,19 +38,19 @@ public class AmbroseHivePreHook implements ExecuteWithHookContext {
     public void run(HookContext hookContext) throws Exception {
 
         String queryId = AmbroseHiveUtil.getHiveQueryId(hookContext.getConf());
-        HiveProgressReporter reporter = HiveProgressReporter.get();
+        EmbeddedAmbroseHiveProgressReporter reporter = getEmbeddedProgressReporter();
         HiveDAGTransformer transformer = new HiveDAGTransformer(hookContext);
        
         //conditional tasks may be filtered out by Hive at runtime. We them as
         //'complete'
         Map<String, DAGNode<Job>> nodeIdToDAGNode = reporter.getNodeIdToDAGNode();
-        sendFilteredJobsStatus(queryId, nodeIdToDAGNode);
+        sendFilteredJobsStatus(queryId, reporter, nodeIdToDAGNode);
         if (transformer.getTotalMRJobs() == 0) {
             return;
         }
 
-        waitBetween(hookContext, queryId);
-
+        waitBetween(hookContext, reporter, queryId);
+        
         nodeIdToDAGNode = transformer.getNodeIdToDAGNode();
         reporter.setNodeIdToDAGNode(nodeIdToDAGNode);
         reporter.setTotalMRJobs(transformer.getTotalMRJobs());
@@ -60,9 +63,10 @@ public class AmbroseHivePreHook implements ExecuteWithHookContext {
      * next statement (workflow) in the submitted script
      * 
      * @param hookContext
+     * @param reporter
      * @param queryId
      */
-    private void waitBetween(HookContext hookContext, String queryId) {
+    private void waitBetween(HookContext hookContext, EmbeddedAmbroseHiveProgressReporter reporter, String queryId) {
 
         Configuration conf = hookContext.getConf();
         boolean justStarted = conf.getBoolean(SCRIPT_STARTED_PARAM, true);
@@ -77,8 +81,15 @@ public class AmbroseHivePreHook implements ExecuteWithHookContext {
                 LOG.info("One workflow complete, sleeping for " + sleepTimeMs
                         + " sec(s) before moving to the next one if exists. Hit ctrl-c to exit.");
                 Thread.sleep(sleepTimeMs * 1000L);
-                HiveProgressReporter.get().saveEventStack();
-                HiveProgressReporter.reset();
+                
+                //send progressbar reset event
+                Map<WorkflowProgressField, String> eventData = 
+                  new HashMap<WorkflowProgressField, String>(1);
+                eventData.put(WorkflowProgressField.workflowProgress, "0");
+                reporter.pushEvent(queryId, new Event.WorkflowProgressEvent(eventData));
+                
+                reporter.saveEventStack();
+                reporter.reset();
             }
             catch (InterruptedException e) {
                 LOG.warn("Sleep interrupted", e);
@@ -86,13 +97,13 @@ public class AmbroseHivePreHook implements ExecuteWithHookContext {
         }
     }
 
-    private void sendFilteredJobsStatus(String queryId, Map<String, DAGNode<Job>> nodeIdToDAGNode) {
+    private void sendFilteredJobsStatus(String queryId, 
+        EmbeddedAmbroseHiveProgressReporter reporter, Map<String, DAGNode<Job>> nodeIdToDAGNode) {
         
         if (nodeIdToDAGNode == null) {
             return;
         }
         
-        HiveProgressReporter reporter = HiveProgressReporter.get();
         Map<WorkflowProgressField, String> eventData = 
             new HashMap<Event.WorkflowProgressField, String>(1);
 
