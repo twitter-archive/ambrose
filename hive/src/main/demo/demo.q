@@ -3,7 +3,7 @@
 -- 
 -- To run in mapreduce mode, copy demo folder to hdfs:
 -- 
--- cd /path/to/ambrose-hive
+-- cd /path/to/ambrose/hive/target/ambrose-hive-$VERSION-bin/ambrose-hive-$VERSION
 -- hadoop fs -put demo .
 -- ./bin/hive-ambrose -f ./demo/demo.q
 -- 
@@ -15,8 +15,6 @@
 -- 
 --
 
-SET hivevar:input_path=demo/input;
-
 SET hive.auto.convert.join = true;
 SET hive.exec.parallel=true;
 SET hive.exec.parallel.thread.number=4;
@@ -24,8 +22,7 @@ SET mapred.reduce.tasks=4;
 
 DROP TABLE IF EXISTS src;
 CREATE TABLE src (key STRING, value STRING) STORED AS TEXTFILE;
-
-LOAD DATA LOCAL INPATH '/home/lori/workspace/github/ambrose/hive/src/main/demo/input/kv1.txt' INTO TABLE src;
+LOAD DATA INPATH '/demo/input/kv1.txt' INTO TABLE src;
 
 select * from (
   select key, value from src 

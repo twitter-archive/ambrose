@@ -28,7 +28,7 @@ embedded within the Hive client:
 
 
 ```
-cd hive/target/ambrose-hive-$VERSION-bin/ambrose-hive-$VERSION
+cd /path/to/ambrose/hive/target/ambrose-hive-$VERSION-bin/ambrose-hive-$VERSION
 ./bin/hive-ambrose -f path/to/my/hive.q
 ```
 
