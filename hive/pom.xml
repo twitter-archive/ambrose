@@ -9,7 +9,29 @@
   </parent>
 
   <artifactId>ambrose-hive</artifactId>
-  <name>Ambrose Hive</name>
+  
+  <name>Ambrose</name>
+  <url>https://github.com/lbendig/ambrose/tree/ambrose-hive</url>
+  <inceptionYear>2013</inceptionYear>
+  <description>
+    Hive runtime for Twitter Ambrose
+  </description>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>Lorand Bendig</id>
+      <name>Lorand Bendig</name>
+      <email>lbendig@gmail.com</email>
+    </developer>
+  </developers>
 
   <dependencies>
     <!-- ambrose -->
