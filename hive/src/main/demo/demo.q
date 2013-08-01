@@ -4,7 +4,7 @@
 -- To run in mapreduce mode, copy demo folder to hdfs:
 -- 
 -- cd /path/to/ambrose/hive/target/ambrose-hive-$VERSION-bin/ambrose-hive-$VERSION
--- hadoop fs -put demo .
+-- hadoop fs -put demo /
 -- ./bin/hive-ambrose -f ./demo/demo.q
 -- 
 -- To store jobs and events json data, update HIVE_OPTS before invoking pig-ambrose:
@@ -20,9 +20,13 @@ SET hive.exec.parallel=true;
 SET hive.exec.parallel.thread.number=4;
 SET mapred.reduce.tasks=4;
 
-DROP TABLE IF EXISTS src;
-CREATE TABLE src (key STRING, value STRING) STORED AS TEXTFILE;
-LOAD DATA INPATH '/demo/input/kv1.txt' INTO TABLE src;
+DROP TABLE IF EXISTS ambrose_hive_demo;
+CREATE EXTERNAL TABLE ambrose_hive_demo (key STRING, value STRING) 
+  ROW FORMAT DELIMITED
+  FIELDS TERMINATED BY '\001'
+  LINES TERMINATED BY '\n'
+  STORED AS TEXTFILE
+  LOCATION '/demo/input';
 
 select * from (
   select key, value from src 
