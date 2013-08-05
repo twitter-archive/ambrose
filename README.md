@@ -24,10 +24,10 @@ Follow [@Ambrose](https://twitter.com/ambrose) on Twitter to stay in touch!
 ## Supported runtimes
 
 * [Pig](http://pig.apache.org/) - See [pig/README.md](https://github.com/twitter/ambrose/blob/master/pig/README.md)
+* [Hive](http://hive.apache.org/) See [hive/README.md](https://github.com/twitter/ambrose/blob/master/hive/README.md)
 * [Cascading](http://www.cascading.org/) - future work
 * [Scalding](https://github.com/twitter/scalding) - future work
 * [Cascalog](https://github.com/nathanmarz/cascalog) - future work
-* [Hive](http://hive.apache.org/) - future work
 
 ## Examples
 
