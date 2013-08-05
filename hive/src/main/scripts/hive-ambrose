@@ -1,0 +1,72 @@
+#!/bin/bash
+# Copyright 2013 Lorand Bendig
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Wrapper around Hive that does the following:
+#
+# - Adds Ambrose to the classpath
+# - Registers hooks to Hive runtime
+# - Starts Hive
+#
+
+function log() { echo "$@" >&2; }
+function die() { log "$@"; exit 1; }
+
+# configure args
+AMBROSE_HIVE_BIN="${AMBROSE_HIVE_BIN:-hive}"
+AMBROSE_HOME="${AMBROSE_HOME:-$(cd $(dirname "$0")/..; pwd -P)}"
+AMBROSE_PORT="${AMBROSE_PORT:-8080}"
+AMBROSE_WF_BETWEEN_TIMEOUT="${AMBROSE_WF_BETWEEN_TIMEOUT:-10}" # 10 sec
+AMBROSE_TIMEOUT="${AMBROSE_TIMEOUT:-600}" # 10 min
+
+# test for presence of hive command
+which "$AMBROSE_HIVE_BIN" >/dev/null 2>&1 || die $(cat <<EOF
+
+Command '$AMBROSE_HIVE_BIN' not found. This script requires a local installation of Apache
+Hive. Please ensure \$HIVE_HOME/bin is in your \$PATH, or export AMBROSE_HIVE_BIN to reference a
+particular Hive script:
+
+export AMBROSE_HIVE_BIN=/path/to/my/hive/bin/hive
+
+EOF
+)
+
+# configure paths
+AMBROSE_JARS=$(find $AMBROSE_HOME -name "*.jar" | sort | xargs printf 'file://%s,') \
+    || die "Failed to find ambrose jars within path '$AMBROSE_HOME/lib'"
+export HIVE_CLASSPATH="$AMBROSE_JARS$HIVE_CLASSPATH"
+export HADOOP_USER_CLASSPATH_FIRST="true"
+
+
+# configure ambrose hive hooks and port
+# Add 
+# -hiveconf ambrose.write.dag.file=/path/to/dag.txt \ 
+# -hiveconf ambrose.write.events.file=/path/to/events.txt
+# to export the dag and events of the script to json
+export HIVE_OPTS="\
+-hiveconf hive.aux.jars.path=$AMBROSE_JARS \
+-hiveconf hive.exec.pre.hooks=com.twitter.ambrose.hive.AmbroseHivePreHook \
+-hiveconf hive.client.stats.publishers=com.twitter.ambrose.hive.AmbroseHiveStatPublisher \
+-hiveconf hive.exec.driver.run.hooks=com.twitter.ambrose.hive.AmbroseHiveFinishHook \
+-hiveconf hive.exec.failure.hooks=com.twitter.ambrose.hive.AmbroseHiveFailHook \
+-hiveconf ambrose.port=$AMBROSE_PORT \
+-hiveconf ambrose.wf.between.sleep.seconds=$AMBROSE_WF_BETWEEN_TIMEOUT \
+-hiveconf ambrose.post.script.sleep.seconds=$AMBROSE_TIMEOUT \
+$HIVE_OPTS"
+
+# construct hive command line, log and invoke
+log "HIVE_CLASSPATH=$HIVE_CLASSPATH"
+log "HIVE_OPTS=$HIVE_OPTS"
+
+exec hive $@
