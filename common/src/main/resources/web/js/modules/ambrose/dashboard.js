@@ -19,9 +19,10 @@ limitations under the License.
  */
 define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
   var statusSet = [
-    'RUNNING',
-    'SUCCEEDED',
-    'FAILED'
+    'any',
+    'running',
+    'succeeded',
+    'failed'
   ];
 
   function pad(number) {
@@ -72,8 +73,11 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
         $('<a>').appendTo(
           $('<li>').appendTo($('#status-menu'))
             .attr('id', 'status_' + id).addClass('status'))
-          .text(id.capitalize())
-          .click(function() { self.setStatus(id); self.loadFlows(); });
+          .text(id)
+          .click(function() {
+            self.setStatus(id);
+            self.loadFlows();
+          });
       });
 
       // configure event handlers
@@ -84,7 +88,7 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
       $('#page-next-link').click(function() { self.nextPage(); });
 
       // set default values
-      self.setStatus('RUNNING');
+      self.setStatus('any');
       self.setUser('');
 
       // request clusters
@@ -132,6 +136,7 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
       this.cluster = cluster;
       $('.cluster').removeClass('active');
       $('#cluster_' + cluster).addClass('active');
+      $('#current-cluster').text(cluster);
       return this;
     },
 
@@ -139,11 +144,13 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
       this.status = status;
       $('.status').removeClass('active');
       $('#status_' + status).addClass('active');
+      $('#current-status').text(status);
       return this;
     },
 
     setUser: function(user) {
       this.user = user;
+      $('#current-user').text(user || 'any');
       return this;
     },
 
@@ -162,12 +169,17 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
 
     loadFlows: function() {
       var self = this;
-      self.client.getWorkflows(self.clusters[self.cluster], self.user, self.status, self.currentStartKey)
+      var cluster = self.cluster;
+      var user = self.user;
+      var status = self.status;
+      if (status == 'any') status = '';
+      status = status.toUpperCase();
+      self.client.getWorkflows(self.clusters[cluster], user, status, self.currentStartKey)
         .success(function(data) {
           self.nextStartKey = data.nextPageStart;
           self.renderFlows(data);
         });
-      return this;
+      return self;
     },
 
     renderFlows: function(data) {
@@ -185,7 +197,7 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
         var createdAt = workflow.createdAt ? formatTimestamp(workflow.createdAt) : 'unknown';
         $('<td>').text(createdAt).appendTo($tr);
         $('<td>').text(workflow.name).appendTo($tr);
-        $('<td>').text(workflow.status).appendTo($tr);
+        $('<td>').text(workflow.status.toLowerCase()).appendTo($tr);
         $('<div class="bar">').width(workflow.progress + '%').appendTo(
           $('<div class="progress">').appendTo($('<td>').appendTo($tr)));
       });

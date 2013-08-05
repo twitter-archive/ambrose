@@ -38,11 +38,17 @@
             <ul class="nav">
               <li class="active"><a href="dashboard.html">Dashboard</a></li>
               <li class="dropdown">
-                <a id="cluster-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown">Cluster <b class="caret"></b></a>
+                <a id="cluster-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Cluster
+                  <b class="caret"></b>
+                </a>
                 <ul id="cluster-menu" class="dropdown-menu" role="menu" aria-labelledby="cluster-dropdown"></ul>
               </li>
               <li class="dropdown">
-                <a id="status-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown">Status <b class="caret"></b></a>
+                <a id="status-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Status
+                  <b class="caret"></b>
+                </a>
                 <ul id="status-menu" class="dropdown-menu" role="menu" aria-labelledby="status-dropdown"></ul>
               </li>
             </ul>
@@ -61,7 +67,14 @@
     <div class="container-fluid">
       <div class="row-fluid">
         <div class="span12">
-          <h2>Workflows</h2>
+          <p class="dashboard-status lead">
+            Workflows on cluster
+            <strong id="current-cluster" class=""></strong>
+            with status
+            <strong id="current-status"></strong>
+            and user
+            <strong id="current-user"></strong>.
+          </p>
           <table class="table table-hover ambrose-dashboard">
             <thead>
             <tr>
