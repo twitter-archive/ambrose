@@ -1,0 +1,14 @@
+Hive runtime for Twitter Ambrose
+Copyright 2013, Lorand Bendig (lbendig@gmail.com)
+
+Third Party Dependences:
+
+Twitter Ambrose
+Apache Public License 2.0
+https://github.com/twitter/ambrose
+
+Apache Hive
+Apache Public License 2.0
+http://hive.apache.org/
+
+For a full list of dependencies, please consult the Maven pom.xml file.
