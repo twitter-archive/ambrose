@@ -29,12 +29,12 @@ CREATE EXTERNAL TABLE ambrose_hive_demo (key STRING, value STRING)
   LOCATION '/demo/input';
 
 select * from (
-  select key, value from src 
+  select key, value from ambrose_hive_demo 
   union all 
   select key, value from 
   (
-    select key, value, count(1) from src group by key, value
+    select key, value, count(1) from ambrose_hive_demo group by key, value
     union all
-    select key, value, count(1) from src group by key, value
+    select key, value, count(1) from ambrose_hive_demo group by key, value
   ) subq
 ) a;
