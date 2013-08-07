@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.hooks.ExecuteWithHookContext;
 import org.apache.hadoop.hive.ql.hooks.HookContext;
 
+import com.google.common.collect.Maps;
 import com.twitter.ambrose.hive.reporter.EmbeddedAmbroseHiveProgressReporter;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
@@ -98,8 +99,7 @@ public class AmbroseHivePreHook implements ExecuteWithHookContext {
                 Thread.sleep(sleepTimeMs * 1000L);
                 
                 //send progressbar reset event
-                Map<WorkflowProgressField, String> eventData = 
-                  new HashMap<WorkflowProgressField, String>(1);
+                Map<WorkflowProgressField, String> eventData = Maps.newHashMapWithExpectedSize(1);
                 eventData.put(WorkflowProgressField.workflowProgress, "0");
                 reporter.pushEvent(queryId, new Event.WorkflowProgressEvent(eventData));
                 

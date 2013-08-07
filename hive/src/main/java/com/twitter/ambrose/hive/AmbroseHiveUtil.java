@@ -110,7 +110,7 @@ public class AmbroseHiveUtil {
 
   /**
    * Returns the nodeId of the given running job <br>
-   * E.g: Stage-1_[queryId]
+   * Example: Stage-1_[queryId]
    * 
    * @param conf
    * @param runningJob
@@ -150,24 +150,16 @@ public class AmbroseHiveUtil {
    * Gets the temporary directory of the given job
    * 
    * @param conf
+   * @param isLocal true to resolve local temporary directory
    * @return
    */
-  public static String getJobTmpDir(Configuration conf) {
-    String fsNameVar = HiveConf.getVar(conf, ConfVars.HADOOPFS);
-    String fsName = fsNameVar.substring(0, fsNameVar.length() - 1);
-    return fsName + HiveConf.getVar(conf, ConfVars.SCRATCHDIR, "");
-  }
-
-  /**
-   * Gets the temporary local directory of the given job
-   * 
-   * @param conf
-   * @return
-   */
-  public static String getJobTmpLocalDir(Configuration conf) {
-    String fsNameVar = HiveConf.getVar(conf, ConfVars.HADOOPFS);
-    String fsName = fsNameVar.substring(0, fsNameVar.length() - 1);
-    return fsName + HiveConf.getVar(conf, ConfVars.LOCALSCRATCHDIR, "");
+  public static String getJobTmpDir(Configuration conf, boolean isLocal) {
+    String fsName = HiveConf.getVar(conf, ConfVars.HADOOPFS);
+    if (fsName.endsWith("/")) {
+      fsName = fsName.substring(0, fsName.length() - 1);
+    }
+    return fsName + HiveConf.getVar(conf, 
+        (isLocal ? ConfVars.LOCALSCRATCHDIR : ConfVars.SCRATCHDIR), "");
   }
 
   /**

@@ -15,8 +15,8 @@ limitations under the License.
 */
 package com.twitter.ambrose.hive;
 
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.Maps;
 
 /**
  * Lookup class that constructs Counter names to be retrieved from Hive
@@ -43,7 +43,7 @@ public enum MetricsCounter {
   REDUCE_INPUT_RECORDS(3),
   REDUCE_OUTPUT_RECORDS(3);
 
-  private static final Map<MetricsCounter, String[]> lookup = new HashMap<MetricsCounter, String[]>();
+  private static final Map<MetricsCounter, String[]> lookup = Maps.newHashMap();
   static {
     for (MetricsCounter hjc : MetricsCounter.values()) {
       lookup.put(hjc, createLookupKeys(hjc));
