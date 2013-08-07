@@ -19,13 +19,13 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,8 +79,8 @@ public class HiveDAGTransformer {
   public HiveDAGTransformer(HookContext hookContext) {
 
     conf = hookContext.getConf();
-    tmpDir = AmbroseHiveUtil.getJobTmpDir(conf);
-    localTmpDir = AmbroseHiveUtil.getJobTmpLocalDir(conf);
+    tmpDir = AmbroseHiveUtil.getJobTmpDir(conf, false);
+    localTmpDir = AmbroseHiveUtil.getJobTmpDir(conf, true);
     queryPlan = hookContext.getQueryPlan();
     allTasks = Utilities.getMRTasks(queryPlan.getRootTasks());
     if (!allTasks.isEmpty()) {
@@ -107,7 +107,7 @@ public class HiveDAGTransformer {
   private void createNodeIdToDAGNode() {
 
     // creates DAGNodes: each node represents a MR job
-    nodeIdToDAGNode = new ConcurrentSkipListMap<String, DAGNode<Job>>();
+    nodeIdToDAGNode = new TreeMap<String, DAGNode<Job>>();
     for (Task<? extends Serializable> task : allTasks) {
       if (task.getWork() instanceof MapredWork) {
         DAGNode<Job> dagNode = asDAGNode(task);
@@ -167,6 +167,7 @@ public class HiveDAGTransformer {
     }
     Set<String> result = new HashSet<String>();
     for (String alias : indexTableAliases) {
+      //if alias is a temporary output location of an ancestor node
       if (alias.startsWith(tmpDir) || alias.startsWith(localTmpDir)) {
         result.add(TEMP_JOB_ID);
       }
@@ -255,7 +256,7 @@ public class HiveDAGTransformer {
    * @return
    */
   private Map<String, List<String>> getNodeIdToDependencies() {
-    Map<String, List<String>> result = new ConcurrentHashMap<String, List<String>>();
+    Map<String, List<String>> result = new HashMap<String, List<String>>();
     try {
       Graph stageGraph = queryPlan.getQueryPlan().getStageGraph();
       if (stageGraph == null) {
