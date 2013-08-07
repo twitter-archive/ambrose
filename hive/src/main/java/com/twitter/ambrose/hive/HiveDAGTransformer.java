@@ -19,13 +19,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +40,9 @@ import org.apache.hadoop.hive.ql.plan.api.Adjacency;
 import org.apache.hadoop.hive.ql.plan.api.Graph;
 import org.apache.hadoop.hive.ql.plan.api.OperatorType;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Job;
 
@@ -107,7 +107,7 @@ public class HiveDAGTransformer {
   private void createNodeIdToDAGNode() {
 
     // creates DAGNodes: each node represents a MR job
-    nodeIdToDAGNode = new TreeMap<String, DAGNode<Job>>();
+    nodeIdToDAGNode = Maps.newTreeMap();
     for (Task<? extends Serializable> task : allTasks) {
       if (task.getWork() instanceof MapredWork) {
         DAGNode<Job> dagNode = asDAGNode(task);
@@ -123,8 +123,7 @@ public class HiveDAGTransformer {
       String nodeId = entry.getKey();
       List<String> successorIds = entry.getValue();
       DAGNode<Job> dagNode = nodeIdToDAGNode.get(nodeId);
-      List<DAGNode<? extends Job>> dagSuccessors = new ArrayList<DAGNode<? extends Job>>(
-          successorIds.size());
+      List<DAGNode<? extends Job>> dagSuccessors = Lists.newArrayListWithCapacity(successorIds.size());
 
       for (String sId : successorIds) {
         DAGNode<Job> successor = nodeIdToDAGNode.get(sId);
@@ -165,7 +164,7 @@ public class HiveDAGTransformer {
     if (indexTableAliases.isEmpty()) {
       return EMPTY_ARR;
     }
-    Set<String> result = new HashSet<String>();
+    Set<String> result = Sets.newLinkedHashSet();
     for (String alias : indexTableAliases) {
       //if alias is a temporary output location of an ancestor node
       if (alias.startsWith(tmpDir) || alias.startsWith(localTmpDir)) {
@@ -209,7 +208,7 @@ public class HiveDAGTransformer {
     if (ops == null) {
       return EMPTY_ARR;
     }
-    Set<String> features = new HashSet<String>();
+    Set<String> features = Sets.newHashSet();
     for (Operator<?> op : ops) {
       OperatorType opType = op.getType();
       // some operators are discarded
@@ -241,7 +240,7 @@ public class HiveDAGTransformer {
     if (pathToAliases == null || pathToAliases.isEmpty()) {
       return Collections.emptyList();
     }
-    List<String> result = new ArrayList<String>();
+    List<String> result = Lists.newArrayList();
     for (List<String> aliases : pathToAliases.values()) {
       if (aliases != null && !aliases.isEmpty()) {
         result.addAll(aliases);
@@ -256,7 +255,7 @@ public class HiveDAGTransformer {
    * @return
    */
   private Map<String, List<String>> getNodeIdToDependencies() {
-    Map<String, List<String>> result = new HashMap<String, List<String>>();
+    Map<String, List<String>> result = Maps.newHashMap();
     try {
       Graph stageGraph = queryPlan.getQueryPlan().getStageGraph();
       if (stageGraph == null) {
@@ -294,7 +293,7 @@ public class HiveDAGTransformer {
    */
   private List<String> getMRAdjacencies(List<String> adjChildren,
       Map<String, DAGNode<Job>> nodeIdToDAGNode) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = Lists.newArrayList();
     for (String nodeName : adjChildren) {
       String nodeId = AmbroseHiveUtil.getNodeIdFromNodeName(conf, nodeName);
       if (nodeIdToDAGNode.containsKey(nodeId)) {

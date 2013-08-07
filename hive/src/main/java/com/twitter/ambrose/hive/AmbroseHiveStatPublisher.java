@@ -16,7 +16,6 @@ limitations under the License.
 package com.twitter.ambrose.hive;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -30,6 +29,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 
+import com.google.common.collect.Maps;
 import com.twitter.ambrose.hive.reporter.EmbeddedAmbroseHiveProgressReporter;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
@@ -63,9 +63,7 @@ public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
   private int totalReduceTasks;
   private int totalMapTasks;
 
-  private final Map<WorkflowProgressField, String> eventData = 
-    new HashMap<WorkflowProgressField, String>(1);
-
+  private final Map<WorkflowProgressField, String> eventData = Maps.newHashMapWithExpectedSize(1);
   private boolean init = true;
 
   private static class HiveMapReduceJobState extends MapReduceJobState {

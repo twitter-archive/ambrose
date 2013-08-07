@@ -110,7 +110,7 @@ public class AmbroseHiveUtil {
 
   /**
    * Returns the nodeId of the given running job <br>
-   * E.g: Stage-1_[queryId]
+   * Example: Stage-1_[queryId]
    * 
    * @param conf
    * @param runningJob
@@ -150,7 +150,7 @@ public class AmbroseHiveUtil {
    * Gets the temporary directory of the given job
    * 
    * @param conf
-   * @param isLocal - true to resolve local temp. directory
+   * @param isLocal true to resolve local temporary directory
    * @return
    */
   public static String getJobTmpDir(Configuration conf, boolean isLocal) {

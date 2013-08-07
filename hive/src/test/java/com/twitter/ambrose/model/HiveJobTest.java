@@ -21,13 +21,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Maps;
 import com.twitter.ambrose.hive.HiveJob;
 
 /**
@@ -42,7 +42,7 @@ public class HiveJobTest {
 
   @Before
   public void setUp() throws Exception {
-    Map<String, Number> metrics = new HashMap<String, Number>();
+    Map<String, Number> metrics = Maps.newHashMapWithExpectedSize(1);
     metrics.put("somemetric", 6);
     Properties properties = new Properties();
     properties.setProperty("someprop", "propvalue");
@@ -74,15 +74,29 @@ public class HiveJobTest {
 
   @Test
   public void testFromJson() throws IOException {
-    String json = "{" + "  \"type\" : \"JOB_STARTED\"," + "  \"payload\" : {"
-        + "    \"name\" : \"Stage-1_user_20130723105858_3f0d530c-34a6-4bb9-8964-22c4ea289895\","
-        + "    \"job\" : {" + "      \"runtime\" : \"hive\","
-        + "      \"id\" : \"job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)\","
-        + "      \"aliases\" : [ \"src\" ]," + "      \"features\" : [ \"SELECT\", \"FILTER\" ]"
-        + "    }," + "    \"successorNames\" : [ ]" + "  }," + "  \"id\" : 1,"
-        + "  \"timestamp\" : 1374569908714" + "}, {" + "  \"type\" : \"WORKFLOW_PROGRESS\","
-        + "  \"payload\" : {" + "    \"workflowProgress\" : \"0\"" + "  }," + "  \"id\" : 2,"
-        + "  \"timestamp\" : 1374569908754" + "}";
+    String json = 
+      "{" +
+      "  \"type\" : \"JOB_STARTED\"," +
+      "  \"payload\" : {" +
+      "    \"name\" : \"Stage-1_user_20130723105858_3f0d530c-34a6-4bb9-8964-22c4ea289895\"," +
+      "    \"job\" : {" +
+      "      \"runtime\" : \"hive\"," +
+      "      \"id\" : \"job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)\"," +
+      "      \"aliases\" : [ \"src\" ]," +
+      "      \"features\" : [ \"SELECT\", \"FILTER\" ]" +
+      "    }," +
+      "    \"successorNames\" : [ ]" +
+      "  }," +
+      "  \"id\" : 1," +
+      "  \"timestamp\" : 1374569908714" +
+      "}, {" +
+      "  \"type\" : \"WORKFLOW_PROGRESS\"," +
+      "  \"payload\" : {" +
+      "    \"workflowProgress\" : \"0\"" +
+      "  }," +
+      "  \"id\" : 2," +
+      "  \"timestamp\" : 1374569908754" +
+      "}";
 
     Event<?> event = Event.fromJson(json);
     @SuppressWarnings("unchecked")
