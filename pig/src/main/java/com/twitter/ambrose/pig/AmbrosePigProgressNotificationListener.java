@@ -21,6 +21,7 @@ import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
+import com.twitter.ambrose.server.APIHandler;
 import com.twitter.ambrose.service.StatsWriteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,12 +38,15 @@ import org.apache.pig.tools.pigstats.OutputStats;
 import org.apache.pig.tools.pigstats.PigProgressNotificationListener;
 import org.apache.pig.tools.pigstats.PigStats;
 import org.apache.pig.tools.pigstats.ScriptState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -62,6 +66,7 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("deprecation")
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
 
+  private static final Logger LOG = LoggerFactory.getLogger(AmbrosePigProgressNotificationListener.class);
   private static final Joiner COMMA_JOINER = Joiner.on(',');
   protected Log log = LogFactory.getLog(getClass());
   private StatsWriteService statsWriteService;
@@ -236,7 +241,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
     eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
     pushEvent(scriptId, new Event.WorkflowProgressEvent(eventData));
-
+    
+    LOG.info("pushed event , progress={}", progress);
+    
     // then for each running job, we report the job progress
     for (DAGNode<PigJob> node : dagNodeNameMap.values()) {
       // don't send progress events for unstarted jobs
@@ -249,7 +256,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         pushEvent(scriptId, new Event.JobProgressEvent(node));
 
         if (node.getJob().getMapReduceJobState().isComplete()) {
-          completedJobIds.add(node.getJob().getId());
+            completedJobIds.add(node.getJob().getId());
         }
       }
     }
@@ -261,6 +268,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   @Override
   public void jobsSubmittedNotification(String scriptId, int numJobsSubmitted) { }
 
+  /**
+   * Invoked just after an output is successfully written.
+   */
   @Override
   public void outputCompletedNotification(String scriptId, OutputStats outputStats) { }
 
@@ -276,7 +286,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
       Configuration conf = stats.getInputs().get(0).getConf();
       for (Map.Entry<String, String> entry : conf) {
-        jobConfProperties.setProperty(entry.getKey(), entry.getValue());
+          jobConfProperties.setProperty(entry.getKey(), entry.getValue());
       }
 
       if (workflowVersion == null)  {
@@ -306,7 +316,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   @SuppressWarnings("deprecation")
   private void addMapReduceJobState(PigJob pigJob) {
     JobClient jobClient = PigStats.get().getJobClient();
-
+    
     try {
       RunningJob runningJob = jobClient.getJob(pigJob.getId());
       if (runningJob == null) {
@@ -318,6 +328,14 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       TaskReport[] mapTaskReport = jobClient.getMapTaskReports(jobID);
       TaskReport[] reduceTaskReport = jobClient.getReduceTaskReports(jobID);
       pigJob.setMapReduceJobState(new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
+      
+      Properties jobConfProperties = new Properties();
+      Configuration conf = jobClient.getConf();
+      for (Map.Entry<String, String> entry : conf) {
+          jobConfProperties.setProperty(entry.getKey(), entry.getValue());
+      }
+      pigJob.setConfiguration(jobConfProperties);
+      
     } catch (IOException e) {
       log.error("Error getting job info.", e);
     }

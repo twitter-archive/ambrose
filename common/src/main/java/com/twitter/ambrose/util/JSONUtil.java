@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -83,7 +84,11 @@ public class JSONUtil {
    * @throws IOException
    */
   public static <T> T toObject(String json, TypeReference<T> type) throws IOException {
-    return mapper.readValue(json, type);
+      try {
+          return mapper.readValue(json, type);
+      } catch (JsonParseException e) {
+          throw new RuntimeException("Could not parse " + json, e);
+      }
   }
 
   public static <T> T toObject(String json, JavaType type) throws IOException {

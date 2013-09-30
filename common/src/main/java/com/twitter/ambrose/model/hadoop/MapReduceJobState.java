@@ -1,7 +1,11 @@
 package com.twitter.ambrose.model.hadoop;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.sun.org.apache.commons.logging.Log;
+
+import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.TIPStatus;
 import org.apache.hadoop.mapred.TaskReport;
 
 import java.io.IOException;
@@ -19,7 +23,13 @@ public class MapReduceJobState {
   private float reduceProgress;
   private int totalMappers;
   private int totalReducers;
-
+  private long mapTaskStartTime;
+  private long reduceTaskStartTime;
+  private long mapTaskEndTime;
+  private long reduceTaskEndTime;
+  private int finishedMappers;
+  private int finishedReducers;
+  
   @JsonCreator
   public MapReduceJobState() { }
 
@@ -36,7 +46,34 @@ public class MapReduceJobState {
     reduceProgress = runningJob.reduceProgress();
     totalMappers = mapTaskReport.length;
     totalReducers = reduceTaskReport.length;
-  }
+    
+    mapTaskStartTime = Long.MAX_VALUE;
+    reduceTaskStartTime = Long.MAX_VALUE;
+    mapTaskEndTime = 0L;
+    reduceTaskEndTime = 0L;
+    finishedMappers = 0;
+    finishedReducers = 0;
+    
+    for (TaskReport report : mapTaskReport) {
+        if (mapTaskEndTime < report.getFinishTime()) mapTaskEndTime = report.getFinishTime();
+        if (report.getStartTime() < mapTaskStartTime) mapTaskStartTime = report.getStartTime();
+        
+        TIPStatus status = report.getCurrentStatus();
+        if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
+            finishedMappers++;
+        }
+    }
+    
+    for (TaskReport report : reduceTaskReport) {
+        if (reduceTaskEndTime < report.getFinishTime()) reduceTaskEndTime = report.getFinishTime();
+        if (report.getStartTime() < reduceTaskStartTime) reduceTaskStartTime = report.getStartTime();
+        
+        TIPStatus status = report.getCurrentStatus();
+        if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
+            finishedReducers++;
+        }
+    }
+  } 
 
   public String getJobId() {
     return jobId;
@@ -108,5 +145,53 @@ public class MapReduceJobState {
 
   public void setTotalReducers(int totalReducers) {
     this.totalReducers = totalReducers;
+  }
+  
+  public int getFinishedMappers() {
+      return finishedMappers;
+  }
+
+  public void setFinishedMappers(int finishedMappers) {
+      this.finishedMappers = finishedMappers;
+  }
+
+  public int getFinishedReducers() {
+      return finishedReducers;
+  }
+
+  public void setFinishedReducers(int finishedReducers) {
+      this.finishedReducers = finishedReducers;
+  }
+  
+  public long getMapTaskStartTime() {
+      return mapTaskStartTime;
+  }
+
+  public void setMapTaskStartTime(long mapTaskStartTime) {
+      this.mapTaskStartTime = mapTaskStartTime;
+  }
+
+  public long getReduceTaskStartTime() {
+      return reduceTaskStartTime;
+  }
+
+  public void setReduceTaskStartTime(long reduceTaskStartTime) {
+      this.reduceTaskStartTime = reduceTaskStartTime;
+  }
+
+  public long getMapTaskEndTime() {
+      return mapTaskEndTime;
+  }
+
+  public void setMapTaskEndTime(long mapTaskEndTime) {
+      this.mapTaskEndTime = mapTaskEndTime;
+  }
+
+  public long getReduceTaskEndTime() {
+      return reduceTaskEndTime;
+  }
+
+  public void setReduceTaskEndTime(long reduceTaskEndTime) {
+      this.reduceTaskEndTime = reduceTaskEndTime;
   }
 }

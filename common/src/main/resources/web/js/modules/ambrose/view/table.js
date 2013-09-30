@@ -64,6 +64,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         + '<th>Status</th>'
         + '<th>Aliases</th>'
         + '<th>Features</th>'
+        + '<th>Time</th>'
         + '<th>Mappers</th>'
         + '<th>Reducers</th>'
         + '</tr></thead>'
@@ -110,6 +111,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
       tr.append('td').attr('class', 'job-status');
       tr.append('td').attr('class', 'job-aliases');
       tr.append('td').attr('class', 'job-features');
+      tr.append('td').attr('class', 'job-time');
       tr.append('td').attr('class', 'job-mappers');
       tr.append('td').attr('class', 'job-reducers');
       var self = this;
@@ -146,9 +148,71 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         return array.join(', ');
       }
 
-      function taskProgressMessage(totalTasks, taskProgress) {
+      function taskProgressMessage(totalTasks, taskProgress, completedTasks) {
         if (totalTasks == null || taskProgress == null) return 'N/A';
-        return totalTasks + ' (' + Math.round(Number(taskProgress) * 100, 0) + '%)';
+        
+        if (completedTasks != null && totalTasks != null && taskProgress != null) {
+            return completedTasks + " / " + totalTasks + ' (' + 
+            (Math.round(Number(taskProgress) * 10000, 0)) / 100 + '%)';
+        } else {
+            return totalTasks + ' (' + (Math.round(Number(taskProgress) * 10000, 0)) / 100 + '%)';
+        }
+      }
+      
+      function setJobTime(status, mapperStartTime, mapperEndTime, reducerStartTime, reducerEndTime) {
+        if (status && mapperStartTime) {
+            if (status == 'RUNNING') {
+                return "Started at: <br>" + formatTimestamp(mapperStartTime);
+            } else if (reducerEndTime && mapperStartTime){
+                return "Started at: <br>" + formatTimestamp(mapperStartTime) + "<br>" 
+                + "Ended at: <br>" + formatTimestamp(reducerEndTime) + "<br>"
+                + "Elapsed Time: <br>" + calculateElapsedTime(mapperStartTime, reducerEndTime);
+            }
+        } else {
+            return '---';
+        }
+      }
+      
+      function calculateElapsedTime(start, end) {
+          var ms = Number(end) - Number(start);
+          
+          var d, h, m, s;
+          var elapsedTime = "";
+          s = Math.floor(ms / 1000);
+          m = Math.floor(s / 60);
+          s = s % 60;
+          h = Math.floor(m / 60);
+          m = m % 60;
+          d = Math.floor(h / 24);
+          h = h % 24;
+          
+          if (d != 0 && d != null) elapsedTime += ", " + d + "days";
+          if (h != 0 && h != null) elapsedTime += ", " + h + "hours";
+          if (m != 0 && m != null) elapsedTime += ", " + m + "mins";
+          if (s != 0) elapsedTime += ", " + s + "sec";
+          
+          return elapsedTime.substring(2);
+      };
+      
+      function pad(number) {
+          var r = String(number);
+          if (r.length === 1) r = '0' + r;
+          return r;
+      }
+      
+      function formatTimestamp(timestamp) {
+            var time = Number(timestamp);
+            var date = new Date(time);
+            var timezoneOffsetHours = date.getTimezoneOffset() / 60;
+            var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
+            timezoneOffsetHours = Math.abs(timezoneOffsetHours);
+            return date.getFullYear() + '-'
+            + pad(date.getMonth() + 1) + '-'
+            + pad(date.getDate()) + ' '
+            + pad(date.getHours()) + ':'
+            + pad(date.getMinutes()) + ':'
+            + pad(date.getSeconds())
+            + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
       }
 
       // update all other params normally
@@ -164,17 +228,28 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         .text(function (job) { return commaDelimit(job.aliases); });
       tr.selectAll('td.job-features')
         .text(function (job) { return commaDelimit(job.features); });
+      tr.selectAll('td.job-time').html(function (job) {
+          var mrState = job.mapReduceJobState || {};
+          return setJobTime(
+                  job.status, 
+                  mrState.mapTaskStartTime, 
+                  mrState.mapTaskEndTime, 
+                  mrState.reduceTaskStartTime, 
+                  mrState.reduceTaskEndTime);
+        });
       tr.selectAll('td.job-mappers').text(function (job) {
         var mrState = job.mapReduceJobState || {};
         return taskProgressMessage(
           mrState.totalMappers,
-          mrState.mapProgress);
+          mrState.mapProgress,
+          mrState.finishedMappers);
       });
-      tr.selectAll('td.job-reducers').text(function (job) {
+       tr.selectAll('td.job-reducers').text(function (job) {
         var mrState = job.mapReduceJobState || {};
         return taskProgressMessage(
-          mrState.totalReducers,
-          mrState.reduceProgress);
+          mrState.totalReducers, 
+          mrState.reduceProgress,
+          mrState.finishedReducers);
       });
     },
   };
