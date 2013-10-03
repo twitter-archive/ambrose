@@ -159,17 +159,15 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
       }
 
       function setJobTime(status, mapperStartTime, mapperEndTime, reducerStartTime, reducerEndTime) {
-        if (status == null || mapperStartTime == null) { return '---'; }
+        if (status == null || mapperStartTime == null || mapperStartTime == 0) { return '---'; }
 
         // Return mapper start/end time once ready.
-        if (status && mapperStartTime) {
-          if (reducerEndTime == null && mapperStartTime == null) {
-            return "Started at: <br>" + formatTimestamp(mapperStartTime);
-          } else {
-            return "Started at: <br>" + formatTimestamp(mapperStartTime) + "<br>"
-              + "Ended at: <br>" + formatTimestamp(reducerEndTime) + "<br>"
-              + "Elapsed Time: <br>" + calculateElapsedTime(mapperStartTime, reducerEndTime);
-          }
+        if (reducerEndTime == null || reducerEndTime == 0) {
+          return "Started at: <br>" + formatTimestamp(mapperStartTime);
+        } else {
+          return "Started at: <br>" + formatTimestamp(mapperStartTime) + "<br>"
+            + "Ended at: <br>" + formatTimestamp(reducerEndTime) + "<br>"
+            + "Elapsed Time: <br>" + calculateElapsedTime(mapperStartTime, reducerEndTime);
         }
       }
 
@@ -233,10 +231,10 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
           var mrState = job.mapReduceJobState || {};
           return setJobTime(
                   job.status,
-                  mrState.mapTaskStartTime,
-                  mrState.mapTaskEndTime,
-                  mrState.reduceTaskStartTime,
-                  mrState.reduceTaskEndTime);
+                  mrState.mapStartTime,
+                  mrState.mapEndTime,
+                  mrState.reduceStartTime,
+                  mrState.reduceEndTime);
         });
       tr.selectAll('td.job-mappers').text(function (job) {
         var mrState = job.mapReduceJobState || {};

@@ -23,10 +23,10 @@ public class MapReduceJobState {
   private float reduceProgress;
   private int totalMappers;
   private int totalReducers;
-  private long mapTaskStartTime;
-  private long reduceTaskStartTime;
-  private long mapTaskEndTime;
-  private long reduceTaskEndTime;
+  private long mapStartTime;
+  private long reduceStartTime;
+  private long mapEndTime;
+  private long reduceEndTime;
   private int finishedMappers;
   private int finishedReducers;
 
@@ -47,16 +47,18 @@ public class MapReduceJobState {
     totalMappers = mapTaskReport.length;
     totalReducers = reduceTaskReport.length;
 
-    mapTaskStartTime = Long.MAX_VALUE;
-    reduceTaskStartTime = Long.MAX_VALUE;
-    mapTaskEndTime = 0L;
-    reduceTaskEndTime = 0L;
+    mapStartTime = 0L;
+    reduceStartTime = 0L;
+    mapEndTime = 0L;
+    reduceEndTime = 0L;
     finishedMappers = 0;
     finishedReducers = 0;
 
     for (TaskReport report : mapTaskReport) {
-      if (mapTaskEndTime < report.getFinishTime()) { mapTaskEndTime = report.getFinishTime(); }
-      if (report.getStartTime() < mapTaskStartTime) { mapTaskStartTime = report.getStartTime(); }
+      if (mapEndTime < report.getFinishTime()) { mapEndTime = report.getFinishTime(); }
+      if (report.getStartTime() < mapStartTime || mapStartTime == 0L) {
+        mapStartTime = report.getStartTime();
+      }
 
       TIPStatus status = report.getCurrentStatus();
       if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
@@ -65,8 +67,10 @@ public class MapReduceJobState {
     }
 
     for (TaskReport report : reduceTaskReport) {
-      if (reduceTaskEndTime < report.getFinishTime()) { reduceTaskEndTime = report.getFinishTime(); }
-      if (report.getStartTime() < reduceTaskStartTime) { reduceTaskStartTime = report.getStartTime(); }
+      if (reduceEndTime < report.getFinishTime()) { reduceEndTime = report.getFinishTime(); }
+      if (report.getStartTime() < reduceStartTime || reduceStartTime == 0L) {
+        reduceStartTime = report.getStartTime();
+      }
 
       TIPStatus status = report.getCurrentStatus();
       if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
@@ -148,50 +152,50 @@ public class MapReduceJobState {
   }
 
   public int getFinishedMappersCount() {
-      return finishedMappers;
+    return finishedMappers;
   }
 
   public void setFinishedMappersCount(int finishedMappers) {
-      this.finishedMappers = finishedMappers;
+    this.finishedMappers = finishedMappers;
   }
 
   public int getFinishedReducersCount() {
-      return finishedReducers;
+    return finishedReducers;
   }
 
   public void setFinishedReducersCount(int finishedReducers) {
-      this.finishedReducers = finishedReducers;
+    this.finishedReducers = finishedReducers;
   }
 
   public long getMapStartTime() {
-      return mapTaskStartTime;
+    return mapStartTime;
   }
 
   public void setMapStartTime(long mapTaskStartTime) {
-      this.mapTaskStartTime = mapTaskStartTime;
+    this.mapStartTime = mapTaskStartTime;
   }
 
   public long getReduceStartTime() {
-      return reduceTaskStartTime;
+    return reduceStartTime;
   }
 
   public void setReduceStartTime(long reduceTaskStartTime) {
-      this.reduceTaskStartTime = reduceTaskStartTime;
+    this.reduceStartTime = reduceTaskStartTime;
   }
 
   public long getMapEndTime() {
-      return mapTaskEndTime;
+    return mapEndTime;
   }
 
   public void setMapEndTime(long mapTaskEndTime) {
-      this.mapTaskEndTime = mapTaskEndTime;
+    this.mapEndTime = mapTaskEndTime;
   }
 
   public long getReduceEndTime() {
-      return reduceTaskEndTime;
+    return reduceEndTime;
   }
 
   public void setReduceEndTime(long reduceTaskEndTime) {
-      this.reduceTaskEndTime = reduceTaskEndTime;
+    this.reduceEndTime = reduceTaskEndTime;
   }
 }
