@@ -241,14 +241,14 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         return taskProgressMessage(
           mrState.totalMappers,
           mrState.mapProgress,
-          mrState.finishedMappers);
+          mrState.finishedMappersCount);
       });
       tr.selectAll('td.job-reducers').text(function (job) {
         var mrState = job.mapReduceJobState || {};
         return taskProgressMessage(
           mrState.totalReducers,
           mrState.reduceProgress,
-          mrState.finishedReducers);
+          mrState.finishedReducersCount);
       });
     },
   };
