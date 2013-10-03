@@ -15,8 +15,8 @@ limitations under the License.
 */
 package com.twitter.ambrose.hive;
 
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.Maps;
 
 /**
  * Additional job properties
@@ -34,7 +34,7 @@ public enum TaskTag {
   LOCAL_MAPJOIN(5),
   MAPJOIN_ONLY_NOBACKUP(6);
 
-  private static final Map<Integer, String> lookup = new HashMap<Integer, String>();
+  private static final Map<Integer, String> lookup = Maps.newHashMap();
 
   static {
     for (TaskTag s : TaskTag.values()) {

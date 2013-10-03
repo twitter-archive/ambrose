@@ -16,7 +16,6 @@ limitations under the License.
 package com.twitter.ambrose.hive.reporter;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +31,6 @@ import org.apache.commons.logging.LogFactory;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.Event.WorkflowProgressField;
 import com.twitter.ambrose.service.StatsWriteService;
 
 /**
