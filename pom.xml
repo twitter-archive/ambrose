@@ -66,7 +66,7 @@
     <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
     <apache.pig.version>0.11.1</apache.pig.version>
     <apache.hive.version>0.11.0</apache.hive.version>
-    <apache.hadoop.version>1.0.4</apache.hadoop.version>
+    <apache.hadoop.version>0.22.0</apache.hadoop.version>
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
   </properties>
@@ -158,21 +158,26 @@
         <version>${mortbay.jetty.servlet.version}</version>
       </dependency>
 
-      <!-- hadoop --> 
+      <!-- hadoop -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-core</artifactId>
+        <artifactId>hadoop-common</artifactId>
         <version>${apache.hadoop.version}</version>
         <exclusions>
           <exclusion>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
           </exclusion>
           <exclusion>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapred</artifactId>
+        <version>${apache.hadoop.version}</version>
       </dependency>
 
       <!-- pig -->
