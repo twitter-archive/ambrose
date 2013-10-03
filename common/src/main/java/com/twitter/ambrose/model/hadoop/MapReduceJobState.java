@@ -1,7 +1,7 @@
 package com.twitter.ambrose.model.hadoop;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sun.org.apache.commons.logging.Log;
+import org.apache.commons.logging.Log;
 
 import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
@@ -29,7 +29,7 @@ public class MapReduceJobState {
   private long reduceTaskEndTime;
   private int finishedMappers;
   private int finishedReducers;
-  
+
   @JsonCreator
   public MapReduceJobState() { }
 
@@ -46,34 +46,34 @@ public class MapReduceJobState {
     reduceProgress = runningJob.reduceProgress();
     totalMappers = mapTaskReport.length;
     totalReducers = reduceTaskReport.length;
-    
+
     mapTaskStartTime = Long.MAX_VALUE;
     reduceTaskStartTime = Long.MAX_VALUE;
     mapTaskEndTime = 0L;
     reduceTaskEndTime = 0L;
     finishedMappers = 0;
     finishedReducers = 0;
-    
+
     for (TaskReport report : mapTaskReport) {
-        if (mapTaskEndTime < report.getFinishTime()) mapTaskEndTime = report.getFinishTime();
-        if (report.getStartTime() < mapTaskStartTime) mapTaskStartTime = report.getStartTime();
-        
-        TIPStatus status = report.getCurrentStatus();
-        if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
-            finishedMappers++;
-        }
+      if (mapTaskEndTime < report.getFinishTime()) { mapTaskEndTime = report.getFinishTime(); }
+      if (report.getStartTime() < mapTaskStartTime) { mapTaskStartTime = report.getStartTime(); }
+
+      TIPStatus status = report.getCurrentStatus();
+      if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
+        finishedMappers++;
+      }
     }
-    
+
     for (TaskReport report : reduceTaskReport) {
-        if (reduceTaskEndTime < report.getFinishTime()) reduceTaskEndTime = report.getFinishTime();
-        if (report.getStartTime() < reduceTaskStartTime) reduceTaskStartTime = report.getStartTime();
-        
-        TIPStatus status = report.getCurrentStatus();
-        if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
-            finishedReducers++;
-        }
+      if (reduceTaskEndTime < report.getFinishTime()) { reduceTaskEndTime = report.getFinishTime(); }
+      if (report.getStartTime() < reduceTaskStartTime) { reduceTaskStartTime = report.getStartTime(); }
+
+      TIPStatus status = report.getCurrentStatus();
+      if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
+        finishedReducers++;
+      }
     }
-  } 
+  }
 
   public String getJobId() {
     return jobId;
@@ -146,52 +146,52 @@ public class MapReduceJobState {
   public void setTotalReducers(int totalReducers) {
     this.totalReducers = totalReducers;
   }
-  
-  public int getFinishedMappers() {
+
+  public int getFinishedMappersCount() {
       return finishedMappers;
   }
 
-  public void setFinishedMappers(int finishedMappers) {
+  public void setFinishedMappersCount(int finishedMappers) {
       this.finishedMappers = finishedMappers;
   }
 
-  public int getFinishedReducers() {
+  public int getFinishedReducersCount() {
       return finishedReducers;
   }
 
-  public void setFinishedReducers(int finishedReducers) {
+  public void setFinishedReducersCount(int finishedReducers) {
       this.finishedReducers = finishedReducers;
   }
-  
-  public long getMapTaskStartTime() {
+
+  public long getMapStartTime() {
       return mapTaskStartTime;
   }
 
-  public void setMapTaskStartTime(long mapTaskStartTime) {
+  public void setMapStartTime(long mapTaskStartTime) {
       this.mapTaskStartTime = mapTaskStartTime;
   }
 
-  public long getReduceTaskStartTime() {
+  public long getReduceStartTime() {
       return reduceTaskStartTime;
   }
 
-  public void setReduceTaskStartTime(long reduceTaskStartTime) {
+  public void setReduceStartTime(long reduceTaskStartTime) {
       this.reduceTaskStartTime = reduceTaskStartTime;
   }
 
-  public long getMapTaskEndTime() {
+  public long getMapEndTime() {
       return mapTaskEndTime;
   }
 
-  public void setMapTaskEndTime(long mapTaskEndTime) {
+  public void setMapEndTime(long mapTaskEndTime) {
       this.mapTaskEndTime = mapTaskEndTime;
   }
 
-  public long getReduceTaskEndTime() {
+  public long getReduceEndTime() {
       return reduceTaskEndTime;
   }
 
-  public void setReduceTaskEndTime(long reduceTaskEndTime) {
+  public void setReduceEndTime(long reduceTaskEndTime) {
       this.reduceTaskEndTime = reduceTaskEndTime;
   }
 }

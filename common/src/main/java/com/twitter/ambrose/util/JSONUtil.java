@@ -87,7 +87,7 @@ public class JSONUtil {
       try {
           return mapper.readValue(json, type);
       } catch (JsonParseException e) {
-          throw new RuntimeException("Could not parse " + json, e);
+          throw new IOException("Could not parse " + json, e);
       }
   }
 

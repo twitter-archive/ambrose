@@ -78,7 +78,7 @@ public class PigJob extends Job {
     this.inputInfoList = inputInfoList;
     this.outputInfoList = outputInfoList;
   }
-  
+
   public String[] getAliases() { return aliases; }
   public String[] getFeatures() { return features; }
 
@@ -91,7 +91,7 @@ public class PigJob extends Job {
   public CounterGroup getCounterGroupInfo(String name) {
     return counterGroupMap == null ? null : counterGroupMap.get(name);
   }
-  
+
   @JsonIgnore
   public void setJobStats(JobStats stats) {
     this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
@@ -118,7 +118,7 @@ public class PigJob extends Job {
     metrics.put("reduceInputRecords", stats.getReduceInputRecords());
     metrics.put("reduceOutputRecords", stats.getReduceOutputRecords());
     metrics.put("SMMSpillCount", stats.getSMMSpillCount());
-    
+
     setMetrics(metrics);
   }
 
@@ -137,8 +137,8 @@ public class PigJob extends Job {
     List<OutputInfo> outputInfoList = new ArrayList<OutputInfo>();
     if (outputStatsList == null) { return outputInfoList; }
 
-    for (OutputStats inputStats : outputStatsList) {
-    	outputInfoList.add(new PigOutputInfo(inputStats));
+    for (OutputStats outputStats : outputStatsList) {
+        outputInfoList.add(new PigOutputInfo(outputStats));
     }
 
     return outputInfoList;
