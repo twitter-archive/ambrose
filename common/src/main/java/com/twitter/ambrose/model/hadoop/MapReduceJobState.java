@@ -1,9 +1,7 @@
 package com.twitter.ambrose.model.hadoop;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import org.apache.commons.logging.Log;
 
-import org.apache.hadoop.mapred.JobStatus;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TIPStatus;
 import org.apache.hadoop.mapred.TaskReport;
@@ -21,14 +19,16 @@ public class MapReduceJobState {
   private boolean isSuccessful;
   private float mapProgress;
   private float reduceProgress;
+
   private int totalMappers;
-  private int totalReducers;
   private long mapStartTime;
-  private long reduceStartTime;
   private long mapEndTime;
+  private int finishedMappersCount;
+
+  private int totalReducers;
+  private long reduceStartTime;
   private long reduceEndTime;
-  private int finishedMappers;
-  private int finishedReducers;
+  private int finishedReducersCount;
 
   @JsonCreator
   public MapReduceJobState() { }
@@ -44,15 +44,16 @@ public class MapReduceJobState {
     isSuccessful = runningJob.isSuccessful();
     mapProgress = runningJob.mapProgress();
     reduceProgress = runningJob.reduceProgress();
-    totalMappers = mapTaskReport.length;
-    totalReducers = reduceTaskReport.length;
 
+    totalMappers = mapTaskReport.length;
     mapStartTime = 0L;
-    reduceStartTime = 0L;
     mapEndTime = 0L;
+    finishedMappersCount = 0;
+
+    totalReducers = reduceTaskReport.length;
+    reduceStartTime = 0L;
     reduceEndTime = 0L;
-    finishedMappers = 0;
-    finishedReducers = 0;
+    finishedReducersCount = 0;
 
     for (TaskReport report : mapTaskReport) {
       if (mapEndTime < report.getFinishTime()) { mapEndTime = report.getFinishTime(); }
@@ -62,7 +63,7 @@ public class MapReduceJobState {
 
       TIPStatus status = report.getCurrentStatus();
       if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
-        finishedMappers++;
+        finishedMappersCount++;
       }
     }
 
@@ -74,7 +75,7 @@ public class MapReduceJobState {
 
       TIPStatus status = report.getCurrentStatus();
       if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
-        finishedReducers++;
+        finishedReducersCount++;
       }
     }
   }
@@ -152,19 +153,19 @@ public class MapReduceJobState {
   }
 
   public int getFinishedMappersCount() {
-    return finishedMappers;
+    return finishedMappersCount;
   }
 
-  public void setFinishedMappersCount(int finishedMappers) {
-    this.finishedMappers = finishedMappers;
+  public void setFinishedMappersCount(int finishedMappersCount) {
+    this.finishedMappersCount = finishedMappersCount;
   }
 
   public int getFinishedReducersCount() {
-    return finishedReducers;
+    return finishedReducersCount;
   }
 
-  public void setFinishedReducersCount(int finishedReducers) {
-    this.finishedReducers = finishedReducers;
+  public void setFinishedReducersCount(int finishedReducersCount) {
+    this.finishedReducersCount = finishedReducersCount;
   }
 
   public long getMapStartTime() {

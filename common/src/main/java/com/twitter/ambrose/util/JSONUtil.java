@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-
 /**
  * Helper method for dealing with JSON in a common way.
  *
@@ -85,9 +84,9 @@ public class JSONUtil {
    */
   public static <T> T toObject(String json, TypeReference<T> type) throws IOException {
       try {
-          return mapper.readValue(json, type);
+        return mapper.readValue(json, type);
       } catch (JsonParseException e) {
-          throw new IOException("Could not parse " + json, e);
+        throw new IOException(String.format("Failed to parse json '%s'", json), e);
       }
   }
 
