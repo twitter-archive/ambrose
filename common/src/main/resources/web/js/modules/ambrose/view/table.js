@@ -162,7 +162,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         if (status == null || mapperStartTime == null || mapperStartTime == 0) { return '---'; }
 
         // Return mapper start/end time once ready.
-        if (reducerEndTime == null || reducerEndTime == 0) {
+        if (reducerEndTime == null || status == 'RUNNING' || reducerEndTime == 0) {
           return "Started at: <br>" + formatTimestamp(mapperStartTime);
         } else if (status == 'COMPLETE' || status == 'FAILED') {
           return "Started at: <br>" + formatTimestamp(mapperStartTime) + "<br>"
