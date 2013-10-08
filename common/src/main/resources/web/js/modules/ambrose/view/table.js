@@ -164,7 +164,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         // Return mapper start/end time once ready.
         if (reducerEndTime == null || reducerEndTime == 0) {
           return "Started at: <br>" + formatTimestamp(mapperStartTime);
-        } else {
+        } else if (status == 'COMPLETE' || status == 'FAILED') {
           return "Started at: <br>" + formatTimestamp(mapperStartTime) + "<br>"
             + "Ended at: <br>" + formatTimestamp(reducerEndTime) + "<br>"
             + "Elapsed Time: <br>" + calculateElapsedTime(mapperStartTime, reducerEndTime);
