@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the Table view which generates a dynamic tabular view of a Workflow's jobs.
  */
-define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, View) {
+define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function($, d3, Ambrose, View) {
   // Table ctor
   var Table = View.Table = function(workflow, container) {
     return new View.Table.fn.init(workflow, container);
@@ -64,7 +64,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         + '<th>Status</th>'
         + '<th>Aliases</th>'
         + '<th>Features</th>'
-        + '<th>Time</th>'
+        + '<th>Elapsed Time</th>'
         + '<th>Mappers</th>'
         + '<th>Reducers</th>'
         + '</tr></thead>'
@@ -158,17 +158,26 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
         return totalTasks + ' (' + (Math.round(Number(taskProgress) * 10000, 0)) / 100 + '%)';
       }
 
-      function setJobTime(status, mapperStartTime, mapperEndTime, reducerStartTime, reducerEndTime) {
-        if (status == null || mapperStartTime == null || mapperStartTime == 0) { return '---'; }
+      function setJobTime(status, jobStartTime, jobLastUpdateTime) {
+        var tooltipdata = "";
+
+        if (status == null || jobStartTime == null || jobStartTime == 0) {
+          return divClassWithToolTip('time-tooltip', '', '---');
+        }
 
         // Return mapper start/end time once ready.
-        if (reducerEndTime == null || status == 'RUNNING' || reducerEndTime == 0) {
-          return "Started at: <br>" + formatTimestamp(mapperStartTime);
+        if (jobLastUpdateTime == null || status == 'RUNNING' || jobLastUpdateTime == 0) {
+          tooltipdata = "From " + formatTimestamp(jobStartTime);
         } else if (status == 'COMPLETE' || status == 'FAILED') {
-          return "Started at: <br>" + formatTimestamp(mapperStartTime) + "<br>"
-            + "Ended at: <br>" + formatTimestamp(reducerEndTime) + "<br>"
-            + "Elapsed Time: <br>" + calculateElapsedTime(mapperStartTime, reducerEndTime);
+          tooltipdata = "From " + formatTimestamp(jobStartTime) + " To "
+                        + formatTimestamp(jobLastUpdateTime);
         }
+        return divClassWithToolTip('time-tooltip', tooltipdata,
+               calculateElapsedTime(jobStartTime, jobLastUpdateTime));
+      }
+
+      function divClassWithToolTip(divid, title, text) {
+        return '<div class="' + divid + '" title="' + title + '">' + text + '</div>';
       }
 
       function calculateElapsedTime(start, end) {
@@ -231,10 +240,8 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
           var mrState = job.mapReduceJobState || {};
           return setJobTime(
                   job.status,
-                  mrState.mapStartTime,
-                  mrState.mapEndTime,
-                  mrState.reduceStartTime,
-                  mrState.reduceEndTime);
+                  mrState.jobStartTime,
+                  mrState.jobLastUpdateTime);
         });
       tr.selectAll('td.job-mappers').text(function (job) {
         var mrState = job.mapReduceJobState || {};
@@ -250,6 +257,9 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function($, d3, Ambrose, V
           mrState.reduceProgress,
           mrState.finishedReducersCount);
       });
+
+      // Create tooltip for the time column.
+      $(".time-tooltip").tooltip();
     },
   };
 

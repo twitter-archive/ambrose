@@ -19,15 +19,13 @@ public class MapReduceJobState {
   private boolean isSuccessful;
   private float mapProgress;
   private float reduceProgress;
+  private long jobStartTime;
+  private long jobLastUpdateTime;
 
   private int totalMappers;
-  private long mapStartTime;
-  private long mapEndTime;
   private int finishedMappersCount;
 
   private int totalReducers;
-  private long reduceStartTime;
-  private long reduceEndTime;
   private int finishedReducersCount;
 
   @JsonCreator
@@ -49,9 +47,8 @@ public class MapReduceJobState {
     totalReducers = reduceTaskReport.length;
 
     for (TaskReport report : mapTaskReport) {
-      if (mapEndTime < report.getFinishTime()) { mapEndTime = report.getFinishTime(); }
-      if (report.getStartTime() < mapStartTime || mapStartTime == 0L) {
-        mapStartTime = report.getStartTime();
+      if (report.getStartTime() < jobStartTime || jobStartTime == 0L) {
+        jobStartTime = report.getStartTime();
       }
 
       TIPStatus status = report.getCurrentStatus();
@@ -61,15 +58,17 @@ public class MapReduceJobState {
     }
 
     for (TaskReport report : reduceTaskReport) {
-      if (reduceEndTime < report.getFinishTime()) { reduceEndTime = report.getFinishTime(); }
-      if (report.getStartTime() < reduceStartTime || reduceStartTime == 0L) {
-        reduceStartTime = report.getStartTime();
-      }
+      if (jobLastUpdateTime < report.getFinishTime()) { jobLastUpdateTime = report.getFinishTime(); }
 
       TIPStatus status = report.getCurrentStatus();
       if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
         finishedReducersCount++;
       }
+    }
+
+    // If not all the reducers are finished.
+    if (finishedReducersCount != reduceTaskReport.length || jobLastUpdateTime == 0) {
+      jobLastUpdateTime = System.currentTimeMillis();
     }
   }
 
@@ -161,35 +160,19 @@ public class MapReduceJobState {
     this.finishedReducersCount = finishedReducersCount;
   }
 
-  public long getMapStartTime() {
-    return mapStartTime;
+  public long getJobStartTime() {
+    return jobStartTime;
   }
 
-  public void setMapStartTime(long mapTaskStartTime) {
-    this.mapStartTime = mapTaskStartTime;
+  public void setJobStartTime(long jobStartTime) {
+    this.jobStartTime = jobStartTime;
   }
 
-  public long getReduceStartTime() {
-    return reduceStartTime;
+  public long getJobLastUpdateTime() {
+    return jobLastUpdateTime;
   }
 
-  public void setReduceStartTime(long reduceTaskStartTime) {
-    this.reduceStartTime = reduceTaskStartTime;
-  }
-
-  public long getMapEndTime() {
-    return mapEndTime;
-  }
-
-  public void setMapEndTime(long mapTaskEndTime) {
-    this.mapEndTime = mapTaskEndTime;
-  }
-
-  public long getReduceEndTime() {
-    return reduceEndTime;
-  }
-
-  public void setReduceEndTime(long reduceTaskEndTime) {
-    this.reduceEndTime = reduceTaskEndTime;
+  public void setJobLastUpdateTime(long jobLastUpdateTime) {
+    this.jobLastUpdateTime = jobLastUpdateTime;
   }
 }
