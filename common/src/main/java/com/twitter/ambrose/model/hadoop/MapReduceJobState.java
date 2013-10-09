@@ -46,14 +46,7 @@ public class MapReduceJobState {
     reduceProgress = runningJob.reduceProgress();
 
     totalMappers = mapTaskReport.length;
-    mapStartTime = 0L;
-    mapEndTime = 0L;
-    finishedMappersCount = 0;
-
     totalReducers = reduceTaskReport.length;
-    reduceStartTime = 0L;
-    reduceEndTime = 0L;
-    finishedReducersCount = 0;
 
     for (TaskReport report : mapTaskReport) {
       if (mapEndTime < report.getFinishTime()) { mapEndTime = report.getFinishTime(); }
