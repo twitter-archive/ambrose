@@ -15,7 +15,6 @@ limitations under the License.
 */
 package com.twitter.ambrose.hive;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -26,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.collect.Maps;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
@@ -95,7 +95,7 @@ public class HiveJob extends Job {
     counterGroupMap = AmbroseHiveUtil.counterGroupInfoMap(counterNameToValue);
 
     // job metrics
-    Map<String, Number> metrics = new HashMap<String, Number>();
+    Map<String, Number> metrics = Maps.newHashMap();
     metrics.put("numberMaps", totalMappers);
     metrics.put("numberReduces", totalReducers);
     metrics.put("avgMapTime",
