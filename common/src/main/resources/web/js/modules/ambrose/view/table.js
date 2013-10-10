@@ -169,7 +169,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
         if (jobLastUpdateTime == null || status == 'RUNNING' || jobLastUpdateTime == 0) {
           tooltipdata = "From " + formatTimestamp(jobStartTime);
         } else if (status == 'COMPLETE' || status == 'FAILED') {
-          tooltipdata = "From " + formatTimestamp(jobStartTime) + " To "
+          tooltipdata = "From: " + formatTimestamp(jobStartTime) + " <br>To: "
                         + formatTimestamp(jobLastUpdateTime);
         }
         return divClassWithToolTip('time-tooltip', tooltipdata,
@@ -259,7 +259,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
       });
 
       // Create tooltip for the time column.
-      $(".time-tooltip").tooltip();
+      $(".time-tooltip").tooltip({html : true});
     },
   };
 
