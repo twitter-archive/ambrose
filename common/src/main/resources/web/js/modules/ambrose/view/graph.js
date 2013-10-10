@@ -76,6 +76,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
      */
     init: function(workflow, container, params) {
       var self = this;
+      self.dataMax = 0;
+      self.dataMin = 0;
+
       self.workflow = workflow;
       self.container = container = $(container);
       self.params = $.extend(true, {
@@ -159,6 +162,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
     },
 
     handleJobsLoaded: function() {
+      this.dataMax = 0;
+      this.dataMin = 0;
+
       // compute node x,y coords
       var graph = this.workflow.graph;
       var groups = graph.topologicalGroups;
@@ -222,7 +228,24 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
     handleJobsUpdated: function(jobs) {
       var nodes = jobs.map(function(j) { return j.node; });
+
+      var clone = nodes.slice(0);
+
+      while (clone.length > 0) {
+        var newClone = new Array();
+        $.each(clone, function(i, node) {
+          $.each(node.parents, function(j, parent) {
+            if (parent.pseudo) {
+              newClone.push(parent);
+              nodes.push(parent);
+            }
+          });
+        });
+        clone = newClone;
+      }
+
       this.updateNodeGroups(this.selectNodeGroups(nodes));
+      this.updateNodeGroups(this.selectPseudoNodeGroups(nodes));
     },
 
     handleMouseInteraction: function(jobs) {
@@ -232,6 +255,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
     selectNodeGroups: function(nodes) {
       return this.svg.selectAll('g.node').data(nodes, function(node) { return node.id; });
+    },
+
+    selectPseudoNodeGroups: function(nodes) {
+      return this.svg.selectAll('g.pseudo').data(nodes, function(node) { return node.id; });
     },
 
     removeNodeGroups: function(g) {
@@ -256,6 +283,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges).enter()
           .append('svg:path').attr('class', 'edge')
+          .attr("stroke-width", "1px")
+          .attr("stroke", "#aaa")
           .attr('d', function(edge, i) {
             var p0 = edge.source,
             p3 = edge.target,
@@ -364,6 +393,44 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
           }
           return radius;
         });
+
+      g.each(function(node, i) {
+        if (node.data.metrics && node.data.metrics.hdfsBytesWritten) {
+          var written = node.data.metrics.hdfsBytesWritten;
+          if (written != 0) {
+            if (self.dataMax < written) {
+              self.dataMax = written;
+            }
+
+            if (self.dataMin > written || self.dataMin == 0) {
+              self.dataMin = written;
+            }
+          }
+        }
+      });
+
+      var maxWidth = 7;
+      var minWidth = 2;
+
+      g.each(function(node, i) {
+        d3.select(this).selectAll('path.edge').data(node.edges)
+          .attr("stroke-width", function(d, i) {
+            if (self.dataMax == self.dataMin && self.dataMin != 0) {
+              return minWidth + "px";
+            } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+              var w = d.target.data.metrics.hdfsBytesWritten;
+              return (minWidth + (maxWidth - minWidth) / (self.dataMax - self.dataMin)
+                  * (w - self.dataMin)) + "px";
+            }
+            return "1px";
+          })
+          .attr("stroke", function(d, i) {
+            if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+              return "#888";
+            }
+            return "#aaa";
+          })
+      });
     },
 
     updateNodeGroupsFill: function(g) {
