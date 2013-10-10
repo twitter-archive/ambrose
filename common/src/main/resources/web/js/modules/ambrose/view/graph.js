@@ -229,8 +229,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
     handleJobsUpdated: function(jobs) {
       var nodes = jobs.map(function(j) { return j.node; });
 
+      // Add all the pseudo node also to the nodes list.
       var clone = nodes.slice(0);
-
       while (clone.length > 0) {
         var newClone = new Array();
         $.each(clone, function(i, node) {
@@ -394,6 +394,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
           return radius;
         });
 
+      // Find the current max and min for all the available hdfsBytesWritten value.
       g.each(function(node, i) {
         if (node.data.metrics && node.data.metrics.hdfsBytesWritten) {
           var written = node.data.metrics.hdfsBytesWritten;
@@ -409,9 +410,11 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
         }
       });
 
+      // Let the upper and lower bound of the edges be 7px and 2px.
       var maxWidth = 7;
       var minWidth = 2;
 
+      // Update the stroke width based on the hdfsBytesWritten value.
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges)
           .attr("stroke-width", function(d, i) {
