@@ -1,6 +1,8 @@
 package com.twitter.ambrose.model;
 
 import com.twitter.ambrose.pig.PigJob;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,15 +28,16 @@ public class PigJobTest {
 
   @Before
   public void setUp() throws Exception {
-    Map<String, Number> metrics = new HashMap<String, Number>();
-    metrics.put("somemetric", 6);
     Properties properties = new Properties();
     properties.setProperty("someprop", "propvalue");
     String[] aliases = new String[] { "alias1" };
     String[] features = new String[] { "feature1" };
     pigJob = new PigJob(aliases, features);
+    Map<String, Number> m = new HashMap<String, Number>();
+    m.put("somemetric", 45);
+    pigJob.setMetrics(m);
   }
-
+  
   @Test
   public void testPigJobRoundTrip() throws IOException {
     doTestRoundTrip(pigJob);
@@ -65,7 +68,10 @@ public class PigJobTest {
                    "      \"runtime\" : \"pig\",\n" +
                    "      \"id\" : \"job_local_0001\",\n" +
                    "      \"aliases\" : [ \"A\", \"AA\", \"B\", \"C\" ],\n" +
-                   "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ]\n" +
+                   "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ],\n" +
+                   "      \"metrics\" : {\n" +
+                   "        \"somemetric\": 123\n" +
+                   "      } \n" +
                    "    },\n" +
                    "    \"successorNames\" : [ ]\n" +
                    "  },\n" +
@@ -77,6 +83,8 @@ public class PigJobTest {
     assertEquals("job_local_0001", job.getId());
     assertArrayEquals(new String[] {"A", "AA", "B", "C"}, job.getAliases());
     assertArrayEquals(new String[] {"GROUP_BY", "COMBINER", "MAP_PARTIALAGG"}, job.getFeatures());
+    assertNotNull(job.getMetrics());
+    assertEquals(123, job.getMetrics().get("somemetric"));
   }
 
   private void doTestRoundTrip(DAGNode<PigJob> expected) throws IOException {
@@ -87,7 +95,6 @@ public class PigJobTest {
 
     // assert that it's an instance of PigJob
     assertNotNull(asDAGNodeAgain.getJob() instanceof PigJob);
-
     assertJobEquals(expected.getJob(), (PigJob)asDAGNodeAgain.getJob());
   }
 

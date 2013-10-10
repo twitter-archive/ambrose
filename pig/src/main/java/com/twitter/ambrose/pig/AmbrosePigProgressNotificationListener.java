@@ -21,6 +21,7 @@ import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
+import com.twitter.ambrose.server.APIHandler;
 import com.twitter.ambrose.service.StatsWriteService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,12 +38,15 @@ import org.apache.pig.tools.pigstats.OutputStats;
 import org.apache.pig.tools.pigstats.PigProgressNotificationListener;
 import org.apache.pig.tools.pigstats.PigStats;
 import org.apache.pig.tools.pigstats.ScriptState;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -261,6 +265,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   @Override
   public void jobsSubmittedNotification(String scriptId, int numJobsSubmitted) { }
 
+  /**
+   * Invoked just after an output is successfully written.
+   */
   @Override
   public void outputCompletedNotification(String scriptId, OutputStats outputStats) { }
 
@@ -318,6 +325,14 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       TaskReport[] mapTaskReport = jobClient.getMapTaskReports(jobID);
       TaskReport[] reduceTaskReport = jobClient.getReduceTaskReports(jobID);
       pigJob.setMapReduceJobState(new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
+
+      Properties jobConfProperties = new Properties();
+      Configuration conf = jobClient.getConf();
+      for (Map.Entry<String, String> entry : conf) {
+        jobConfProperties.setProperty(entry.getKey(), entry.getValue());
+      }
+      pigJob.setConfiguration(jobConfProperties);
+
     } catch (IOException e) {
       log.error("Error getting job info.", e);
     }

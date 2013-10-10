@@ -48,7 +48,10 @@ public class EventTest {
                    "      \"runtime\" : \"default\",\n" +
                    "      \"id\" : \"job_local_0001\",\n" +
                    "      \"aliases\" : [ \"A\", \"AA\", \"B\", \"C\" ],\n" +
-                   "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ]\n" +
+                   "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ],\n" +
+                   "      \"metrics\" : { \n" +
+                   "            \"somemetrics\" : 111 \n" +
+                   "        } \n " +
                    "    },\n" +
                    "    \"successorNames\" : [ ]\n" +
                    "  },\n" +
@@ -58,5 +61,6 @@ public class EventTest {
     Event event = Event.fromJson(json);
     Job job = ((DAGNode<Job>)event.getPayload()).getJob();
     assertEquals("job_local_0001", job.getId());
+    assertEquals(111, job.getMetrics().get("somemetrics"));
   }
 }

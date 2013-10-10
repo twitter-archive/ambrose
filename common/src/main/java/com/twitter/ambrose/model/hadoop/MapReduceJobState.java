@@ -1,7 +1,9 @@
 package com.twitter.ambrose.model.hadoop;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+
 import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.TIPStatus;
 import org.apache.hadoop.mapred.TaskReport;
 
 import java.io.IOException;
@@ -17,8 +19,14 @@ public class MapReduceJobState {
   private boolean isSuccessful;
   private float mapProgress;
   private float reduceProgress;
+  private long jobStartTime;
+  private long jobLastUpdateTime;
+
   private int totalMappers;
+  private int finishedMappersCount;
+
   private int totalReducers;
+  private int finishedReducersCount;
 
   @JsonCreator
   public MapReduceJobState() { }
@@ -34,8 +42,34 @@ public class MapReduceJobState {
     isSuccessful = runningJob.isSuccessful();
     mapProgress = runningJob.mapProgress();
     reduceProgress = runningJob.reduceProgress();
+
     totalMappers = mapTaskReport.length;
     totalReducers = reduceTaskReport.length;
+
+    for (TaskReport report : mapTaskReport) {
+      if (report.getStartTime() < jobStartTime || jobStartTime == 0L) {
+        jobStartTime = report.getStartTime();
+      }
+
+      TIPStatus status = report.getCurrentStatus();
+      if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
+        finishedMappersCount++;
+      }
+    }
+
+    for (TaskReport report : reduceTaskReport) {
+      if (jobLastUpdateTime < report.getFinishTime()) { jobLastUpdateTime = report.getFinishTime(); }
+
+      TIPStatus status = report.getCurrentStatus();
+      if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
+        finishedReducersCount++;
+      }
+    }
+
+    // If not all the reducers are finished.
+    if (finishedReducersCount != reduceTaskReport.length || jobLastUpdateTime == 0) {
+      jobLastUpdateTime = System.currentTimeMillis();
+    }
   }
 
   public String getJobId() {
@@ -108,5 +142,37 @@ public class MapReduceJobState {
 
   public void setTotalReducers(int totalReducers) {
     this.totalReducers = totalReducers;
+  }
+
+  public int getFinishedMappersCount() {
+    return finishedMappersCount;
+  }
+
+  public void setFinishedMappersCount(int finishedMappersCount) {
+    this.finishedMappersCount = finishedMappersCount;
+  }
+
+  public int getFinishedReducersCount() {
+    return finishedReducersCount;
+  }
+
+  public void setFinishedReducersCount(int finishedReducersCount) {
+    this.finishedReducersCount = finishedReducersCount;
+  }
+
+  public long getJobStartTime() {
+    return jobStartTime;
+  }
+
+  public void setJobStartTime(long jobStartTime) {
+    this.jobStartTime = jobStartTime;
+  }
+
+  public long getJobLastUpdateTime() {
+    return jobLastUpdateTime;
+  }
+
+  public void setJobLastUpdateTime(long jobLastUpdateTime) {
+    this.jobLastUpdateTime = jobLastUpdateTime;
   }
 }
