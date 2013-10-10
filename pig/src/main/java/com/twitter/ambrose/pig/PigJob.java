@@ -118,6 +118,7 @@ public class PigJob extends Job {
     metrics.put("reduceInputRecords", stats.getReduceInputRecords());
     metrics.put("reduceOutputRecords", stats.getReduceOutputRecords());
     metrics.put("SMMSpillCount", stats.getSMMSpillCount());
+
     setMetrics(metrics);
   }
 
@@ -132,15 +133,15 @@ public class PigJob extends Job {
     return inputInfoList;
   }
 
-  private static List<OutputInfo> outputInfoList(List<OutputStats> inputStatsList) {
-    List<OutputInfo> inputInfoList = new ArrayList<OutputInfo>();
-    if (inputStatsList == null) { return inputInfoList; }
+  private static List<OutputInfo> outputInfoList(List<OutputStats> outputStatsList) {
+    List<OutputInfo> outputInfoList = new ArrayList<OutputInfo>();
+    if (outputStatsList == null) { return outputInfoList; }
 
-    for (OutputStats inputStats : inputStatsList) {
-      inputInfoList.add(new PigOutputInfo(inputStats));
+    for (OutputStats outputStats : outputStatsList) {
+        outputInfoList.add(new PigOutputInfo(outputStats));
     }
 
-    return inputInfoList;
+    return outputInfoList;
   }
 
   private static class PigInputInfo extends InputInfo {
