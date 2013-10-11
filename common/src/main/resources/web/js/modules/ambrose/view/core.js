@@ -39,13 +39,13 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
         selected: selected,
         mouseover: mouseover,
         nodeEdgeDefault: nodeEdgeDefault,
-        nodeEdgeScaled: nodeEdgeScaled,
+        nodeEdgeScaled: nodeEdgeScaled
       },
       palettes: {
         queued: colorbrewer.Greys,
         complete: colorbrewer.Greens,
-        failed: colorbrewer.Reds,
-      },
+        failed: colorbrewer.Reds
+      }
     }
   };
 });
