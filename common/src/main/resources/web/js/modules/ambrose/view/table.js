@@ -64,7 +64,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
         + '<th>Status</th>'
         + '<th>Aliases</th>'
         + '<th>Features</th>'
-        + '<th>Elapsed Time</th>'
+        + '<th>Duration</th>'
         + '<th>Mappers</th>'
         + '<th>Reducers</th>'
         + '</tr></thead>'
@@ -260,7 +260,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
 
       // Create tooltip for the time column.
       $(".time-tooltip").tooltip({html : true});
-    },
+    }
   };
 
   // bind prototype to ctor

@@ -21,6 +21,7 @@ h2 { margin: 1em 0px; }
 /* Table view */
 .ambrose-view-table td.job-mappers,
 .ambrose-view-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table td.job-time { white-space: nowrap; }
 .ambrose-view-table a,
 .ambrose-view-table a:link,
 .ambrose-view-table a:visited,

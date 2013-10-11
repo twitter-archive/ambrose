@@ -26,6 +26,8 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
   var failed = d3.rgb(196, 98, 98);
   var selected = d3.rgb(98, 98, 196).brighter();
   var mouseover = selected.brighter();
+  var nodeEdgeDefault = d3.rgb(170, 170, 170);
+  var nodeEdgeScaled = d3.rgb(170, 170, 170).darker();
 
   return Ambrose.View = {
     Theme: {
@@ -36,6 +38,8 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
         failed: failed,
         selected: selected,
         mouseover: mouseover,
+        nodeEdgeDefault: nodeEdgeDefault,
+        nodeEdgeScaled: nodeEdgeScaled,
       },
       palettes: {
         queued: colorbrewer.Greys,
