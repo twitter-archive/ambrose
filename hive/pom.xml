@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>ambrose-hive</artifactId>
-  
+
   <name>Ambrose Hive</name>
   <url>https://github.com/lbendig/ambrose/tree/ambrose-hive</url>
   <inceptionYear>2013</inceptionYear>
@@ -62,8 +62,14 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
       <version>0.23.9</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-daemon</groupId>
+          <artifactId>commons-daemon</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    
+
     <!-- hive -->
     <!-- javax.jdo is excluded, see: https://issues.apache.org/jira/browse/HIVE-4089 -->
     <dependency>
