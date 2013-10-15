@@ -83,7 +83,10 @@ public class HiveJobTest {
       "      \"runtime\" : \"hive\"," +
       "      \"id\" : \"job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)\"," +
       "      \"aliases\" : [ \"src\" ]," +
-      "      \"features\" : [ \"SELECT\", \"FILTER\" ]" +
+      "      \"features\" : [ \"SELECT\", \"FILTER\" ]," +
+      "      \"metrics\" : {\n" +
+      "        \"somemetric\": 123\n" +
+      "      } \n" +
       "    }," +
       "    \"successorNames\" : [ ]" +
       "  }," +
@@ -104,6 +107,8 @@ public class HiveJobTest {
     assertEquals("job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)", job.getId());
     assertArrayEquals(new String[] { "src" }, job.getAliases());
     assertArrayEquals(new String[] { "SELECT", "FILTER" }, job.getFeatures());
+    assertNotNull(job.getMetrics());
+    assertEquals(123, job.getMetrics().get("somemetric"));
   }
 
   private void doTestRoundTrip(DAGNode<HiveJob> expected) throws IOException {
