@@ -102,8 +102,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       }, View.Theme, params);
       self.resetView();
 
-      // Let the upper and lower bound of the edges be 8px (radius) and 2px.
-      self.edgeMaxWidth = self.params.dimensions.node.radius;
+      // Let the upper and lower bound of the edges be 16px (radius) and 2px.
+      self.edgeMaxWidth = self.params.dimensions.node.radius * 2;
       self.edgeMinWidth = 2;
 
       // shortcut to dimensions
@@ -349,6 +349,25 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
         };
       }
 
+      // Rescales the width of the edges based on the counter/metrics we want.
+      function rescaleEdgesWidth(d, i) {
+        if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
+          return self.edgeMinWidth + "px";
+        } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+          var w = d.target.data.metrics.hdfsBytesWritten;
+          return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth) / (self.arcValueMax - self.arcValueMin)
+            * (w - self.arcValueMin)) + "px";
+          }
+        return "1px";
+      }
+
+      function rescaleEdgesColor(d, i) {
+        if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+          return colors.nodeEdgeScaled;
+        }
+        return colors.nodeEdgeDefault;
+      }
+
       // initiate transition
       t = g.transition().duration(duration);
 
@@ -422,20 +441,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges)
           .attr("stroke-width", function(d, i) {
-            if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
-              return self.edgeMinWidth + "px";
-            } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
-              var w = d.target.data.metrics.hdfsBytesWritten;
-              return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth) / (self.arcValueMax - self.arcValueMin)
-                  * (w - self.arcValueMin)) + "px";
-            }
-            return "1px";
+            return rescaleEdgesWidth(d, i);
           })
           .attr("stroke", function(d, i) {
-            if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
-              return colors.nodeEdgeScaled;
-            }
-            return colors.nodeEdgeDefault;
+            return rescaleEdgesColor(d, i);
           })
       });
     },

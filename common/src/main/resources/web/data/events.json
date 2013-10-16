@@ -371,7 +371,7 @@
       "metrics" : {
         "proactiveSpillCountObjects" : 0,
         "avgMapTime" : -1,
-        "hdfsBytesWritten" : 100456789,
+        "hdfsBytesWritten" : 90456789,
         "maxReduceTime" : -1,
         "minReduceTime" : -1,
         "SMMSpillCount" : 0,
@@ -1098,7 +1098,7 @@
       "metrics" : {
         "proactiveSpillCountObjects" : 0,
         "avgMapTime" : -1,
-        "hdfsBytesWritten" : 111111111,
+        "hdfsBytesWritten" : 100000000,
         "maxReduceTime" : -1,
         "minReduceTime" : -1,
         "SMMSpillCount" : 0,
@@ -1155,7 +1155,7 @@
       "metrics" : {
         "proactiveSpillCountObjects" : 0,
         "avgMapTime" : -1,
-        "hdfsBytesWritten" : 99999999,
+        "hdfsBytesWritten" : 90000000,
         "maxReduceTime" : -1,
         "minReduceTime" : -1,
         "SMMSpillCount" : 0,
@@ -1557,7 +1557,7 @@
       "metrics" : {
         "proactiveSpillCountObjects" : 0,
         "avgMapTime" : -1,
-        "hdfsBytesWritten" : 93456789,
+        "hdfsBytesWritten" : 87654321,
         "maxReduceTime" : -1,
         "minReduceTime" : -1,
         "SMMSpillCount" : 0,
@@ -1743,7 +1743,7 @@
       "metrics" : {
         "proactiveSpillCountObjects" : 0,
         "avgMapTime" : -1,
-        "hdfsBytesWritten" : 70000000,
+        "hdfsBytesWritten" : 75000000,
         "maxReduceTime" : -1,
         "minReduceTime" : -1,
         "SMMSpillCount" : 0,
