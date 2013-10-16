@@ -21,6 +21,7 @@ h2 { margin: 1em 0px; }
 /* Table view */
 .ambrose-view-table td.job-mappers,
 .ambrose-view-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table td.job-time { white-space: nowrap; }
 .ambrose-view-table a,
 .ambrose-view-table a:link,
 .ambrose-view-table a:visited,
@@ -31,7 +32,7 @@ h2 { margin: 1em 0px; }
 .ambrose-view-chord {}
 
 /* Graph view */
-.ambrose-view-graph path.edge { fill: none; stroke: #aaa; stroke-width: 1.2px; }
+.ambrose-view-graph path.edge { fill: none; }
 .ambrose-view-graph path.progress {}
 .ambrose-view-graph path.map { fill: #0e90d2; }
 .ambrose-view-graph path.reduce { fill: #FF7800; }
