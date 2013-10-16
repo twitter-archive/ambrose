@@ -64,7 +64,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
         + '<th>Status</th>'
         + '<th>Aliases</th>'
         + '<th>Features</th>'
-        + '<th>Elapsed Time</th>'
+        + '<th>Duration</th>'
         + '<th>Mappers</th>'
         + '<th>Reducers</th>'
         + '</tr></thead>'
@@ -193,12 +193,12 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
           d = Math.floor(h / 24);
           h = h % 24;
 
-          if (d != 0 && d != null) elapsedTime += ", " + d + " days";
-          if (h != 0 && h != null) elapsedTime += ", " + h + " hours";
-          if (m != 0 && m != null) elapsedTime += ", " + m + " mins";
-          if (s != 0) elapsedTime += ", " + s + " sec";
+          if (d != 0) elapsedTime += d + "d ";
+          if (h != 0) elapsedTime += h + "h ";
+          if (m != 0) elapsedTime += m + "m ";
+          if (s != 0) elapsedTime += s + "s ";
 
-          return elapsedTime.substring(2);
+          return elapsedTime;
       };
 
       function pad(number) {
@@ -260,7 +260,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
 
       // Create tooltip for the time column.
       $(".time-tooltip").tooltip({html : true});
-    },
+    }
   };
 
   // bind prototype to ctor

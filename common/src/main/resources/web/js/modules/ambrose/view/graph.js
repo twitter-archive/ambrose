@@ -76,6 +76,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
      */
     init: function(workflow, container, params) {
       var self = this;
+      self.arcValueMax = 0;
+      self.arcValueMin = 0;
+
       self.workflow = workflow;
       self.container = container = $(container);
       self.params = $.extend(true, {
@@ -98,6 +101,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
         },
       }, View.Theme, params);
       self.resetView();
+
+      // Let the upper and lower bound of the edges be 16px (radius) and 2px.
+      self.edgeMaxWidth = self.params.dimensions.node.radius * 2;
+      self.edgeMinWidth = 2;
 
       // shortcut to dimensions
       var dim = self.params.dimensions;
@@ -159,6 +166,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
     },
 
     handleJobsLoaded: function() {
+      this.arcValueMax = 0;
+      this.arcValueMin = 0;
+
       // compute node x,y coords
       var graph = this.workflow.graph;
       var groups = graph.topologicalGroups;
@@ -222,7 +232,26 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
     handleJobsUpdated: function(jobs) {
       var nodes = jobs.map(function(j) { return j.node; });
+
+      // Add all the pseudo node which are ancestors of the updated nodes also to the nodes list.
+      // Recursive function which adds direct ancestor pseudo nodes to nodes array.
+      var addPseudoNodes = function(node) {
+        if (node == null || !node.pseudo) return;
+        nodes.push(node);
+        node.parents.forEach(addPseudoNodes);
+      };
+
+      // Initial nodes are not pseudo, but parents may be a pseudo node.
+      nodes.slice(0).forEach(function(node) {
+        node.parents.forEach(addPseudoNodes);
+      });
+
       this.updateNodeGroups(this.selectNodeGroups(nodes));
+      this.updateNodeGroups(this.selectPseudoNodeGroups(nodes));
+
+      // Reset the to update the width of the previous edges.
+      this.resetView();
+      this.handleJobsLoaded();
     },
 
     handleMouseInteraction: function(jobs) {
@@ -232,6 +261,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
     selectNodeGroups: function(nodes) {
       return this.svg.selectAll('g.node').data(nodes, function(node) { return node.id; });
+    },
+
+    selectPseudoNodeGroups: function(nodes) {
+      return this.svg.selectAll('g.pseudo').data(nodes, function(node) { return node.id; });
     },
 
     removeNodeGroups: function(g) {
@@ -245,6 +278,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       var projection = self.projection;
       var cx = function(d) { return xs(d.x); };
       var cy = function(d) { return ys(d.y); };
+      var colors = self.params.colors;
 
       // create node group elements
       g = g.enter().append('svg:g')
@@ -256,6 +290,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges).enter()
           .append('svg:path').attr('class', 'edge')
+          .attr("stroke-width", "1px")
+          .attr("stroke", colors.nodeEdgeDefault)
           .attr('d', function(edge, i) {
             var p0 = edge.source,
             p3 = edge.target,
@@ -300,6 +336,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
     updateNodeGroups: function(g) {
       var self = this;
       var duration = 750;
+      var colors = self.params.colors;
 
       function getArcTween(progress, arc) {
         return function(d) {
@@ -310,6 +347,25 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
             return arc(i(t));
           };
         };
+      }
+
+      // Rescales the width of the edges based on the counter/metrics we want.
+      function rescaleEdgesWidth(d, i) {
+        if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
+          return self.edgeMinWidth + "px";
+        } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+          var w = d.target.data.metrics.hdfsBytesWritten;
+          return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth) / (self.arcValueMax - self.arcValueMin)
+            * (w - self.arcValueMin)) + "px";
+          }
+        return "1px";
+      }
+
+      function rescaleEdgesColor(d, i) {
+        if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+          return colors.nodeEdgeScaled;
+        }
+        return colors.nodeEdgeDefault;
       }
 
       // initiate transition
@@ -364,6 +420,33 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
           }
           return radius;
         });
+
+      // Find the current max and min for all the available hdfsBytesWritten value.
+      g.each(function(node, i) {
+        if (node.data.metrics && node.data.metrics.hdfsBytesWritten) {
+          var written = node.data.metrics.hdfsBytesWritten;
+          if (written != 0) {
+            if (self.arcValueMax < written) {
+              self.arcValueMax = written;
+            }
+
+            if (self.arcValueMin > written || self.arcValueMin == 0) {
+              self.arcValueMin = written;
+            }
+          }
+        }
+      });
+
+      // Update the stroke width based on the hdfsBytesWritten value.
+      g.each(function(node, i) {
+        d3.select(this).selectAll('path.edge').data(node.edges)
+          .attr("stroke-width", function(d, i) {
+            return rescaleEdgesWidth(d, i);
+          })
+          .attr("stroke", function(d, i) {
+            return rescaleEdgesColor(d, i);
+          })
+      });
     },
 
     updateNodeGroupsFill: function(g) {
