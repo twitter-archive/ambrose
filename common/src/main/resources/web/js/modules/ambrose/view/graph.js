@@ -248,6 +248,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
       this.updateNodeGroups(this.selectNodeGroups(nodes));
       this.updateNodeGroups(this.selectPseudoNodeGroups(nodes));
+
+      // Reset the to update the width of the previous edges.
+      this.resetView();
+      this.handleJobsLoaded();
     },
 
     handleMouseInteraction: function(jobs) {
