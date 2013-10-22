@@ -74,6 +74,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private Map<String, DAGNode<PigJob>> dagNodeNameMap = Maps.newTreeMap();
   private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = Maps.newTreeMap();
   private Set<String> completedJobIds = Sets.newHashSet();
+  private JobClient jobClient;
+  private PigStats.JobGraph jobGraph;
 
   /**
    * Initialize this class with an instance of StatsWriteService to push stats to.
@@ -85,6 +87,13 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   }
 
   protected StatsWriteService getStatsWriteService() { return statsWriteService; }
+
+
+  public void planNotification(String scriptId, MROperPlan plan, JobClient jobClient) {
+       this.jobClient = jobClient;
+      initialPlanNotification(scriptId, plan);
+      jobClient = null;
+  }
 
   /**
    * Called after the job DAG has been created, but before any jobs are fired.
@@ -129,10 +138,20 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     try {
-      statsWriteService.sendDagNodeNameMap(scriptId, this.dagNodeNameMap);
+      statsWriteService.sendDagNodeNameMap(scriptId, this.dagNodeNameMap, jobClient);
     } catch (IOException e) {
       log.error("Couldn't send dag to StatsWriteService", e);
     }
+  }
+
+  public void startedNotification(String scriptId, String assignedJobId,
+          PigStats.JobGraph jobGraph, JobClient jobClient) {
+      this.jobGraph = jobGraph;
+      this.jobClient = jobClient;
+      jobStartedNotification(scriptId, assignedJobId);
+
+      jobGraph = null;
+      jobClient = null;
   }
 
   /**
@@ -143,7 +162,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void jobStartedNotification(String scriptId, String assignedJobId) {
-    PigStats.JobGraph jobGraph = PigStats.get().getJobGraph();
+    if (jobGraph == null) {
+      jobGraph = PigStats.get().getJobGraph();
+    }
     log.info("jobStartedNotification - jobId " + assignedJobId + ", jobGraph:\n" + jobGraph);
 
     // for each job in the graph, check if the stats for a job with this name is found. If so, look
@@ -158,7 +179,13 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
                   + jobStats.getName() + ") for jobId " + assignedJobId);
         } else {
           node.getJob().setId(assignedJobId);
-          addMapReduceJobState(node.getJob());
+
+          if (jobClient == null) {
+              addMapReduceJobState(node.getJob(), null);
+          } else {
+              addMapReduceJobState(node.getJob(), jobClient);
+          }
+
           dagNodeJobIdMap.put(node.getJob().getId(), node);
           pushEvent(scriptId, new Event.JobStartedEvent(node));
         }
@@ -228,6 +255,13 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
   }
 
+  public void updateProgress(String scriptId, int progress, JobClient jc) {
+      jobClient = jc;
+      progressUpdatedNotification(scriptId, progress);
+
+      jobClient = null;
+  }
+
   /**
    * Called throught execution of the script with progress notifications.
    * @param scriptId scriptId of the running script
@@ -235,7 +269,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void progressUpdatedNotification(String scriptId, int progress) {
-
     // first we report the scripts progress
     Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
     eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
@@ -246,7 +279,11 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       // don't send progress events for unstarted jobs
       if (node.getJob().getId() == null) { continue; }
 
-      addMapReduceJobState(node.getJob());
+      if (jobClient == null) {
+          addMapReduceJobState(node.getJob(), null);
+      } else {
+          addMapReduceJobState(node.getJob(), jobClient);
+      }
 
       //only push job progress events for a completed job once
       if (node.getJob().getMapReduceJobState() != null && !completedJobIds.contains(node.getJob().getId())) {
@@ -311,11 +348,14 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   }
 
   @SuppressWarnings("deprecation")
-  private void addMapReduceJobState(PigJob pigJob) {
-    JobClient jobClient = PigStats.get().getJobClient();
+  private void addMapReduceJobState(PigJob pigJob, JobClient jobClient) {
+    if (jobClient == null) {
+        jobClient = PigStats.get().getJobClient();
+    }
 
     try {
-      RunningJob runningJob = jobClient.getJob(pigJob.getId());
+      String id = pigJob.getId();
+      RunningJob runningJob = jobClient.getJob(id);
       if (runningJob == null) {
         log.warn("Couldn't find job status for jobId=" + pigJob.getId());
         return;

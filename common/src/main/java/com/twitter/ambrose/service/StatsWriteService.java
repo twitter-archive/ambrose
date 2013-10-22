@@ -22,6 +22,8 @@ import com.twitter.ambrose.model.Job;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.hadoop.mapred.JobClient;
+
 /**
  * Service that accepts the DAGNode map and push events. Implementations of this service might write
  * these objects somewhere where they can be retrieved later by a StatsReadService (i.e. to disk, to
@@ -40,6 +42,8 @@ public interface StatsWriteService<T extends Job> {
    * @param dagNodeNameMap a Map of DAGNodes where the key is the DAGNode name
    */
   public void sendDagNodeNameMap(String workflowId, Map<String, DAGNode<T>> dagNodeNameMap) throws IOException;
+  public void sendDagNodeNameMap(String workflowId, Map<String, DAGNode<T>> dagNodeNameMap,
+          JobClient jobClient) throws IOException;
 
   /**
    * Push an events for a given workflow.
