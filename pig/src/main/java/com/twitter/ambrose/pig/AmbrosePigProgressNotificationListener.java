@@ -64,7 +64,8 @@ import com.google.common.collect.Sets;
  *
  */
 @SuppressWarnings("deprecation")
-public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
+public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener,
+    JobClientHandler {
 
   private static final Joiner COMMA_JOINER = Joiner.on(',');
   protected Log log = LogFactory.getLog(getClass());
@@ -87,13 +88,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   }
 
   protected StatsWriteService getStatsWriteService() { return statsWriteService; }
-
-
-  public void planNotification(String scriptId, MROperPlan plan, JobClient jobClient) {
-       this.jobClient = jobClient;
-      initialPlanNotification(scriptId, plan);
-      jobClient = null;
-  }
 
   /**
    * Called after the job DAG has been created, but before any jobs are fired.
@@ -138,20 +132,10 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     try {
-      statsWriteService.sendDagNodeNameMap(scriptId, this.dagNodeNameMap, jobClient);
+      statsWriteService.sendDagNodeNameMap(scriptId, this.dagNodeNameMap);
     } catch (IOException e) {
       log.error("Couldn't send dag to StatsWriteService", e);
     }
-  }
-
-  public void startedNotification(String scriptId, String assignedJobId,
-          PigStats.JobGraph jobGraph, JobClient jobClient) {
-      this.jobGraph = jobGraph;
-      this.jobClient = jobClient;
-      jobStartedNotification(scriptId, assignedJobId);
-
-      jobGraph = null;
-      jobClient = null;
   }
 
   /**
@@ -253,13 +237,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         log.error("Exception outputting workflow", e);
       }
     }
-  }
-
-  public void updateProgress(String scriptId, int progress, JobClient jc) {
-      jobClient = jc;
-      progressUpdatedNotification(scriptId, progress);
-
-      jobClient = null;
   }
 
   /**
@@ -380,5 +357,15 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
   private static String[] toArray(String string) {
     return string == null ? new String[0] : string.trim().split(",");
+  }
+
+  @Override
+  public void setJobClient(JobClient jobClient) {
+    this.jobClient = jobClient;
+  }
+
+  @Override
+  public void setJobGraph(PigStats.JobGraph jobGraph) {
+    this.jobGraph = jobGraph;
   }
 }

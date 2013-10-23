@@ -184,11 +184,4 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
       eventsWriter.close();
     }
   }
-
-  @Override
-  public void sendDagNodeNameMap(String workflowId,
-          Map<String, DAGNode<Job>> dagNodeNameMap, JobClient jobClient)
-          throws IOException {
-      // TODO Auto-generated method stub
-  }
 }
