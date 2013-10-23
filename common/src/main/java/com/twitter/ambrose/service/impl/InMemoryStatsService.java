@@ -19,19 +19,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import org.apache.hadoop.mapred.JobClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
