@@ -78,6 +78,33 @@ public class HiveDAGTransformer {
 
   private static final String[] EMPTY_ARR = {};
 
+  private static Class<?> mapWorkClazz;
+  private static Method m_getPathToAlias;
+  private static Method m_getMapWork;
+  
+  /*
+   * Resolves API incompatibility between Hive 0.11.0 and 0.12.0 (see HIVE-4825)
+   */
+  static {
+    String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
+    try {
+      try {
+        mapWorkClazz = Class.forName(mapWorkClassName);
+        m_getMapWork = MapredWork.class.getDeclaredMethod("getMapWork");
+      }
+      catch (Exception e) {
+        mapWorkClazz = MapredWork.class;
+        LOG.info("No Hive 0.12.0 compatible API was found, couldn't load " + mapWorkClassName);
+        LOG.debug(e);
+      }
+      m_getPathToAlias = mapWorkClazz.getDeclaredMethod("getPathToAliases");
+    }
+    catch (Exception e) {
+      LOG.fatal("Can't access to getPathToAliases() on " + MapredWork.class.getName(), e);
+      throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
+    }
+  }
+  
   public HiveDAGTransformer(HookContext hookContext) {
 
     conf = hookContext.getConf();
@@ -308,8 +335,7 @@ public class HiveDAGTransformer {
   }
   
   /**
-   * Returns aliases and also resolves API incompatibility between Hive 0.11.0 and 0.12.0
-   * (see HIVE-4825)
+   * Returns aliases by reflective method invocation based on the actual Hive version
    * <pre>
    *   Hive 0.11.0 : 
    *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mrWork.getPathToAliases();}
@@ -324,29 +350,15 @@ public class HiveDAGTransformer {
    */
   @SuppressWarnings("unchecked")
   private LinkedHashMap<String, ArrayList<String>> getPathToAliases(MapredWork mrWork) {
-    String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
-    Class<?> clazz = MapredWork.class;
-    Method m_getMapWork = null;
+    //in Hive 0.11.0 m_getMapWork is null
     try {
-      clazz = Class.forName(mapWorkClassName);
-      m_getMapWork = MapredWork.class.getDeclaredMethod("getMapWork");
-    }
-    catch (Exception e) {
-      LOG.info("No Hive 0.12.0 compatible API was found, couldn't load " + mapWorkClassName);
-      LOG.debug(e);
-    }
-    
-    try {
-      Method m_getPathToAlias = clazz.getDeclaredMethod("getPathToAliases");
-      //in Hive 0.11.0 m_getMapWork is null
       Object obj = (m_getMapWork == null) ? mrWork : m_getMapWork.invoke(mrWork);
       return (LinkedHashMap<String, ArrayList<String>>) m_getPathToAlias.invoke(obj);
     }
     catch (Exception e) {
-      LOG.fatal("Can't access to getPathToAliases() on " + MapredWork.class.getName(), e);
+      LOG.fatal(e);
       throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
     }
-    
   }
-
+  
 }
