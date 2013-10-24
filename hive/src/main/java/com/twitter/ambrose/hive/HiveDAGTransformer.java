@@ -40,6 +40,7 @@ import org.apache.hadoop.hive.ql.plan.api.Adjacency;
 import org.apache.hadoop.hive.ql.plan.api.Graph;
 import org.apache.hadoop.hive.ql.plan.api.OperatorType;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -77,17 +78,14 @@ public class HiveDAGTransformer {
   private final Configuration conf;
 
   private static final String[] EMPTY_ARR = {};
-
-  private static Class<?> mapWorkClazz;
-  private static Method m_getPathToAlias;
-  private static Method m_getMapWork;
   
-  /*
-   * Resolves API incompatibility between Hive 0.11.0 and 0.12.0 (see HIVE-4825)
-   */
+  private static Function<MapredWork, LinkedHashMap<String, ArrayList<String>>> closure;
   static {
-    String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
+    Method m_getPathToAlias;
+    Method m_getMapWork = null;
     try {
+      String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
+      Class<?> mapWorkClazz;
       try {
         mapWorkClazz = Class.forName(mapWorkClassName);
         m_getMapWork = MapredWork.class.getDeclaredMethod("getMapWork");
@@ -103,6 +101,40 @@ public class HiveDAGTransformer {
       LOG.fatal("Can't access to getPathToAliases() on " + MapredWork.class.getName(), e);
       throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
     }
+
+    initClosure(m_getMapWork, m_getPathToAlias);
+
+  }
+  
+  /**
+   * Initializes a function that handles Hive API incompatibility issues (see HIVE-4825)
+   * <pre>
+   *   Hive 0.11.0 : 
+   *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mrWork.getPathToAliases();}
+   * 
+   *   Hive 0.12.0 :
+   *   {@code org.apache.hadoop.hive.ql.plan.MapWork mapWork = mrWork.getMapWork();}
+   *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mapWork.getPathToAliases();}
+   * </pre>
+   * 
+   * @param m_getMapWork
+   * @param m_getPathToAlias
+   */
+  private static void initClosure(final Method m_getMapWork, final Method m_getPathToAlias) {
+    closure = new Function<MapredWork, LinkedHashMap<String, ArrayList<String>>>() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public LinkedHashMap<String, ArrayList<String>> apply(MapredWork mrWork) {
+        try {
+          Object obj = (m_getMapWork == null) ? mrWork : m_getMapWork.invoke(mrWork);
+          return (LinkedHashMap<String, ArrayList<String>>) m_getPathToAlias.invoke(obj);
+        }
+        catch (Exception e) {
+          LOG.fatal(e);
+          throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
+        }
+      }
+    };
   }
   
   public HiveDAGTransformer(HookContext hookContext) {
@@ -335,30 +367,12 @@ public class HiveDAGTransformer {
   }
   
   /**
-   * Returns aliases by reflective method invocation based on the actual Hive version
-   * <pre>
-   *   Hive 0.11.0 : 
-   *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mrWork.getPathToAliases();}
-   * 
-   *   Hive 0.12.0 :
-   *   {@code org.apache.hadoop.hive.ql.plan.MapWork mapWork = mrWork.getMapWork();}
-   *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mapWork.getPathToAliases();}
-   * </pre>
-   * 
+   * Returns a path - alias mapping by invoking the function implementation
    * @param mrWork
    * @return
    */
-  @SuppressWarnings("unchecked")
   private LinkedHashMap<String, ArrayList<String>> getPathToAliases(MapredWork mrWork) {
-    //in Hive 0.11.0 m_getMapWork is null
-    try {
-      Object obj = (m_getMapWork == null) ? mrWork : m_getMapWork.invoke(mrWork);
-      return (LinkedHashMap<String, ArrayList<String>>) m_getPathToAlias.invoke(obj);
-    }
-    catch (Exception e) {
-      LOG.fatal(e);
-      throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
-    }
+    return closure.apply(mrWork);
   }
   
 }
