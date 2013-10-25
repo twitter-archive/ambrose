@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,24 +82,26 @@ public class HiveDAGTransformer {
   
   private static Function<MapredWork, LinkedHashMap<String, ArrayList<String>>> closure;
   static {
-    Method m_getPathToAlias;
+    
+    String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
     Method m_getMapWork = null;
+    Class<?> mapWorkClazz;
     try {
-      String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
-      Class<?> mapWorkClazz;
-      try {
-        mapWorkClazz = Class.forName(mapWorkClassName);
-        m_getMapWork = MapredWork.class.getDeclaredMethod("getMapWork");
-      }
-      catch (Exception e) {
-        mapWorkClazz = MapredWork.class;
-        LOG.info("No Hive 0.12.0 compatible API was found, couldn't load " + mapWorkClassName);
-        LOG.debug(e);
-      }
+      mapWorkClazz = Class.forName(mapWorkClassName);
+      m_getMapWork = MapredWork.class.getDeclaredMethod("getMapWork");
+    }
+    catch (Exception e) {
+      mapWorkClazz = MapredWork.class;
+      LOG.info("No Hive 0.12.0 compatible API was found, couldn't load " + mapWorkClassName);
+      LOG.debug(e);
+    }
+
+    Method m_getPathToAlias;
+    try {
       m_getPathToAlias = mapWorkClazz.getDeclaredMethod("getPathToAliases");
     }
     catch (Exception e) {
-      LOG.fatal("Can't access to getPathToAliases() on " + MapredWork.class.getName(), e);
+      LOG.fatal("Can't access to getPathToAliases() on " + mapWorkClazz.getName(), e);
       throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
     }
 
@@ -120,11 +123,12 @@ public class HiveDAGTransformer {
    * @param m_getMapWork
    * @param m_getPathToAlias
    */
-  private static void initClosure(final Method m_getMapWork, final Method m_getPathToAlias) {
+  private static void initClosure(@Nullable final Method m_getMapWork, final Method m_getPathToAlias) {
     closure = new Function<MapredWork, LinkedHashMap<String, ArrayList<String>>>() {
       @SuppressWarnings("unchecked")
       @Override
-      public LinkedHashMap<String, ArrayList<String>> apply(MapredWork mrWork) {
+      @Nullable
+      public LinkedHashMap<String, ArrayList<String>> apply(@Nullable MapredWork mrWork) {
         try {
           Object obj = (m_getMapWork == null) ? mrWork : m_getMapWork.invoke(mrWork);
           return (LinkedHashMap<String, ArrayList<String>>) m_getPathToAlias.invoke(obj);
