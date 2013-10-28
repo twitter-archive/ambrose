@@ -41,7 +41,8 @@ import static com.twitter.ambrose.hive.reporter.AmbroseHiveReporterFactory.getEm
 /**
  * Hook that is invoked every <tt>hive.exec.counters.pull.interval</tt> seconds
  * to report a given job's status to
- * {@link com.twitter.ambrose.hive.HiveProgressReporter HiveProgressReporter} <br>
+ * {@link com.twitter.ambrose.hive.reporter.AmbroseHiveProgressReporter AmbroseHiveProgressReporter}
+ * <br>
  * If <tt>hive.exec.parallel</tt> is set each thread obtain an instance from
  * this class.
  * 
@@ -55,59 +56,13 @@ public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
   /** Running job information */
   private final JobClient jobClient;
   private RunningJob rj;
-  private HiveMapReduceJobState jobProgress;
+  private MapReduceJobState jobProgress;
 
   private String nodeId;
   private JobID jobId;
 
-  private int totalReduceTasks;
-  private int totalMapTasks;
-
   private final Map<WorkflowProgressField, String> eventData = Maps.newHashMapWithExpectedSize(1);
   private boolean init = true;
-
-  private static class HiveMapReduceJobState extends MapReduceJobState {
-
-    public HiveMapReduceJobState(String jobIdStr, RunningJob rj, int totalMapTasks,
-        int totalReduceTasks) throws IOException {
-
-      setJobId(jobIdStr);
-      setJobName(rj.getJobName());
-      setTrackingURL(rj.getTrackingURL());
-      setComplete(rj.isComplete());
-      setSuccessful(rj.isSuccessful());
-      setMapProgress(rj.mapProgress());
-      setReduceProgress(rj.reduceProgress());
-      setTotalMappers(totalMapTasks);
-      setTotalReducers(totalReduceTasks);
-    }
-
-    public boolean update(RunningJob rj) throws IOException {
-
-      boolean complete = rj.isComplete();
-      boolean successful = rj.isSuccessful();
-      float mapProgress = rj.mapProgress();
-      float reduceProgress = rj.reduceProgress();
-
-      boolean update = !(isComplete() == complete && isSuccessful() == successful
-          && AmbroseHiveUtil.isEqual(getMapProgress(), mapProgress) && AmbroseHiveUtil.isEqual(
-          getReduceProgress(), reduceProgress));
-
-      if (update) {
-        setComplete(complete);
-        setSuccessful(successful);
-        setMapProgress(mapProgress);
-        setReduceProgress(reduceProgress);
-      }
-      return update;
-    }
-
-    public int getProgress() {
-      float result = ((getMapProgress() + getReduceProgress()) * 100) / 2;
-      return (int) result;
-    }
-
-  }
 
   public AmbroseHiveStatPublisher() throws IOException {
     Configuration conf = SessionState.get().getConf();
@@ -129,8 +84,6 @@ public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
       jobId = JobID.forName(jobIDStr);
       rj = jobClient.getJob(jobId);
       nodeId = AmbroseHiveUtil.getNodeIdFromJob(SessionState.get().getConf(), rj);
-      totalMapTasks = jobClient.getMapTaskReports(jobId).length;
-      totalReduceTasks = jobClient.getReduceTaskReports(jobId).length;
     }
     catch (IOException e) {
       LOG.error("Error getting running job for id : " + jobIDStr, e);
@@ -159,17 +112,10 @@ public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
       reporter.pushEvent(queryId, new Event.JobStartedEvent(dagNode));
     }
     try {
-
-      boolean update = false;
-      if (jobProgress == null) {
-        jobProgress = new HiveMapReduceJobState(jobIDStr, rj, totalMapTasks, totalReduceTasks);
-        update = true;
-      }
-      else {
-        update = jobProgress.update(rj);
-      }
-
-      if (update && !reporter.getCompletedJobIds().contains(jobIDStr)) {
+      
+      boolean isUpdated = updateJobState();
+      if (isUpdated && !reporter.getCompletedJobIds().contains(jobIDStr)) {
+        
         Event<DAGNode<? extends Job>> event = null;
         job.setMapReduceJobState(jobProgress);
         if (jobProgress.isComplete()) {
@@ -187,7 +133,7 @@ public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
         else {
           event = new Event.JobProgressEvent(dagNode);
         }
-        reporter.addJobIdToProgress(jobIDStr, jobProgress.getProgress());
+        reporter.addJobIdToProgress(jobIDStr, getJobProgress());
         pushWorkflowProgress(queryId, reporter);
         reporter.pushEvent(queryId, event);
       }
@@ -201,6 +147,39 @@ public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
     eventData.put(WorkflowProgressField.workflowProgress,
         Integer.toString(reporter.getOverallProgress()));
     reporter.pushEvent(queryId, new Event.WorkflowProgressEvent(eventData));
+  }
+  
+  private boolean updateJobState() throws IOException {
+    if (jobProgress == null) {
+      jobProgress = new MapReduceJobState(
+          rj, jobClient.getMapTaskReports(jobId), jobClient.getReduceTaskReports(jobId));
+      return true;
+    }
+    
+    boolean complete = rj.isComplete();
+    boolean successful = rj.isSuccessful();
+    float mapProgress = rj.mapProgress();
+    float reduceProgress = rj.reduceProgress();
+
+    boolean update = !(
+        jobProgress.isComplete() == complete && 
+        jobProgress.isSuccessful() == successful &&
+        AmbroseHiveUtil.isEqual(jobProgress.getMapProgress(), mapProgress) &&
+        AmbroseHiveUtil.isEqual(jobProgress.getReduceProgress(), reduceProgress)
+    );
+    
+    //do progress report only if necessary
+    if (update) {
+      jobProgress = new MapReduceJobState(
+          rj, jobClient.getMapTaskReports(jobId), jobClient.getReduceTaskReports(jobId));
+      jobProgress.setJobLastUpdateTime(System.currentTimeMillis());
+    }
+    return update;
+  }
+  
+  private int getJobProgress() {
+    float result = ((jobProgress.getMapProgress() + jobProgress.getReduceProgress()) * 100) / 2;
+    return (int) result;
   }
 
 }

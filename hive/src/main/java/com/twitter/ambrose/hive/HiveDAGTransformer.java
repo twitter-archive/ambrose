@@ -65,7 +65,9 @@ public class HiveDAGTransformer {
   private static final Pattern SUBQUERY_ALIAS = Pattern.compile("-subquery\\d+\\:([^\\-]+)");
   private static final String PENDING_JOB = "N/A";
   private static final String TEMP_JOB_ID = "temp. intermediate data";
-
+  private static final String INTERNAL_HIVE_JOIN_ALIAS = "$INTNAME";
+  private static final String INTERNAL_JOIN_ALIAS = "internal";
+  
   private final String tmpDir;
   private final String localTmpDir;
   private final QueryPlan queryPlan;
@@ -169,6 +171,10 @@ public class HiveDAGTransformer {
       //if alias is a temporary output location of an ancestor node
       if (alias.startsWith(tmpDir) || alias.startsWith(localTmpDir)) {
         result.add(TEMP_JOB_ID);
+      }
+      //in case of an internal join alias
+      else if (alias.startsWith(INTERNAL_HIVE_JOIN_ALIAS)) {
+        result.add(alias.replace(INTERNAL_HIVE_JOIN_ALIAS, INTERNAL_JOIN_ALIAS));
       }
       else if (alias.contains("subquery")) {
         Matcher m = SUBQUERY_ALIAS.matcher(alias);

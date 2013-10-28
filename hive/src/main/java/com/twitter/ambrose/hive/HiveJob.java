@@ -59,10 +59,11 @@ public class HiveJob extends Job {
   }
 
   @JsonCreator
-  public HiveJob(@JsonProperty("id") String id, @JsonProperty("aliases") String[] aliases,
-      @JsonProperty("features") String[] features,
-      @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-      @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
+  public HiveJob(@JsonProperty("id") String id,
+                 @JsonProperty("aliases") String[] aliases,
+                 @JsonProperty("features") String[] features,
+                 @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
+                 @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
     this(aliases, features);
     setId(id);
     this.mapReduceJobState = mapReduceJobState;
@@ -85,6 +86,10 @@ public class HiveJob extends Job {
     this.mapReduceJobState = mapReduceJobState;
   }
 
+  public Map<String, CounterGroup> getCounterGroupMap() {
+    return counterGroupMap;
+  }
+
   public CounterGroup getCounterGroupInfo(String name) {
     return counterGroupMap == null ? null : counterGroupMap.get(name);
   }
@@ -100,7 +105,7 @@ public class HiveJob extends Job {
     metrics.put("numberReduces", totalReducers);
     metrics.put("avgMapTime",
         getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_MAPS, totalMappers));
-   metrics.put("avgReduceTime",
+    metrics.put("avgReduceTime",
        getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_REDUCES, totalReducers));
     metrics.put("bytesWritten",
         getCounterValue(counterNameToValue, MetricsCounter.FILE_BYTES_WRITTEN));
