@@ -129,8 +129,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
       self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
-      // ensure we resize appropriately
+      // Ensure we resize appropriately
       $(window).resize(function() {
+       // Remove the popover before resize, otherwise there will be more than 1 popover.
         $(".popover.fade").remove();
         self.resetView();
         self.handleJobsLoaded();
@@ -230,9 +231,20 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
 
-      // Display Popover.
-      $(".node circle.anchor").each(function (i, node) {
+      // Create the popover title section based on the node.
+      function getTitleEL(node) {
         var titleEL = 'Job ID Not Available';
+
+        if (node.__data__.data.mapReduceJobState) {
+          var mrJobState = node.__data__.data.mapReduceJobState;
+          titleEL = '<a target="_blank" href="'
+          + mrJobState.trackingURL + '"> ' + 'ID: ' + mrJobState.jobId + ' </a>';
+        }
+        return titleEL;
+      }
+
+      // Create the popover body section based on the node.
+      function getBodyEL(node) {
         var bodyEL = '<div id="popoverBody">';
 
         if (node.__data__.data.status) {
@@ -249,10 +261,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
-
-          titleEL = '<a target="_blank" href="'
-            + mrJobState.trackingURL + '"> ' + 'ID: ' + mrJobState.jobId + ' </a>';
-
           if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
             var startTime = mrJobState.jobStartTime;
             var lastUpdateTime = mrJobState.jobLastUpdateTime;
@@ -268,16 +276,21 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           }
         }
 
-        if (bodyEL == '<div id="popoverBody">') bodyEL = "Job Details Not Available.";
+        if (bodyEL == '<div id="popoverBody">') { bodyEL = "Job Details Not Available."; }
+        return bodyEL;
+      }
+
+      // Display Popover.
+      $(".node circle.anchor").each(function (i, node) {
+        var titleEL = getTitleEL(node);
+        var bodyEL = getBodyEL(node);
 
         $(this).popover({
           placement : function (context, source) {
+            // Place the popover on the left if there is enough space.
             var position = $(source).position();
 
-            if (position.left > 300) {
-                return "left";
-            }
-
+            if (position.left > 300) { return "left"; }
             return "right";
           },
           title : titleEL,
