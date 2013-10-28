@@ -53,6 +53,55 @@ define(['lib/jquery'], function($) {
     return this.splice(i, 1);
   };
 
+  // Split the array elements by comma.
+  Array.prototype.commaDelimit = function() {
+    if (this == null) return '';
+    return this.join(', ');
+  };
+
+  function pad(number) {
+    var r = String(number);
+    if (r.length === 1) r = '0' + r;
+    return r;
+  }
+
+  Number.prototype.formatTimestamp = function() {
+    var time = Number(this);
+      var date = new Date(time);
+      var timezoneOffsetHours = date.getTimezoneOffset() / 60;
+      var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
+      timezoneOffsetHours = Math.abs(timezoneOffsetHours);
+
+      return date.getFullYear() + '-'
+      + pad(date.getMonth() + 1) + '-'
+      + pad(date.getDate()) + ' '
+      + pad(date.getHours()) + ':'
+      + pad(date.getMinutes()) + ':'
+      + pad(date.getSeconds())
+      + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
+  };
+
+  Number.prototype.calculateElapsedTime = function(start, end){
+    var ms = Number(end) - Number(start);
+
+    var d, h, m, s;
+    var elapsedTime = "";
+    s = Math.floor(ms / 1000);
+    m = Math.floor(s / 60);
+    s = s % 60;
+    h = Math.floor(m / 60);
+    m = m % 60;
+    d = Math.floor(h / 24);
+    h = h % 24;
+
+    if (d != 0) elapsedTime += d + "d ";
+    if (h != 0) elapsedTime += h + "h ";
+    if (m != 0) elapsedTime += m + "m ";
+    if (s != 0) elapsedTime += s + "s ";
+
+    return elapsedTime;
+  };
+
   // core Ambrose object
   return {};
 });

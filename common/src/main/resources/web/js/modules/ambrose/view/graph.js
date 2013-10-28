@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function(
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
   $, _, d3, Ambrose, View
 ) {
 
@@ -131,6 +131,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
       // ensure we resize appropriately
       $(window).resize(function() {
+        $(".popover.fade").remove();
         self.resetView();
         self.handleJobsLoaded();
       });
@@ -228,6 +229,68 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       this.removeNodeGroups(g);
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
+
+      // Display Popover.
+      $(".node circle.anchor").each(function (i, node) {
+        var titleEL = 'Job ID Not Available';
+        var bodyEL = '<div id="popoverBody">';
+
+        if (node.__data__.data.status) {
+          bodyEL += '<p><b> Status: </b>' + node.__data__.data.status + '</p>';
+        }
+
+        if (node.__data__.data.aliases) {
+          bodyEL += '<p><b> Aliases: </b>' + node.__data__.data.aliases.commaDelimit() + '</p>';
+        }
+
+        if (node.__data__.data.features) {
+          bodyEL += '<p><b> Features: </b>' + node.__data__.data.features.commaDelimit() + '</p>';
+        }
+
+        if (node.__data__.data.mapReduceJobState) {
+          var mrJobState = node.__data__.data.mapReduceJobState;
+
+          titleEL = '<a target="_blank" href="'
+            + mrJobState.trackingURL + '"> ' + 'ID: ' + mrJobState.jobId + ' </a>';
+
+          if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
+            var startTime = mrJobState.jobStartTime;
+            var lastUpdateTime = mrJobState.jobLastUpdateTime;
+            bodyEL += '<p><b> Duration: </b>' + startTime.calculateElapsedTime(startTime, lastUpdateTime) + '</p>';
+          }
+
+          if (mrJobState.totalMappers) {
+            bodyEL += '<p><b> Mappers: </b>' + mrJobState.totalMappers + '</p>';
+          }
+
+          if (mrJobState.totalReducers) {
+            bodyEL += '<p><b> Reducers: </b>' + mrJobState.totalReducers + '</p>';
+          }
+        }
+
+        if (bodyEL == '<div id="popoverBody">') bodyEL = "Job Details Not Available.";
+
+        $(this).popover({
+          placement : function (context, source) {
+            var position = $(source).position();
+
+            if (position.left > 300) {
+                return "left";
+            }
+
+            return "right";
+          },
+          title : titleEL,
+          content : bodyEL,
+          container : 'body',
+          html : 'true'
+        });
+      });
+
+      $('.node circle.anchor').click(function(e) {
+        // Hide all popover but the one just clicked.
+        $('.node circle.anchor').not(this).popover('hide');
+      });
     },
 
     handleJobsUpdated: function(jobs) {
@@ -307,7 +370,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
       // create translucent circle depicting relative size of each node
       real.append('svg:circle')
-        .attr('class', 'magnitude')
+        .attr('class', function(node) {
+          return 'magnitude ' + node.id;
+        })
         .attr('cx', cx)
         .attr('cy', cy);
 
