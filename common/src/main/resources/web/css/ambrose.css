@@ -43,3 +43,6 @@ h2 { margin: 1em 0px; }
 .dashboard-status { margin: 1em 0; }
 
 .popoverKey { font-weight:bold; }
+
+.popover-content  { padding-top: 10px; padding-left: 3px; margin: 0px; border: 0px; }
+#popoverBody ul { list-style: square; }

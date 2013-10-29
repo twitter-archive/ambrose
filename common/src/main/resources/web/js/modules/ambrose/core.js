@@ -74,27 +74,27 @@ define(['lib/jquery'], function($) {
     + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
   };
 
-  var calculateElapsedTime = function(start, end){
-    var ms = Number(end) - Number(start);
-
-    var d, h, m, s;
-    var elapsedTime = "";
-    s = Math.floor(ms / 1000);
-    m = Math.floor(s / 60);
-    s = s % 60;
-    h = Math.floor(m / 60);
-    m = m % 60;
-    d = Math.floor(h / 24);
-    h = h % 24;
-
-    if (d != 0) elapsedTime += d + "d ";
-    if (h != 0) elapsedTime += h + "h ";
-    if (m != 0) elapsedTime += m + "m ";
-    if (s != 0) elapsedTime += s + "s ";
-
-    return elapsedTime;
-  };
-
   // core Ambrose object, util methods
-  return {calculateElapsedTime:calculateElapsedTime};
+  return {
+    calculateElapsedTime : function(start, end) {
+      var ms = Number(end) - Number(start);
+
+      var d, h, m, s;
+      var elapsedTime = "";
+
+      s = Math.floor(ms / 1000);
+      m = Math.floor(s / 60);
+      s = s % 60;
+      h = Math.floor(m / 60);
+      m = m % 60;
+      d = Math.floor(h / 24);
+      h = h % 24;
+
+      if (d != 0) elapsedTime += d + "d ";
+      if (h != 0) elapsedTime += h + "h ";
+      if (m != 0) elapsedTime += m + "m ";
+      if (s != 0) elapsedTime += s + "s ";
+      return elapsedTime;
+    }
+  };
 });

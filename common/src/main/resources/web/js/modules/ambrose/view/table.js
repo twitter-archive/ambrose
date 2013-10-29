@@ -143,7 +143,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
         });
       }
 
-      // Split the array elements by comma.
+      // Join the array elements by comma.
       function commaDelimit(array) {
         if (array == null) return '';
         return array.join(', ');

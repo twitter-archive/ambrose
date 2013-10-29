@@ -233,7 +233,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Create the popover title section based on the node.
       function getTitleEL(node) {
-        var titleEL = 'Job Id undefined';
+        var titleEL = 'Job id undefined';
 
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
@@ -245,21 +245,21 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Create the popover body section based on the node.
       function getBodyEL(node) {
-        if (!node.__data__.data) { return "Job Details Not Available."; }
+        if (!node.__data__.data) { return "Job details unavailable"; }
         var data = node.__data__.data;
         var bodyEL = '<div id="popoverBody"><ul>';
 
         if (data.status) {
-          bodyEL += '<li><span class="popoverKey"> Status: </span>' + data.status + '</li>';
+          bodyEL += '<li><span class="popoverKey">Status:</span> ' + data.status + '</li>';
         }
 
         if (data.aliases) {
-          bodyEL += '<li><span class="popoverKey"> Aliases: </span>' + data.aliases.join(', ')
+          bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
           + '</li>';
         }
 
         if (data.features) {
-          bodyEL += '<li><span class="popoverKey"> Features: </span>' + data.features.join(', ')
+          bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
           + '</li>';
         }
 
@@ -268,17 +268,17 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
             var startTime = mrJobState.jobStartTime;
             var lastUpdateTime = mrJobState.jobLastUpdateTime;
-            bodyEL += '<li><span class="popoverKey"> Duration: </span>'
+            bodyEL += '<li><span class="popoverKey">Duration:</span> '
               + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
           }
 
           if (mrJobState.totalMappers) {
-            bodyEL += '<li><span class="popoverKey"> Mappers: </span>'
+            bodyEL += '<li><span class="popoverKey">Mappers:</span> '
               + mrJobState.totalMappers + '</li>';
           }
 
           if (mrJobState.totalReducers) {
-            bodyEL += '<li><span class="popoverKey"> Reducers: </span>'
+            bodyEL += '<li><span class="popoverKey">Reducers:</span> '
               + mrJobState.totalReducers + '</li>';
           }
         }
