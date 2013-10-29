@@ -131,8 +131,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Ensure we resize appropriately
       $(window).resize(function() {
-       // Remove the popover before resize, otherwise there will be more than 1 popover.
-        $(".popover.fade").remove();
+        // Remove the popover before resize, otherwise there will be more than 1 popover.
+        $(".popover").remove();
         self.resetView();
         self.handleJobsLoaded();
       });
@@ -233,51 +233,57 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Create the popover title section based on the node.
       function getTitleEL(node) {
-        var titleEL = 'Job ID Not Available';
+        var titleEL = 'Job Id undefined';
 
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
           titleEL = '<a target="_blank" href="'
-          + mrJobState.trackingURL + '"> ' + 'ID: ' + mrJobState.jobId + ' </a>';
+          + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
         }
         return titleEL;
       }
 
       // Create the popover body section based on the node.
       function getBodyEL(node) {
-        var bodyEL = '<div id="popoverBody">';
+        if (!node.__data__.data) { return "Job Details Not Available."; }
+        var data = node.__data__.data;
+        var bodyEL = '<div id="popoverBody"><ul>';
 
-        if (node.__data__.data.status) {
-          bodyEL += '<p><b> Status: </b>' + node.__data__.data.status + '</p>';
+        if (data.status) {
+          bodyEL += '<li><span class="popoverKey"> Status: </span>' + data.status + '</li>';
         }
 
-        if (node.__data__.data.aliases) {
-          bodyEL += '<p><b> Aliases: </b>' + node.__data__.data.aliases.commaDelimit() + '</p>';
+        if (data.aliases) {
+          bodyEL += '<li><span class="popoverKey"> Aliases: </span>' + data.aliases.join(', ')
+          + '</li>';
         }
 
-        if (node.__data__.data.features) {
-          bodyEL += '<p><b> Features: </b>' + node.__data__.data.features.commaDelimit() + '</p>';
+        if (data.features) {
+          bodyEL += '<li><span class="popoverKey"> Features: </span>' + data.features.join(', ')
+          + '</li>';
         }
 
-        if (node.__data__.data.mapReduceJobState) {
-          var mrJobState = node.__data__.data.mapReduceJobState;
+        if (data.mapReduceJobState) {
+          var mrJobState = data.mapReduceJobState;
           if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
             var startTime = mrJobState.jobStartTime;
             var lastUpdateTime = mrJobState.jobLastUpdateTime;
-            bodyEL += '<p><b> Duration: </b>' + startTime.calculateElapsedTime(startTime, lastUpdateTime) + '</p>';
+            bodyEL += '<li><span class="popoverKey"> Duration: </span>'
+              + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
           }
 
           if (mrJobState.totalMappers) {
-            bodyEL += '<p><b> Mappers: </b>' + mrJobState.totalMappers + '</p>';
+            bodyEL += '<li><span class="popoverKey"> Mappers: </span>'
+              + mrJobState.totalMappers + '</li>';
           }
 
           if (mrJobState.totalReducers) {
-            bodyEL += '<p><b> Reducers: </b>' + mrJobState.totalReducers + '</p>';
+            bodyEL += '<li><span class="popoverKey"> Reducers: </span>'
+              + mrJobState.totalReducers + '</li>';
           }
         }
 
-        if (bodyEL == '<div id="popoverBody">') { bodyEL = "Job Details Not Available."; }
-        return bodyEL;
+        return bodyEL + '</ul></div>';
       }
 
       // Display Popover.

@@ -53,12 +53,6 @@ define(['lib/jquery'], function($) {
     return this.splice(i, 1);
   };
 
-  // Split the array elements by comma.
-  Array.prototype.commaDelimit = function() {
-    if (this == null) return '';
-    return this.join(', ');
-  };
-
   function pad(number) {
     var r = String(number);
     if (r.length === 1) r = '0' + r;
@@ -66,22 +60,21 @@ define(['lib/jquery'], function($) {
   }
 
   Number.prototype.formatTimestamp = function() {
-    var time = Number(this);
-      var date = new Date(time);
-      var timezoneOffsetHours = date.getTimezoneOffset() / 60;
-      var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
-      timezoneOffsetHours = Math.abs(timezoneOffsetHours);
+    var date = new Date(this);
+    var timezoneOffsetHours = date.getTimezoneOffset() / 60;
+    var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
+    timezoneOffsetHours = Math.abs(timezoneOffsetHours);
 
-      return date.getFullYear() + '-'
-      + pad(date.getMonth() + 1) + '-'
-      + pad(date.getDate()) + ' '
-      + pad(date.getHours()) + ':'
-      + pad(date.getMinutes()) + ':'
-      + pad(date.getSeconds())
-      + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
+    return date.getFullYear() + '-'
+    + pad(date.getMonth() + 1) + '-'
+    + pad(date.getDate()) + ' '
+    + pad(date.getHours()) + ':'
+    + pad(date.getMinutes()) + ':'
+    + pad(date.getSeconds())
+    + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
   };
 
-  Number.prototype.calculateElapsedTime = function(start, end){
+  var calculateElapsedTime = function(start, end){
     var ms = Number(end) - Number(start);
 
     var d, h, m, s;
@@ -102,6 +95,6 @@ define(['lib/jquery'], function($) {
     return elapsedTime;
   };
 
-  // core Ambrose object
-  return {};
+  // core Ambrose object, util methods
+  return {calculateElapsedTime:calculateElapsedTime};
 });

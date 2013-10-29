@@ -143,6 +143,12 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
         });
       }
 
+      // Split the array elements by comma.
+      function commaDelimit(array) {
+        if (array == null) return '';
+        return array.join(', ');
+      }
+
       function taskProgressMessage(totalTasks, taskProgress, completedTasks) {
         if (totalTasks == null || taskProgress == null) return 'N/A';
 
@@ -185,9 +191,9 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
       tr.selectAll('td.job-status')
         .text(function (job) { return job.status || 'PENDING'; });
       tr.selectAll('td.job-aliases')
-        .text(function (job) { return job.aliases.commaDelimit(); });
+        .text(function (job) { return commaDelimit(job.aliases); });
       tr.selectAll('td.job-features')
-        .text(function (job) { return job.features.commaDelimit(); });
+        .text(function (job) { return commaDelimit(job.features); });
       tr.selectAll('td.job-time').html(function (job) {
           var mrState = job.mapReduceJobState || {};
           return setJobTime(
