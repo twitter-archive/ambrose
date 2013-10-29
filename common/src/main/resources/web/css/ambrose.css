@@ -43,6 +43,7 @@ h2 { margin: 1em 0px; }
 .dashboard-status { margin: 1em 0; }
 
 .popoverKey { font-weight:bold; }
+.popoverTitle { font-weight:bold; }
 
-.popover-content  { padding-top: 10px; padding-left: 0px; margin: 0px; border: 0px; }
-#popoverBody li { list-style: none; margin-left: -10px; margin-bottom: 5px;}
+.popover .popover-content { padding: 0px; padding-right : 5px; margin: 0px; border: 0px; }
+#popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}

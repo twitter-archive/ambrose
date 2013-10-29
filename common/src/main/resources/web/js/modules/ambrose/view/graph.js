@@ -233,7 +233,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Create the popover title section based on the node.
       function getTitleEL(node) {
-        var titleEL = 'Job id undefined';
+        var titleEL = '<span class="popoverTitle">Job id undefined</span>';
 
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
@@ -245,7 +245,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Create the popover body section based on the node.
       function getBodyEL(node) {
-        if (!node.__data__.data) { return "Job details unavailable"; }
+        if (!node.__data__.data) { return '<span class="popoverTitle">Job details unavailable</span>'; }
         var data = node.__data__.data;
         var bodyEL = '<div id="popoverBody"><ul>';
 
