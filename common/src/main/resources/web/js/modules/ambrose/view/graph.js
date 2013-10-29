@@ -17,7 +17,7 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function(
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
   $, _, d3, Ambrose, View
 ) {
 
@@ -129,8 +129,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
       self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
-      // ensure we resize appropriately
+      // Ensure we resize appropriately
       $(window).resize(function() {
+        // Remove the popover before resize, otherwise there will be more than 1 popover.
+        $(".popover").remove();
         self.resetView();
         self.handleJobsLoaded();
       });
@@ -228,6 +230,86 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
       this.removeNodeGroups(g);
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
+
+      // Create the popover title section based on the node.
+      function getTitleEL(node) {
+        var titleEL = '<span class="popoverTitle">Job id undefined</span>';
+
+        if (node.__data__.data.mapReduceJobState) {
+          var mrJobState = node.__data__.data.mapReduceJobState;
+          titleEL = '<a target="_blank" href="'
+          + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
+        }
+        return titleEL;
+      }
+
+      // Create the popover body section based on the node.
+      function getBodyEL(node) {
+        if (!node.__data__.data) { return '<span class="popoverTitle">Job details unavailable</span>'; }
+        var data = node.__data__.data;
+        var bodyEL = '<div id="popoverBody"><ul>';
+
+        if (data.status) {
+          bodyEL += '<li><span class="popoverKey">Status:</span> ' + data.status + '</li>';
+        }
+
+        if (data.aliases) {
+          bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
+          + '</li>';
+        }
+
+        if (data.features) {
+          bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
+          + '</li>';
+        }
+
+        if (data.mapReduceJobState) {
+          var mrJobState = data.mapReduceJobState;
+          if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
+            var startTime = mrJobState.jobStartTime;
+            var lastUpdateTime = mrJobState.jobLastUpdateTime;
+            bodyEL += '<li><span class="popoverKey">Duration:</span> '
+              + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
+          }
+
+          if (mrJobState.totalMappers) {
+            bodyEL += '<li><span class="popoverKey">Mappers:</span> '
+              + mrJobState.totalMappers + '</li>';
+          }
+
+          if (mrJobState.totalReducers) {
+            bodyEL += '<li><span class="popoverKey">Reducers:</span> '
+              + mrJobState.totalReducers + '</li>';
+          }
+        }
+
+        return bodyEL + '</ul></div>';
+      }
+
+      // Display Popover.
+      $(".node circle.anchor").each(function (i, node) {
+        var titleEL = getTitleEL(node);
+        var bodyEL = getBodyEL(node);
+
+        $(this).popover({
+          placement : function (context, source) {
+            // Place the popover on the left if there is enough space.
+            var position = $(source).position();
+
+            if (position.left > 300) { return "left"; }
+            return "right";
+          },
+          title : titleEL,
+          content : bodyEL,
+          container : 'body',
+          html : 'true'
+        });
+      });
+
+      $('.node circle.anchor').click(function(e) {
+        // Hide all popover but the one just clicked.
+        $('.node circle.anchor').not(this).popover('hide');
+      });
     },
 
     handleJobsUpdated: function(jobs) {
@@ -307,7 +389,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core'], function
 
       // create translucent circle depicting relative size of each node
       real.append('svg:circle')
-        .attr('class', 'magnitude')
+        .attr('class', function(node) {
+          return 'magnitude ' + node.id;
+        })
         .attr('cx', cx)
         .attr('cy', cy);
 

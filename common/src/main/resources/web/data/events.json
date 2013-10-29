@@ -27,7 +27,22 @@
       "runtime" : "pig",
       "id" : "job_local_0002",
       "aliases" : [ "1-451", "friend", "user_friends" ],
-      "features" : [ "GROUP_BY" ]
+      "features" : [ "GROUP_BY" ],
+      "mapReduceJobState" : {
+        "jobId" : "job_local_002",
+        "jobName" : "PigLatin:queries:daily_2013/01/01_to_2013/01/01",
+        "trackingURL" : "http://hadoop.apache.org/",
+        "mapProgress" : 1.0,
+        "reduceProgress" : 1.0,
+        "jobStartTime" : 1357020000000,
+        "jobLastUpdateTime" : 1357024220000,
+        "totalMappers" : 10,
+        "finishedMappersCount" : 10,
+        "totalReducers" : 5,
+        "finishedReducersCount" : 5,
+        "successful" : true,
+        "complete" : true
+      }
     },
     "successorNames" : [ "scope-382" ]
   },

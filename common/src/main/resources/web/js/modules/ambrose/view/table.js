@@ -143,6 +143,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
         });
       }
 
+      // Join the array elements by comma.
       function commaDelimit(array) {
         if (array == null) return '';
         return array.join(', ');
@@ -167,60 +168,17 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
 
         // Return mapper start/end time once ready.
         if (jobLastUpdateTime == null || status == 'RUNNING' || jobLastUpdateTime == 0) {
-          tooltipdata = "From " + formatTimestamp(jobStartTime);
+          tooltipdata = "From " + jobStartTime.formatTimestamp();
         } else if (status == 'COMPLETE' || status == 'FAILED') {
-          tooltipdata = "From: " + formatTimestamp(jobStartTime) + " <br>To: "
-                        + formatTimestamp(jobLastUpdateTime);
+          tooltipdata = "From: " + jobStartTime.formatTimestamp() + " <br>To: "
+                        + jobLastUpdateTime.formatTimestamp();
         }
         return divClassWithToolTip('time-tooltip', tooltipdata,
-               calculateElapsedTime(jobStartTime, jobLastUpdateTime));
+               jobStartTime.calculateElapsedTime(jobStartTime, jobLastUpdateTime));
       }
 
       function divClassWithToolTip(divid, title, text) {
         return '<div class="' + divid + '" title="' + title + '">' + text + '</div>';
-      }
-
-      function calculateElapsedTime(start, end) {
-          var ms = Number(end) - Number(start);
-
-          var d, h, m, s;
-          var elapsedTime = "";
-          s = Math.floor(ms / 1000);
-          m = Math.floor(s / 60);
-          s = s % 60;
-          h = Math.floor(m / 60);
-          m = m % 60;
-          d = Math.floor(h / 24);
-          h = h % 24;
-
-          if (d != 0) elapsedTime += d + "d ";
-          if (h != 0) elapsedTime += h + "h ";
-          if (m != 0) elapsedTime += m + "m ";
-          if (s != 0) elapsedTime += s + "s ";
-
-          return elapsedTime;
-      };
-
-      function pad(number) {
-          var r = String(number);
-          if (r.length === 1) r = '0' + r;
-          return r;
-      }
-
-      function formatTimestamp(timestamp) {
-        var time = Number(timestamp);
-        var date = new Date(time);
-        var timezoneOffsetHours = date.getTimezoneOffset() / 60;
-        var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
-        timezoneOffsetHours = Math.abs(timezoneOffsetHours);
-
-        return date.getFullYear() + '-'
-        + pad(date.getMonth() + 1) + '-'
-        + pad(date.getDate()) + ' '
-        + pad(date.getHours()) + ':'
-        + pad(date.getMinutes()) + ':'
-        + pad(date.getSeconds())
-        + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
       }
 
       // update all other params normally
