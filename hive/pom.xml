@@ -107,6 +107,7 @@
       <artifactId>jdo-api</artifactId>
       <version>3.0.1</version>
     </dependency>
+    
   </dependencies>
 
   <build>

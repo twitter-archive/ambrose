@@ -17,6 +17,7 @@ package com.twitter.ambrose.hive;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -30,7 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.QueryPlan;
-import org.apache.hadoop.hive.ql.exec.ExecDriver;
 import org.apache.hadoop.hive.ql.exec.Operator;
 import org.apache.hadoop.hive.ql.exec.Task;
 import org.apache.hadoop.hive.ql.exec.Utilities;
@@ -40,6 +40,7 @@ import org.apache.hadoop.hive.ql.plan.api.Adjacency;
 import org.apache.hadoop.hive.ql.plan.api.Graph;
 import org.apache.hadoop.hive.ql.plan.api.OperatorType;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -71,13 +72,73 @@ public class HiveDAGTransformer {
   private final String tmpDir;
   private final String localTmpDir;
   private final QueryPlan queryPlan;
-  private final List<ExecDriver> allTasks;
+  private final List<? extends Task<MapredWork>> allTasks;
   private Map<String, DAGNode<Job>> nodeIdToDAGNode;
 
   private final Configuration conf;
 
   private static final String[] EMPTY_ARR = {};
+  
+  private static Function<MapredWork, LinkedHashMap<String, ArrayList<String>>> closure;
+  static {
+    
+    String mapWorkClassName = "org.apache.hadoop.hive.ql.plan.MapWork";
+    Method m_getMapWork = null;
+    Class<?> mapWorkClazz;
+    try {
+      mapWorkClazz = Class.forName(mapWorkClassName);
+      m_getMapWork = MapredWork.class.getDeclaredMethod("getMapWork");
+    }
+    catch (Exception e) {
+      mapWorkClazz = MapredWork.class;
+      LOG.info("No Hive 0.12.0 compatible API was found, couldn't load " + mapWorkClassName);
+      LOG.debug(e);
+    }
 
+    Method m_getPathToAlias;
+    try {
+      m_getPathToAlias = mapWorkClazz.getDeclaredMethod("getPathToAliases");
+    }
+    catch (Exception e) {
+      LOG.fatal("Can't access to getPathToAliases() on " + mapWorkClazz.getName(), e);
+      throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
+    }
+
+    initClosure(m_getMapWork, m_getPathToAlias);
+
+  }
+  
+  /**
+   * Initializes a function that handles Hive API incompatibility issues (see HIVE-4825)
+   * <pre>
+   *   Hive 0.11.0 : 
+   *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mrWork.getPathToAliases();}
+   * 
+   *   Hive 0.12.0 :
+   *   {@code org.apache.hadoop.hive.ql.plan.MapWork mapWork = mrWork.getMapWork();}
+   *   {@code LinkedHashMap<String, ArrayList<String>> aliases = mapWork.getPathToAliases();}
+   * </pre>
+   * 
+   * @param m_getMapWork
+   * @param m_getPathToAlias
+   */
+  private static void initClosure(final Method m_getMapWork, final Method m_getPathToAlias) {
+    closure = new Function<MapredWork, LinkedHashMap<String, ArrayList<String>>>() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public LinkedHashMap<String, ArrayList<String>> apply(MapredWork mrWork) {
+        try {
+          Object obj = (m_getMapWork == null) ? mrWork : m_getMapWork.invoke(mrWork);
+          return (LinkedHashMap<String, ArrayList<String>>) m_getPathToAlias.invoke(obj);
+        }
+        catch (Exception e) {
+          LOG.fatal(e);
+          throw new RuntimeException("Incompatible Hive API found. Expected: 0.11.0+", e);
+        }
+      }
+    };
+  }
+  
   public HiveDAGTransformer(HookContext hookContext) {
 
     conf = hookContext.getConf();
@@ -110,11 +171,9 @@ public class HiveDAGTransformer {
 
     // creates DAGNodes: each node represents a MR job
     nodeIdToDAGNode = Maps.newTreeMap();
-    for (Task<? extends Serializable> task : allTasks) {
-      if (task.getWork() instanceof MapredWork) {
-        DAGNode<Job> dagNode = asDAGNode(task);
-        nodeIdToDAGNode.put(dagNode.getName(), dagNode);
-      }
+    for (Task<MapredWork> task : allTasks) {
+      DAGNode<Job> dagNode = asDAGNode(task);
+      nodeIdToDAGNode.put(dagNode.getName(), dagNode);
     }
 
     // get job dependencies
@@ -144,7 +203,7 @@ public class HiveDAGTransformer {
   private DAGNode<Job> asDAGNode(Task<? extends Serializable> task) {
 
     MapredWork mrWork = (MapredWork) task.getWork();
-    List<String> indexTableAliases = getAllJobAliases(mrWork.getPathToAliases());
+    List<String> indexTableAliases = getAllJobAliases(getPathToAliases(mrWork));
     String[] features = getFeatures(mrWork.getAllOperators(), task.getTaskTag());
     String[] displayAliases = getDisplayAliases(indexTableAliases);
 
@@ -308,5 +367,14 @@ public class HiveDAGTransformer {
     }
     return result;
   }
-
+  
+  /**
+   * Returns a path - alias mapping by invoking the function implementation
+   * @param mrWork
+   * @return
+   */
+  private LinkedHashMap<String, ArrayList<String>> getPathToAliases(MapredWork mrWork) {
+    return closure.apply(mrWork);
+  }
+  
 }

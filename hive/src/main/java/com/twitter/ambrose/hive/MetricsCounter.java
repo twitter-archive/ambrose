@@ -63,7 +63,9 @@ public enum MetricsCounter {
   private static final String JOB_COUNTER_YARN = "org.apache.hadoop.mapreduce.JobCounter";
   private static final String TASK_COUNTER_YARN = "org.apache.hadoop.mapreduce.TaskCounter";
   private static final String FS_COUNTER_YARN = "org.apache.hadoop.mapreduce.FileSystemCounter";
-
+ 
+  private static final String[] EMPTY_ARR = {};
+  
   public static String[] get(MetricsCounter hjc) {
     return lookup.get(hjc);
   }
@@ -89,7 +91,7 @@ public enum MetricsCounter {
         FS_COUNTER_YARN + "::" + hjc.name()
       };
     default:
-      return null;
+      return EMPTY_ARR;
     }
   }
 
