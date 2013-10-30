@@ -174,7 +174,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
                         + jobLastUpdateTime.formatTimestamp();
         }
         return divClassWithToolTip('time-tooltip', tooltipdata,
-               jobStartTime.calculateElapsedTime(jobStartTime, jobLastUpdateTime));
+               Ambrose.calculateElapsedTime(jobStartTime, jobLastUpdateTime));
       }
 
       function divClassWithToolTip(divid, title, text) {
