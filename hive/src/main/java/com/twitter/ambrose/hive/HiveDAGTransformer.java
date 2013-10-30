@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -123,12 +122,11 @@ public class HiveDAGTransformer {
    * @param m_getMapWork
    * @param m_getPathToAlias
    */
-  private static void initClosure(@Nullable final Method m_getMapWork, final Method m_getPathToAlias) {
+  private static void initClosure(final Method m_getMapWork, final Method m_getPathToAlias) {
     closure = new Function<MapredWork, LinkedHashMap<String, ArrayList<String>>>() {
       @SuppressWarnings("unchecked")
       @Override
-      @Nullable
-      public LinkedHashMap<String, ArrayList<String>> apply(@Nullable MapredWork mrWork) {
+      public LinkedHashMap<String, ArrayList<String>> apply(MapredWork mrWork) {
         try {
           Object obj = (m_getMapWork == null) ? mrWork : m_getMapWork.invoke(mrWork);
           return (LinkedHashMap<String, ArrayList<String>>) m_getPathToAlias.invoke(obj);
