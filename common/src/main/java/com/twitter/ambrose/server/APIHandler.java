@@ -148,7 +148,6 @@ public class APIHandler extends AbstractHandler {
       String lastEventIdParam = normalize(request.getParameter(QUERY_PARAM_LAST_EVENT_ID));
       Integer lastEventId = getInt(lastEventIdParam, -1);
 
-      LOG.info("Submitted request for lastEventId={}", lastEventId);
       Collection<Event> events = statsReadService
           .getEventsSinceId(request.getParameter(QUERY_PARAM_WORKFLOW_ID), lastEventId);
 
