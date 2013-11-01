@@ -127,6 +127,14 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         $.each(data, function(i, node) {
           // retrieve job from node
           var job = node.job;
+
+          /*
+          // Clean the DAG job data for correct animation dispaly.
+          if (job.mapReduceJobState) { job.mapReduceJobState = null; }
+          if (job.counterGroupMap) { job.counterGroupMap = null; }
+          if (job.configuration) { job.configuration = null; }
+          if (job.metrics) { job.metrics = null; }*/
+
           jobs.push(job);
 
           // index job by name
