@@ -290,9 +290,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Display Popover.
       $(".node circle.anchor").each(function (i, node) {
-        var titleEL = getTitleEL(node);
-        var bodyEL = getBodyEL(node);
-
         $(this).popover({
           placement : function (context, source) {
             // Place the popover on the left if there is enough space.
@@ -301,8 +298,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             if (position.left > 300) { return "left"; }
             return "right";
           },
-          title : titleEL,
-          content : bodyEL,
+          title : function (){ return getTitleEL(this); },
+          content: function (){ return getBodyEL(this); },
           container : 'body',
           html : 'true'
         });
