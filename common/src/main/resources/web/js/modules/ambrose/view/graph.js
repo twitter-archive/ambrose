@@ -239,7 +239,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
           titleEL = '<a target="_blank" href="'
-              + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
+            + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
         }
 
         return titleEL;
@@ -257,12 +257,12 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
         if (data.aliases) {
           bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
-              + '</li>';
+            + '</li>';
         }
 
         if (data.features) {
           bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
-              + '</li>';
+            + '</li>';
         }
 
         if (data.mapReduceJobState) {
@@ -271,17 +271,17 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             var startTime = mrJobState.jobStartTime;
             var lastUpdateTime = mrJobState.jobLastUpdateTime;
             bodyEL += '<li><span class="popoverKey">Duration:</span> '
-                + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
+              + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
           }
 
           if (mrJobState.totalMappers) {
             bodyEL += '<li><span class="popoverKey">Mappers:</span> '
-                + mrJobState.totalMappers + '</li>';
+              + mrJobState.totalMappers + '</li>';
           }
 
           if (mrJobState.totalReducers) {
             bodyEL += '<li><span class="popoverKey">Reducers:</span> '
-                + mrJobState.totalReducers + '</li>';
+              + mrJobState.totalReducers + '</li>';
           }
         }
 
