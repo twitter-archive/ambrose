@@ -380,6 +380,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       // Update the stroke width based on the hdfsBytesWritten value.
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges)
+          .transition().duration(1000)
           .attr("stroke-width", function(d, i) {
             return rescaleEdgesWidth(d, i);
           })
