@@ -135,6 +135,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         $(".popover").remove();
         self.resetView();
         self.handleJobsLoaded();
+        self.rescaleEdges();
       });
 
       // bind event workflow handlers
@@ -238,8 +239,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
           titleEL = '<a target="_blank" href="'
-          + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
+            + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
         }
+
         return titleEL;
       }
 
@@ -255,12 +257,12 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
         if (data.aliases) {
           bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
-          + '</li>';
+            + '</li>';
         }
 
         if (data.features) {
           bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
-          + '</li>';
+            + '</li>';
         }
 
         if (data.mapReduceJobState) {
@@ -288,9 +290,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Display Popover.
       $(".node circle.anchor").each(function (i, node) {
-        var titleEL = getTitleEL(node);
-        var bodyEL = getBodyEL(node);
-
         $(this).popover({
           placement : function (context, source) {
             // Place the popover on the left if there is enough space.
@@ -299,8 +298,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             if (position.left > 300) { return "left"; }
             return "right";
           },
-          title : titleEL,
-          content : bodyEL,
+          title : function (){ return getTitleEL(this); },
+          content: function (){ return getBodyEL(this); },
           container : 'body',
           html : 'true'
         });
@@ -329,11 +328,66 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       });
 
       this.updateNodeGroups(this.selectNodeGroups(nodes));
-      this.updateNodeGroups(this.selectPseudoNodeGroups(nodes));
 
       // Reset the to update the width of the previous edges.
-      this.resetView();
-      this.handleJobsLoaded();
+      this.rescaleEdges();
+    },
+
+    rescaleEdges : function() {
+      // Rescales the width of the edges based on the counter/metrics we want.
+      function rescaleEdgesWidth(d, i) {
+        if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
+          return self.edgeMinWidth + "px";
+        } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+          var w = d.target.data.metrics.hdfsBytesWritten;
+          return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth) / (self.arcValueMax - self.arcValueMin)
+              * (w - self.arcValueMin)) + "px";
+        }
+        return "1px";
+      }
+
+      function rescaleEdgesColor(d, i) {
+        if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+          return colors.nodeEdgeScaled;
+        }
+        return colors.nodeEdgeDefault;
+      }
+
+      var self = this;
+      var colors = self.params.colors;
+      var graph = this.workflow.graph;
+      var nodes = graph.nodes.concat(graph.pseudoNodes).sort(function(a, b) {
+        return b.topologicalGroupIndex - a.topologicalGroupIndex;
+      });
+      var g = this.selectAllNodeGroups(nodes);
+
+      // Find the current max and min for all the available hdfsBytesWritten value.
+      g.each(function(node, i) {
+        if (node.data.metrics && node.data.metrics.hdfsBytesWritten) {
+          var written = node.data.metrics.hdfsBytesWritten;
+          if (written != 0) {
+            if (self.arcValueMax < written) {
+              self.arcValueMax = written;
+            }
+
+            if (self.arcValueMin > written || self.arcValueMin == 0) {
+              self.arcValueMin = written;
+            }
+          }
+        }
+      });
+
+      // Update the stroke width based on the hdfsBytesWritten value.
+      g.each(function(node, i) {
+        d3.select(this).selectAll('path.edge').data(node.edges)
+          .transition().duration(1000)
+          .attr("stroke-width", function(d, i) {
+            return rescaleEdgesWidth(d, i);
+          })
+          .attr("stroke", function(d, i) {
+            return rescaleEdgesColor(d, i);
+          })
+      });
     },
 
     handleMouseInteraction: function(jobs) {
@@ -345,8 +399,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       return this.svg.selectAll('g.node').data(nodes, function(node) { return node.id; });
     },
 
-    selectPseudoNodeGroups: function(nodes) {
-      return this.svg.selectAll('g.pseudo').data(nodes, function(node) { return node.id; });
+    selectAllNodeGroups: function(nodes) {
+      return this.svg.selectAll('g').data(nodes, function(node) { return node.id; });
     },
 
     removeNodeGroups: function(g) {
@@ -432,26 +486,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           };
         };
       }
-
-      // Rescales the width of the edges based on the counter/metrics we want.
-      function rescaleEdgesWidth(d, i) {
-        if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
-          return self.edgeMinWidth + "px";
-        } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
-          var w = d.target.data.metrics.hdfsBytesWritten;
-          return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth) / (self.arcValueMax - self.arcValueMin)
-            * (w - self.arcValueMin)) + "px";
-          }
-        return "1px";
-      }
-
-      function rescaleEdgesColor(d, i) {
-        if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
-          return colors.nodeEdgeScaled;
-        }
-        return colors.nodeEdgeDefault;
-      }
-
       // initiate transition
       t = g.transition().duration(duration);
 
@@ -504,33 +538,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           }
           return radius;
         });
-
-      // Find the current max and min for all the available hdfsBytesWritten value.
-      g.each(function(node, i) {
-        if (node.data.metrics && node.data.metrics.hdfsBytesWritten) {
-          var written = node.data.metrics.hdfsBytesWritten;
-          if (written != 0) {
-            if (self.arcValueMax < written) {
-              self.arcValueMax = written;
-            }
-
-            if (self.arcValueMin > written || self.arcValueMin == 0) {
-              self.arcValueMin = written;
-            }
-          }
-        }
-      });
-
-      // Update the stroke width based on the hdfsBytesWritten value.
-      g.each(function(node, i) {
-        d3.select(this).selectAll('path.edge').data(node.edges)
-          .attr("stroke-width", function(d, i) {
-            return rescaleEdgesWidth(d, i);
-          })
-          .attr("stroke", function(d, i) {
-            return rescaleEdgesColor(d, i);
-          })
-      });
     },
 
     updateNodeGroupsFill: function(g) {
