@@ -19,7 +19,6 @@ limitations under the License.
  */
 define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
   var statusSet = [
-    'any',
     'running',
     'succeeded',
     'failed'
@@ -68,7 +67,7 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
       $('#page-next-link').click(function() { self.nextPage(); });
 
       // set default values
-      self.setStatus('any');
+      self.setStatus('running');
       self.setUser('');
 
       // request clusters
@@ -152,7 +151,6 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
       var cluster = self.cluster;
       var user = self.user;
       var status = self.status;
-      if (status == 'any') status = '';
       status = status.toUpperCase();
       self.client.getWorkflows(self.clusters[cluster], user, status, self.currentStartKey)
         .success(function(data) {
