@@ -15,11 +15,13 @@ limitations under the License.
 */
 package com.twitter.ambrose.cascading;
 
-import cascading.CascadingNotifier;
 import cascading.flow.BaseFlow;
 import cascading.flow.Flow;
+import cascading.flow.FlowListener;
 import cascading.flow.FlowStep;
+import cascading.flow.FlowStepListener;
 import cascading.flow.Flows;
+import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.stats.hadoop.HadoopStepStats;
@@ -35,6 +37,7 @@ import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +49,7 @@ import org.apache.commons.logging.Log;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
- * CascadingNotifier that collects plan and job information from within a Pig
+ * CascadingNotifier that collects plan and job information from within a cascading
  * runtime, builds Ambrose model objects, and passes the objects to an Ambrose
  * StatsWriteService object. This listener can be used regardless of what mode
  * Ambrose is running in.
@@ -54,7 +57,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
  * @see EmbeddedAmbroseCascadingNotifier for a subclass that can be used to run
  * an embedded Ambrose web server from Main method.
  */
-public class AmbroseCascadingNotifier implements CascadingNotifier {
+public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener {
 
     private static final String RUNTIME = "Cascading";
     private StatsWriteService statsWriteService;
@@ -66,6 +69,11 @@ public class AmbroseCascadingNotifier implements CascadingNotifier {
     private int totalNumberOfJobs;
     private int runnigJobs;
     private String currentFlowId;   //id of the flow being excuted
+
+    @Override
+    public void onStepStopping(FlowStep fs) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     protected static enum WorkflowProgressField {
         workflowProgress;
@@ -107,7 +115,7 @@ public class AmbroseCascadingNotifier implements CascadingNotifier {
         totalNumberOfJobs = steps.size();
         runnigJobs = 0;
         currentFlowId = flow.getID();
-
+        
         //update cascaging progress
         Map<WorkflowProgressField, String> eventData = new HashMap<WorkflowProgressField, String>();
         eventData.put(WorkflowProgressField.workflowProgress, Integer.toString(0));
@@ -162,12 +170,13 @@ public class AmbroseCascadingNotifier implements CascadingNotifier {
     }
 
     /**
-     * jobCompleted event is fired when a stepFlowJob completed its work
+     * onStepCompleted   event is fired when a stepFlowJob completed its work
      *
-     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
+     * @param flowStep the step in the flow that represents the MapReduce job
      */
     @Override
-    public void onJobCompleted(String jobId) {
+    public void onStepCompleted(FlowStep flowStep) {
+        String jobId = ((HadoopStepStats)flowStep.getFlowStepStats()).getJobID();
         //get job node
         Set<String> keys = this.dagNodeNameMap.keySet();
         for (String key : keys) {
@@ -180,37 +189,39 @@ public class AmbroseCascadingNotifier implements CascadingNotifier {
     }
 
     /**
-     * jobFailed event is fired if job failed during execution A job_failed
+     * onStepThrowable event is fired if job failed during execution A job_failed
      * event is pushed with node represents the failed job
      *
-     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
+     * @param flowStep the step in the flow that represents the MapReduce job
+     * @param throwable  the exception that caused the job to fail
      */
     @Override
-    public void onJobFailed(String jobId) {
+    public boolean onStepThrowable(FlowStep flowStep , Throwable throwable) {
+        String jobId = ((HadoopStepStats)flowStep.getFlowStepStats()).getJobID();
         //search for the node with id = JobId
         Set<String> keys = this.dagNodeNameMap.keySet();
         for (String key : keys) {
             DAGNode node = ((DAGNode) dagNodeNameMap.get(key));
             if (node != null && node.getJobId().equals(jobId)) {
                 pushEvent(currentFlowId, WorkflowEvent.EVENT_TYPE.JOB_FAILED, node);
-                return;
+                return false;
             }
         }
+        return false;
     }
 
     /**
-     * jobProgress event is fired whenever a job made a progress
+     * onStepProgressing event is fired whenever a job made a progress
      *
-     * @param jobName the name of the job that casscading assign to it
-     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
-     * @param flowStepJob the execution unit of the current job
+     * @param flowStep the step in the flow that represents the MapReduce job
      */
     @Override
-    public void onJobProgress(String jobName, String jobId, FlowStepJob<?> flowStepJob) {
+    public void onStepProgressing(FlowStep flowStep) {
         //getting Hadoop running job and job client
-        HadoopStepStats stats = (HadoopStepStats) flowStepJob.getStepStats();
-        RunningJob rj = stats.getRunningJob();
+        HadoopStepStats stats = (HadoopStepStats)flowStep.getFlowStepStats();
+        String jobId = stats.getJobID();
         JobClient jc = stats.getJobClient();
+        RunningJob rj = stats.getRunningJob();
 
         //build progress map and add jobId to completedJobIds incase its done
         Map<JobProgressField, String> progressMap = buildJobStatusMap(rj, jc);
@@ -223,20 +234,20 @@ public class AmbroseCascadingNotifier implements CascadingNotifier {
     }
 
     /**
-     * jobStarted event is fired whenever a job is submitted to Hadoop and begun
+     * onStepStarting event is fired whenever a job is submitted to Hadoop and begun
      * its excution
      *
-     * @param jobName the name of the job that casscading assign to it
-     * @param jobId the ID of the MapReduce job that was submitted to Hadoop
-     * @param flowStepJob the execution unit of the current job
+     * @param flowStep the step in the flow that represents the MapReduce job
      */
     @Override
-    public void onJobStarted(String jobName, String jobId, FlowStepJob<?> flowStepJob) {
+    public void onStepStarting(FlowStep flowStep) {
         //getting Hadoop running job and job client
-        HadoopStepStats stats = (HadoopStepStats) flowStepJob.getStepStats();
+        HadoopStepStats stats = (HadoopStepStats)((HadoopFlowStep)flowStep).getFlowStepStats();
+        String jobId = stats.getJobID();
+        String jobName = flowStep.getName();
         RunningJob rj = stats.getRunningJob();
         JobClient jc = stats.getJobClient();
-
+        
         //update overall progress
         runnigJobs++;
         int progress = (int) (((runnigJobs * 1.0) / totalNumberOfJobs) * 100);

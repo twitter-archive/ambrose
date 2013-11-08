@@ -19,11 +19,15 @@
  */
 package impatient;
 
+import java.io.IOException;
 import java.util.Properties;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.BaseFlow;
+import cascading.flow.FlowStep;
+import cascading.flow.FlowStepListener;
 import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.FlowStepJob;
 import cascading.operation.Insert;
 import cascading.operation.expression.ExpressionFunction;
@@ -42,10 +46,16 @@ import cascading.pipe.assembly.Unique;
 import cascading.pipe.joiner.LeftJoin;
 import cascading.property.AppProps;
 import cascading.scheme.hadoop.TextDelimited;
+import cascading.stats.FlowStepStats;
+import cascading.stats.hadoop.HadoopStepStats;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 import com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier;
+import java.util.List;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
+
 
 public class Main5 {
 
@@ -159,8 +169,10 @@ public class Main5 {
         
         //run ambrose and cascading
         EmbeddedAmbroseCascadingNotifier server = new EmbeddedAmbroseCascadingNotifier();
-        FlowStepJob.setJobNotifier(server);
         tfidfFlow.addListener(server);
+        tfidfFlow.addStepListener(server);
         tfidfFlow.complete();
+
+        
     }
 }

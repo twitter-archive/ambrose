@@ -10,7 +10,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.1.0-T3-SNAPSHOT</version>
+  <version>0.2.8-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
@@ -362,6 +362,17 @@
 
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 
   <modules>
