@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.twitter.ambrose.cascading;
 
-import cascading.flow.BaseFlow;
+
 import cascading.flow.Flow;
 import cascading.flow.FlowListener;
 import cascading.flow.FlowStep;
@@ -23,7 +23,6 @@ import cascading.flow.FlowStepListener;
 import cascading.flow.Flows;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.BaseFlowStep;
-import cascading.flow.planner.FlowStepJob;
 import cascading.stats.hadoop.HadoopStepStats;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
@@ -31,25 +30,19 @@ import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
-import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 import com.twitter.ambrose.service.StatsWriteService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
 import org.jgrapht.graph.SimpleDirectedGraph;
