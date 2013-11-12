@@ -232,62 +232,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
 
-      // Create the popover title section based on the node.
-      function getTitleEL(node) {
-        var titleEL = '<span class="popoverTitle">Job id undefined</span>';
-
-        if (node.__data__.data.mapReduceJobState) {
-          var mrJobState = node.__data__.data.mapReduceJobState;
-          titleEL = '<a target="_blank" href="'
-            + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
-        }
-
-        return titleEL;
-      }
-
-      // Create the popover body section based on the node.
-      function getBodyEL(node) {
-        if (!node.__data__.data) { return '<span class="popoverTitle">Job details unavailable</span>'; }
-        var data = node.__data__.data;
-        var bodyEL = '<div id="popoverBody"><ul>';
-
-        if (data.status) {
-          bodyEL += '<li><span class="popoverKey">Status:</span> ' + data.status + '</li>';
-        }
-
-        if (data.aliases) {
-          bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
-            + '</li>';
-        }
-
-        if (data.features) {
-          bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
-            + '</li>';
-        }
-
-        if (data.mapReduceJobState) {
-          var mrJobState = data.mapReduceJobState;
-          if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
-            var startTime = mrJobState.jobStartTime;
-            var lastUpdateTime = mrJobState.jobLastUpdateTime;
-            bodyEL += '<li><span class="popoverKey">Duration:</span> '
-              + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
-          }
-
-          if (mrJobState.totalMappers) {
-            bodyEL += '<li><span class="popoverKey">Mappers:</span> '
-              + mrJobState.totalMappers + '</li>';
-          }
-
-          if (mrJobState.totalReducers) {
-            bodyEL += '<li><span class="popoverKey">Reducers:</span> '
-              + mrJobState.totalReducers + '</li>';
-          }
-        }
-
-        return bodyEL + '</ul></div>';
-      }
-
       // Display Popover.
       $(".node circle.anchor").each(function (i, node) {
         $(this).popover({
@@ -298,8 +242,61 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             if (position.left > 300) { return "left"; }
             return "right";
           },
-          title : function (){ return getTitleEL(this); },
-          content: function (){ return getBodyEL(this); },
+          title : function (){
+            // Create the popover title section based on the node.
+            var titleEL = '<span class="popoverTitle">Job id undefined</span>';
+            var node = this;
+
+            if (node.__data__.data.mapReduceJobState) {
+              var mrJobState = node.__data__.data.mapReduceJobState;
+              titleEL = '<a target="_blank" href="'
+                + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
+            }
+            return titleEL;
+          },
+          content: function (){
+            // Create the popover body section based on the node.
+            var node = this;
+            if (!node.__data__.data) { return '<span class="popoverTitle">Job details unavailable</span>'; }
+            var data = node.__data__.data;
+            var bodyEL = '<div id="popoverBody"><ul>';
+
+            if (data.status) {
+              bodyEL += '<li><span class="popoverKey">Status:</span> ' + data.status + '</li>';
+            }
+
+            if (data.aliases) {
+              bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
+                + '</li>';
+            }
+
+            if (data.features) {
+              bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
+                + '</li>';
+            }
+
+            if (data.mapReduceJobState) {
+              var mrJobState = data.mapReduceJobState;
+              if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
+                var startTime = mrJobState.jobStartTime;
+                var lastUpdateTime = mrJobState.jobLastUpdateTime;
+                bodyEL += '<li><span class="popoverKey">Duration:</span> '
+                  + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
+              }
+
+              if (mrJobState.totalMappers) {
+                bodyEL += '<li><span class="popoverKey">Mappers:</span> '
+                  + mrJobState.totalMappers + '</li>';
+              }
+
+              if (mrJobState.totalReducers) {
+                bodyEL += '<li><span class="popoverKey">Reducers:</span> '
+                  + mrJobState.totalReducers + '</li>';
+              }
+            }
+
+            return bodyEL + '</ul></div>';
+          },
           container : 'body',
           html : 'true'
         });
@@ -329,25 +326,28 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       this.updateNodeGroups(this.selectNodeGroups(nodes));
 
-      // Reset the to update the width of the previous edges.
+      // Reset to update the width of the previous edges.
       this.rescaleEdges();
     },
 
     rescaleEdges : function() {
       // Rescales the width of the edges based on the counter/metrics we want.
-      function rescaleEdgesWidth(d, i) {
+      function rescaleEdgesWidth(data, i, rescaleOption) {
         if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
           return self.edgeMinWidth + "px";
-        } else if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
-          var w = d.target.data.metrics.hdfsBytesWritten;
-          return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth) / (self.arcValueMax - self.arcValueMin)
-              * (w - self.arcValueMin)) + "px";
+        } else if (rescaleOption === "hdfsBytesWritten") {
+          if (data && data.metrics && data.metrics.hdfsBytesWritten) {
+            var w = data.metrics.hdfsBytesWritten;
+            return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth)
+                / (self.arcValueMax - self.arcValueMin) * (w - self.arcValueMin)) + "px";
+          }
         }
         return "1px";
       }
 
-      function rescaleEdgesColor(d, i) {
-        if (d.target.data && d.target.data.metrics && d.target.data.metrics.hdfsBytesWritten) {
+      function rescaleEdgesColor(data, i, rescaleOption) {
+        if (rescaleOption === "hdfsBytesWritten"
+          && data && data.metrics && data.metrics.hdfsBytesWritten) {
           return colors.nodeEdgeScaled;
         }
         return colors.nodeEdgeDefault;
@@ -355,10 +355,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       var self = this;
       var colors = self.params.colors;
+      var duration = 500;
       var graph = this.workflow.graph;
-      var nodes = graph.nodes.concat(graph.pseudoNodes).sort(function(a, b) {
-        return b.topologicalGroupIndex - a.topologicalGroupIndex;
-      });
+      var nodes = graph.nodes.concat(graph.pseudoNodes);
       var g = this.selectAllNodeGroups(nodes);
 
       // Find the current max and min for all the available hdfsBytesWritten value.
@@ -377,15 +376,18 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         }
       });
 
+      // Rescale the edges based on the option chosen.
+      var rescaleOption = "hdfsBytesWritten";
+
       // Update the stroke width based on the hdfsBytesWritten value.
       g.each(function(node, i) {
         d3.select(this).selectAll('path.edge').data(node.edges)
-          .transition().duration(1000)
+          .transition().duration(duration)
           .attr("stroke-width", function(d, i) {
-            return rescaleEdgesWidth(d, i);
+            return rescaleEdgesWidth(d.target.data, i, rescaleOption);
           })
           .attr("stroke", function(d, i) {
-            return rescaleEdgesColor(d, i);
+            return rescaleEdgesColor(d.target.data, i, rescaleOption);
           })
       });
     },
