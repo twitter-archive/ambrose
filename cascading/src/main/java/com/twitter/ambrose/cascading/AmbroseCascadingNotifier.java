@@ -334,6 +334,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
   private class StepProgressReporter extends Thread{
     private AmbroseCascadingNotifier notifier;
     private FlowStep step;
+    private long pollingInterval = 1000;
 
     StepProgressReporter(AmbroseCascadingNotifier notifier, FlowStep step){
       this.notifier = notifier;
@@ -349,9 +350,9 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
         stepFinished = stats.isFinished() || stats.isStopped() ||
                 stats.isFailed() || stats.isSuccessful();
         try {
-          Thread.sleep(100);
+          Thread.sleep(pollingInterval);
         } catch (InterruptedException ex) {
-          Logger.getLogger(AmbroseCascadingNotifier.class.getName()).log(Level.SEVERE, null, ex);
+          log.error("Progress pullling thread for step "+step+" was interrupted.", ex);
         }
       }
     }
