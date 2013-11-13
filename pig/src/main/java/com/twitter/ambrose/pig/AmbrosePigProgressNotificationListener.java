@@ -22,9 +22,14 @@ import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 import com.twitter.ambrose.service.StatsWriteService;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
@@ -32,6 +37,7 @@ import org.apache.hadoop.mapred.TaskReport;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
 import org.apache.pig.impl.plan.OperatorKey;
+import org.apache.pig.impl.util.ObjectSerializer;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
 import org.apache.pig.tools.pigstats.PigProgressNotificationListener;
@@ -39,12 +45,17 @@ import org.apache.pig.tools.pigstats.PigStats;
 import org.apache.pig.tools.pigstats.ScriptState;
 import org.apache.pig.tools.pigstats.PigStats.JobGraph;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -123,7 +134,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
           successorNodeList.add(successorNode);
         }
       }
-
       node.setSuccessors(successorNodeList);
     }
 
@@ -272,7 +282,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    * Collects statistics from JobStats and builds a nested Map of values.
    */
   private void addCompletedJobStats(PigJob job, JobStats stats) {
-
     // put the job conf into a Properties object so we can serialize them
     Properties jobConfProperties = new Properties();
     if (stats.getInputs() != null && stats.getInputs().size() > 0 &&
@@ -289,7 +298,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     job.setJobStats(stats);
-    job.setConfiguration(jobConfProperties);
+    //job.setConfiguration(jobConfProperties);
     jobs.add(job);
   }
 
@@ -314,6 +323,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     try {
       String id = pigJob.getId();
       RunningJob runningJob = jobClientLocal.getJob(id);
+
+      Properties jobConfProperties = getJobConfFromFile(runningJob);
+
       if (runningJob == null) {
         log.warn("Couldn't find job status for jobId=" + pigJob.getId());
         return;
@@ -322,18 +334,63 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       JobID jobID = runningJob.getID();
       TaskReport[] mapTaskReport = jobClientLocal.getMapTaskReports(jobID);
       TaskReport[] reduceTaskReport = jobClientLocal.getReduceTaskReports(jobID);
-      pigJob.setMapReduceJobState(new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
-
-      Properties jobConfProperties = new Properties();
-      Configuration conf = jobClientLocal.getConf();
-      for (Map.Entry<String, String> entry : conf) {
-        jobConfProperties.setProperty(entry.getKey(), entry.getValue());
+      if (jobConfProperties != null && jobConfProperties.size() > 0) {
+        pigJob.setConfiguration(jobConfProperties);
       }
-      pigJob.setConfiguration(jobConfProperties);
-
+      pigJob.setMapReduceJobState(new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
     } catch (IOException e) {
       log.error("Error getting job info.", e);
     }
+  }
+
+  /**
+   * Get the configurations at the beginning of the job flow, it will contain information
+   * about the map/reduce plan and decoded pig script.
+   * @param runningJob
+   * @return Properties - configuration properties of the job
+   */
+  private Properties getJobConfFromFile(RunningJob runningJob) {
+    Properties jobConfProperties = new Properties();
+    try {
+      log.info("RunningJob Configuration File location: " + runningJob.getJobFile());
+      Path path = new Path(runningJob.getJobFile());
+      Configuration conf = new Configuration();
+      conf.addResource(path);
+      FileSystem fileSystem = FileSystem.get(new Configuration());
+      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(path)));
+      String line = bufferedReader.readLine();
+
+      while (line != null) {
+        // Read the xml and parse out the properties.
+        String key = "";
+        String value = "";
+        Pattern p = Pattern.compile("<name>(.*?)</name>");
+        Matcher m = p.matcher(line);
+        if (m.find()) { key = m.group(1); }
+
+        p = Pattern.compile("<value>(.*?)</value>");
+        m = p.matcher(line);
+        if (m.find()) { value = m.group(1); }
+
+        if (!key.equals("") && !value.equals("")) {
+          if (key.equals("pig.script")) {
+            value = StringUtils.newStringUtf8(Base64.decodeBase64(value));
+          }
+
+          if (key.equals("pig.mapPlan") || key.equals("pig.reducePlan")) {
+            value = ObjectSerializer.deserialize(value).toString();
+          }
+
+          jobConfProperties.setProperty(key, value);
+        }
+        line = bufferedReader.readLine();
+      }
+    } catch (FileNotFoundException e) {
+      log.error("Configuration File Not Found");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return jobConfProperties;
   }
 
   private static String[] toArray(String string) {
