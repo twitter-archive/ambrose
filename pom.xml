@@ -9,7 +9,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.2.9-SNAPSHOT</version>
+  <version>0.2.8</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
