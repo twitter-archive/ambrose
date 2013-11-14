@@ -302,6 +302,15 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         });
       });
 
+      /*
+      $("path.edge").each(function (i, edge) {
+        $(this).tooltip({
+          container : 'body',
+          title : "test"
+        }).tooltip('show');
+      });*/
+
+
       $('.node circle.anchor').click(function(e) {
         // Hide all popover but the one just clicked.
         $('.node circle.anchor').not(this).popover('hide');
@@ -353,6 +362,18 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         return colors.nodeEdgeDefault;
       }
 
+      function setMaxMinArcValue(self, value) {
+        if (value != 0) {
+          if (self.arcValueMax < value) {
+            self.arcValueMax = value;
+          }
+
+          if (self.arcValueMin > value || self.arcValueMin == 0) {
+            self.arcValueMin = value;
+          }
+        }
+      }
+
       var self = this;
       var colors = self.params.colors;
       var duration = 500;
@@ -360,24 +381,16 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       var nodes = graph.nodes.concat(graph.pseudoNodes);
       var g = this.selectAllNodeGroups(nodes);
 
-      // Find the current max and min for all the available hdfsBytesWritten value.
-      g.each(function(node, i) {
-        if (node.data.metrics && node.data.metrics.hdfsBytesWritten) {
-          var written = node.data.metrics.hdfsBytesWritten;
-          if (written != 0) {
-            if (self.arcValueMax < written) {
-              self.arcValueMax = written;
-            }
-
-            if (self.arcValueMin > written || self.arcValueMin == 0) {
-              self.arcValueMin = written;
-            }
-          }
-        }
-      });
-
       // Rescale the edges based on the option chosen.
       var rescaleOption = "hdfsBytesWritten";
+
+      // Find the current max and min for all the available hdfsBytesWritten value.
+      g.each(function(node, i) {
+        if (rescaleOption === "hdfsBytesWritten" && node.data.metrics
+            && node.data.metrics.hdfsBytesWritten) {
+          setMaxMinArcValue(self, node.data.metrics.hdfsBytesWritten);
+        }
+      });
 
       // Update the stroke width based on the hdfsBytesWritten value.
       g.each(function(node, i) {
