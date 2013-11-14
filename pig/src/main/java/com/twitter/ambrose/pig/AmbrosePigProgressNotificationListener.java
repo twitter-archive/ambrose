@@ -46,8 +46,10 @@ import org.apache.pig.tools.pigstats.ScriptState;
 import org.apache.pig.tools.pigstats.PigStats.JobGraph;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -354,42 +356,29 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     try {
       log.info("RunningJob Configuration File location: " + runningJob.getJobFile());
       Path path = new Path(runningJob.getJobFile());
-      Configuration conf = new Configuration();
-      conf.addResource(path);
+      Configuration conf = new Configuration(false);
       FileSystem fileSystem = FileSystem.get(new Configuration());
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(path)));
-      String line = bufferedReader.readLine();
+      InputStream inputStream = fileSystem.open(path);
+      conf.addResource(inputStream);
 
-      while (line != null) {
-        // Read the xml and parse out the properties.
-        String key = "";
-        String value = "";
-        Pattern p = Pattern.compile("<name>(.*?)</name>");
-        Matcher m = p.matcher(line);
-        if (m.find()) { key = m.group(1); }
-
-        p = Pattern.compile("<value>(.*?)</value>");
-        m = p.matcher(line);
-        if (m.find()) { value = m.group(1); }
-
-        if (!key.equals("") && !value.equals("")) {
-          if (key.equals("pig.script")) {
-            value = StringUtils.newStringUtf8(Base64.decodeBase64(value));
-          }
-
-          if (key.equals("pig.mapPlan") || key.equals("pig.reducePlan")) {
-            value = ObjectSerializer.deserialize(value).toString();
-          }
-
-          jobConfProperties.setProperty(key, value);
+      for (Map.Entry<String, String> entry : conf) {
+        if (entry.getKey().equals("pig.script")) {
+          jobConfProperties.setProperty(entry.getKey(),
+              StringUtils.newStringUtf8(Base64.decodeBase64(entry.getValue())));
+        } else if (entry.getKey().equals("pig.mapPlan")
+            || entry.getKey().equals("pig.reducePlan")) {
+          jobConfProperties.setProperty(entry.getKey(),
+              ObjectSerializer.deserialize(entry.getValue()).toString());
+        } else {
+          jobConfProperties.setProperty(entry.getKey(), entry.getValue());
         }
-        line = bufferedReader.readLine();
       }
     } catch (FileNotFoundException e) {
       log.error("Configuration File Not Found");
     } catch (IOException e) {
       e.printStackTrace();
     }
+
     return jobConfProperties;
   }
 

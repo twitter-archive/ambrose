@@ -49,14 +49,14 @@ h2 { margin: 1em 0px; }
 #popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
 
 #testdiv {
-  width: 400px;
+  width: 500px;
   position: absolute;
   z-index: 1;
   background-color: #66CCFF;
   left: 30px;
   top: 50px;
   font-family: Tahoma, Geneva, sans-serif;
-  font-size: 14px;
+  font-size: 11px;
   text-align: center;
   font-weight: bold;
   color: #FFF;

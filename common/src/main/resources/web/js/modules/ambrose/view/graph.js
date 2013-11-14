@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', './movableDiv', 'lib/bootstrap'], function(
-  $, _, d3, Ambrose, View, MovableDiv
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
+  $, _, d3, Ambrose, View
 ) {
 
   // utility functions
@@ -502,7 +502,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', './movabl
       t.selectAll('g.node circle.magnitude')
         .attr('r', function(node) {
           if (node.data.configuration) {
-            $("#testdiv").html("<p>" + node.data.configuration["pig.script"] + "</p>");
+            var script = node.data.configuration["pig.script"];
+            script.replace("\n", "<br />");
+
+            $("#testdiv").html(script);
           }
 
           var radius = 0;
