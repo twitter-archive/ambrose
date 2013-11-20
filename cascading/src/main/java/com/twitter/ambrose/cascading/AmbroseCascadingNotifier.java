@@ -243,7 +243,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flowStep the step in the flow that represents the MapReduce job
    */
   @Override
-  public void onStepProgressing(FlowStep flowStep) {
+  public void onStepRunning(FlowStep flowStep) {
     //getting Hadoop running job and job client
     HadoopStepStats stats = (HadoopStepStats)flowStep.getFlowStepStats();
     JobClient jc = stats.getJobClient();
@@ -346,7 +346,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
       boolean stepFinished = false;
       while(!stepFinished){
         HadoopStepStats stats = (HadoopStepStats)step.getFlowStepStats();
-        notifier.onStepProgressing(step);
+        notifier.onStepRunning(step);
         stepFinished = stats.isFinished() || stats.isStopped() ||
                 stats.isFailed() || stats.isSuccessful();
         try {
