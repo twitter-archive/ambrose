@@ -48,16 +48,16 @@ import cascading.tuple.Fields;
 import com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier;
 
 
-public class Main5{
+public class Main{
 
   public static void main( String[] args ){
-    String docPath = "test/data/rain.txt";
-    String wcPath = "target/output/out";
-    String stopPath = "test/data/en.stop";
-    String tfidfPath = "target/output/out2";
+    String docPath = "src/test/data/rain.txt";
+    String wcPath = "output/out";
+    String stopPath = "src/test/data/en.stop";
+    String tfidfPath = "output/out2";
 
     Properties properties = new Properties();
-    AppProps.setApplicationJarClass( properties, Main5.class );
+    AppProps.setApplicationJarClass( properties, Main.class );
     HadoopFlowConnector flowConnector = new HadoopFlowConnector( properties );
 
     // create source and sink taps
