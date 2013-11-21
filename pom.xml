@@ -9,7 +9,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.2.8</version>
+  <version>0.2.9-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
@@ -87,11 +87,6 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ambrose-hive</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>ambrose-cascading</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -207,13 +202,6 @@
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-cli</artifactId>
         <version>${apache.hive.version}</version>
-      </dependency>
-
-      <!-- cascading -->
-      <dependency>
-        <groupId>cascading</groupId>
-        <artifactId>cascading</artifactId>
-        <version>${cascading.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -356,7 +344,7 @@
 
   <modules>
     <module>common</module>
+    <module>pig</module>
     <module>hive</module>
-    <module>cascading</module>
   </modules>
 </project>
