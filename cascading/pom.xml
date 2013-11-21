@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.twitter.ambrose</groupId>
     <artifactId>ambrose</artifactId>
-    <version>0.2.9-SNAPSHOT</version>
+    <version>0.2.8</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -17,47 +17,23 @@
     <repository>
       <id>conjars.org</id>
       <url>http://conjars.org/repo</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
   <dependencies>
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-core</artifactId>
-      <version>2.5.0-wip-77</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-local</artifactId>
-      <version>2.5.0-wip-77</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-hadoop</artifactId>
-      <version>2.5.0-wip-77</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-xml</artifactId>
-      <version>2.5.0-wip-77</version>
-    </dependency>
-
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-platform</artifactId>
-      <version>2.5.0-wip-77</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- cascading dependences -->
-
     <!-- ambrose -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ambrose-common</artifactId>
+    </dependency>
+
+    <!-- testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
     </dependency>
 
     <!-- logging -->
@@ -69,43 +45,41 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
     </dependency>
+
+    <!-- hadoop -->
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>13.0.1</version>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapred</artifactId>
     </dependency>
 
-    <!-- web -->
+    <!-- cascading -->
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>${mortbay.jetty.version}</version>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-core</artifactId>
+      <version>2.5.0-wip-77</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-util</artifactId>
-      <version>${mortbay.jetty.version}</version>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-local</artifactId>
+      <version>2.5.0-wip-77</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>${mortbay.jetty.servlet.version}</version>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-hadoop</artifactId>
+      <version>2.5.0-wip-77</version>
     </dependency>
-    
-    <!-- testing -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-xml</artifactId>
+      <version>2.5.0-wip-77</version>
+    </dependency>
+    <dependency>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-platform</artifactId>
+      <version>2.5.0-wip-77</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
-
-  <properties>
-    <hadoop.version>0.16.4</hadoop.version>
-    <cascading.version>0.6.1</cascading.version>
-    <janino.version>2.5.12</janino.version>
-    <jgrapht.version>jdk1.5</jgrapht.version>
-    <tagsoup.version>1.1.3</tagsoup.version>
-  </properties>
 
   <build>
     <plugins>
