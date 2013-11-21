@@ -29,6 +29,7 @@ import org.apache.hadoop.mapred.TaskReport;
  * A wrapper that contains related flow step job statistics
  * @author Ahmed Mohsen
  */
+@SuppressWarnings("deprecation")
 public class CascadingMapReduceJobState extends MapReduceJobState {
   
   @JsonCreator
