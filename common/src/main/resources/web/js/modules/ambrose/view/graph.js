@@ -139,14 +139,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         self.rescaleEdges();
       });
 
-      var tmp = $.fn.popover.Constructor.prototype.show;
-      $.fn.popover.Constructor.prototype.show = function () {
-        tmp.call(this);
-        if (this.options.callback) {
-          this.options.callback();
-        }
-      }
-
       // bind event workflow handlers
       workflow.on('jobsLoaded', function() {
         self.handleJobsLoaded();
