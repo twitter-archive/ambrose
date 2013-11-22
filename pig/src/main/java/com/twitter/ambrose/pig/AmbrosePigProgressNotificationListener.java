@@ -378,9 +378,9 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         }
       }
     } catch (FileNotFoundException e) {
-      log.error("Configuration File Not Found");
+      log.error("Configuration file not found for old jobs, nothing to worry about.");
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error occurred getting job info.", e);
     }
 
     return jobConfProperties;
