@@ -17,7 +17,8 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap',
+        'lib/jquery-ui'], function(
   $, _, d3, Ambrose, View
 ) {
 
@@ -138,6 +139,14 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         self.rescaleEdges();
       });
 
+      var tmp = $.fn.popover.Constructor.prototype.show;
+      $.fn.popover.Constructor.prototype.show = function () {
+        tmp.call(this);
+        if (this.options.callback) {
+          this.options.callback();
+        }
+      }
+
       // bind event workflow handlers
       workflow.on('jobsLoaded', function() {
         self.handleJobsLoaded();
@@ -178,6 +187,13 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       var groupCount = groups.length;
       var groupDelta = 1 / groupCount;
       var groupOffset = groupDelta / 2;
+
+      if (graph && graph.data && graph.data.length > 0 && graph.data[0].runtime === "pig") {
+        var moreOptionsEl = document.getElementById("moreOptions");
+        moreOptionsEl.innerHTML = 'More Options <b class="caret"></b>';
+        $("#moreOptions").toggleClass("hidden", false);
+      }
+
       $.each(groups, function(i, group) {
         var x = i * groupDelta + groupOffset;
 
@@ -394,7 +410,42 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
     handleMouseInteraction: function(jobs) {
       var nodes = jobs.map(function(j) { return j.node; });
+      $(".jobScript").css("background-color", "white");
+      if (nodes[0]) { this.highlineScript(nodes[0]); }
       this.updateNodeGroupsFill(this.selectNodeGroups(nodes));
+    },
+
+    highlineScript : function(node) {
+      var colors = this.params.colors;
+
+      if (node.data && node.data.configuration && node.data.configuration["pig.alias.location"]) {
+        // Aliases are in order of M:...C:... R:...
+        var aliases = node.data.configuration["pig.alias.location"].split(/(?=[A-Z]:)/);
+        var minLineNum = 10000; // Should be a large enough initial value.
+
+        for (var i = 0; i < aliases.length; i++) {
+          var group = aliases[i].substring(0, 1);
+          var lines = aliases[i].match(/\[(.*?)\,/g);
+          if (lines != null) {
+            for (var j = 0; j < lines.length; j++) {
+              var lineNum = Number(lines[j].substring(1, lines[j].length - 1));
+              if (group === "M") {
+                $("#scriptLine" + lineNum).css("background-color", colors.scriptHighlightMap);
+              } else if (group === "R") {
+                $("#scriptLine" + lineNum).css("background-color", colors.scriptHighlightReduce);
+              } else if (group === "C") {
+                $("#scriptLine" + lineNum).css("background-color", colors.scriptHighlightCombine);
+              }
+              if (lineNum < minLineNum) { minLineNum = lineNum; }
+            }
+          }
+        }
+
+        if ($('#scriptLine' + minLineNum).length > 0) {
+          var scrollValue = $('#scriptLine' + minLineNum).offset().top - $('#scriptLine1').offset().top;
+          $('#scriptDivBody').animate({scrollTop: scrollValue}, 500);
+        }
+      }
     },
 
     selectNodeGroups: function(nodes) {
@@ -501,13 +552,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       // update magnitude radius
       t.selectAll('g.node circle.magnitude')
         .attr('r', function(node) {
-          if (node.data.configuration) {
-            var script = node.data.configuration["pig.script"];
-            script.replace("\n", "<br />");
-
-            $("#testdiv").html(script);
-          }
-
           var radius = 0;
           if (node && node.data && node.data.mapReduceJobState) {
             // compute current radius
@@ -556,7 +600,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       function fill(node) {
         var job = node.data;
         var status = job.status || '';
-        if (job.mouseover) return colors.mouseover;
+        if (job.mouseover) {
+          return colors.mouseover;
+        }
         if (job.selected) return colors.selected;
         return colors[status.toLowerCase()] || colors.pending;
       }

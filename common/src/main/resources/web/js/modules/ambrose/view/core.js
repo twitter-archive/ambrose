@@ -28,6 +28,9 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
   var mouseover = selected.brighter();
   var nodeEdgeDefault = d3.rgb(170, 170, 170);
   var nodeEdgeScaled = d3.rgb(170, 170, 170).darker();
+  var scriptHighlightMap = "#80DFFF"; // Blue
+  var scriptHighlightCombine = "#80FFAE"; // Green
+  var scriptHighlightReduce = "#FFFF80"; // Yellow
 
   return Ambrose.View = {
     Theme: {
@@ -39,7 +42,10 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
         selected: selected,
         mouseover: mouseover,
         nodeEdgeDefault: nodeEdgeDefault,
-        nodeEdgeScaled: nodeEdgeScaled
+        nodeEdgeScaled: nodeEdgeScaled,
+        scriptHighlightMap: scriptHighlightMap,
+        scriptHighlightCombine : scriptHighlightCombine,
+        scriptHighlightReduce : scriptHighlightReduce
       },
       palettes: {
         queued: colorbrewer.Greys,

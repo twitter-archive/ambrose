@@ -116,7 +116,55 @@ define(['lib/jquery', './core'], function($, Ambrose) {
       this.data = params.data;
       this.getId = params.getId || function(d) { return d.id; };
       this.getParentIds = params.getParentIds || function(d) { return d.parentIds; };
+      this.script = params.script;
+
+      this.createScriptDiv(this.script);
       _initNodes.call(this);
+    },
+
+    /**
+     * Create the div used for script view.
+     */
+    createScriptDiv : function(script) {
+      $('#scriptDiv').draggable({
+        handle: '#scriptDivTitle'
+      }).resizable();
+
+      var scriptCtn = document.getElementById('scriptContent');
+      var titleEl = document.createElement('div');
+      titleEl.className = "modal-header";
+      titleEl.id = "scriptDivTitle";
+      titleEl.innerHTML = "Pig Script";
+
+      var scriptCloseBtn = document.createElement('button');
+      scriptCloseBtn.className = "close";
+      scriptCloseBtn.innerHTML = "X";
+      scriptCloseBtn.onclick = function() {
+        $("#scriptDiv").toggleClass('hidden', true);
+      };
+
+      var scriptRefreshBtn = document.createElement('button');
+      scriptRefreshBtn.className = "close";
+      scriptRefreshBtn.innerHTML = "&#8635;&nbsp;&nbsp;";
+      scriptRefreshBtn.onclick = function() {
+        $(".jobScript").css("background-color", "white");
+        if ($("#scriptDivBody").length > 0) {
+          $('#scriptDivBody').animate({scrollTop: 0}, 500);
+        }
+      };
+
+      titleEl.appendChild(scriptCloseBtn);
+      titleEl.appendChild(scriptRefreshBtn);
+      scriptCtn.appendChild(titleEl);
+
+      var bodyEl = document.createElement('div');
+      if (script == null) {
+        script = "Script is not ready, please refresh the page.";
+      } else {
+        bodyEl.id = "scriptDivBody";
+      }
+      bodyEl.innerHTML = script;
+      scriptCtn.appendChild(bodyEl);
     },
 
     /**

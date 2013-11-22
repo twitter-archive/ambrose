@@ -1,6 +1,6 @@
 var REQUIREJS_CONFIG = {
   baseUrl: '/js/modules',
-  //urlArgs: 'bust=' + new Date().getTime(),
+  urlArgs: 'bust=' + new Date().getTime(),
   paths: {
     lib: '/js/lib',
   },

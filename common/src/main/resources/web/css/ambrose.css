@@ -48,20 +48,23 @@ h2 { margin: 1em 0px; }
 .popover .popover-content { padding: 0px; padding-top : 5px; padding-right : 12px; margin: 0px; border: 0px; }
 #popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
 
-#testdiv {
+#scriptDiv {
+  height: 200px;
   width: 500px;
-  position: absolute;
-  z-index: 1;
-  background-color: #66CCFF;
-  left: 30px;
-  top: 50px;
-  font-family: Tahoma, Geneva, sans-serif;
-  font-size: 11px;
-  text-align: center;
+  position:absolute;
+  left:400px;
+  top:200px;
+  padding-left: 10px;
+  padding-top: 5px;
+}
+#scriptContent { height:100%; width:100%; }
+#scriptDivTitle { font-weight:bold; }
+#scriptDivBody { width:100%;  height:calc(100% - 40px); overflow: auto; }
+.lineNumber {
+  display: inline-block;
   font-weight: bold;
-  color: #FFF;
-  padding: 20px;
-  cursor: default;
+  text-align: left;
+  width: 30px;
 }
 
-#testdiv a { color: #FFD; }
+.hidden { opacity : 0; }

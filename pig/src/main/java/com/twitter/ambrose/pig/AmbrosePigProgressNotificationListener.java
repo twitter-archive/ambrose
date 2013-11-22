@@ -45,19 +45,14 @@ import org.apache.pig.tools.pigstats.PigStats;
 import org.apache.pig.tools.pigstats.ScriptState;
 import org.apache.pig.tools.pigstats.PigStats.JobGraph;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -363,8 +358,17 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
       for (Map.Entry<String, String> entry : conf) {
         if (entry.getKey().equals("pig.script")) {
-          jobConfProperties.setProperty(entry.getKey(),
-              StringUtils.newStringUtf8(Base64.decodeBase64(entry.getValue())));
+          String script = StringUtils.newStringUtf8(Base64.decodeBase64(entry.getValue()));
+
+          int lineCounter = 1;
+          script = "<div class=\"jobScript\" id=\"scriptLine" + lineCounter + "\">"
+              + "<span class=\"lineNumber\">" + lineCounter + "</span>" + script;
+          while (script.contains("\n")) {
+            lineCounter++;
+            script = script.replaceFirst("\n", "</div><div class=\"jobScript\" id=\"scriptLine"
+                + lineCounter + "\">" + "<span class=\"lineNumber\">" + lineCounter + "</span>");
+          }
+          jobConfProperties.setProperty(entry.getKey(), script + "</div>");
         } else if (entry.getKey().equals("pig.mapPlan")
             || entry.getKey().equals("pig.reducePlan")) {
           jobConfProperties.setProperty(entry.getKey(),

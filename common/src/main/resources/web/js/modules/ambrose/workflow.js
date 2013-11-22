@@ -122,6 +122,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         var jobs = self.jobs = [];
         var jobsByName = self.jobsByName = {};
         var jobsById = self.jobsById = {};
+        var script = null;
 
         // initialize job indices
         $.each(data, function(i, node) {
@@ -131,7 +132,12 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           // Clean the DAG job data for correct animation dispaly.
           if (job.mapReduceJobState) { job.mapReduceJobState = null; }
           if (job.counterGroupMap) { job.counterGroupMap = null; }
-          if (job.configuration) { job.configuration = null; }
+          if (job.configuration) {
+            if (!script && job.configuration["pig.script"]) {
+              script = job.configuration["pig.script"];
+            }
+            job.configuration = null;
+          }
           if (job.metrics) { job.metrics = null; }
 
           jobs.push(job);
@@ -175,6 +181,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         // build job graph and sort
         var graph = self.graph = Graph({
           data: jobs,
+          script: script,
           getId: function(d) { return d.name; },
           getParentIds: function(d) { return d.parentNames; },
         });
@@ -285,6 +292,21 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           var id = event.id;
           var type = event.type;
           var data = event.payload;
+
+          if ($("#scriptDivBody").length == 0 && event.payload.job && event.payload.job.configuration
+              && event.payload.job.configuration["pig.script"]) {
+            var scriptContentEl = document.getElementById("scriptContent");
+            var scriptTitleEl = document.getElementById('scriptDivTitle');
+
+             var scriptBodyEl = document.createElement('div');
+             scriptBodyEl.id = "scriptDivBody";
+             scriptBodyEl.innerHTML = event.payload.job.configuration["pig.script"];
+
+             scriptContentEl.innerHTML = "";
+             scriptContentEl.appendChild(scriptTitleEl);
+             scriptContentEl.appendChild(scriptBodyEl);
+          }
+
           if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
             return;
