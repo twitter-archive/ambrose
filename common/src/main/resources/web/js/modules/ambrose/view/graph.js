@@ -302,14 +302,83 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         });
       });
 
-      /*
       $("path.edge").each(function (i, edge) {
-        $(this).tooltip({
+        $(this).popover({
+          placement: 'top',
           container : 'body',
-          title : "test"
-        }).tooltip('show');
-      });*/
+          html: 'true',
+          title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>',
+          content : function (){
+              // Create the popover body section based on the node.
+              var edge = this.__data__;
+              if (edge) {
+                var bodyEL = '<div id="popoverBody"><ul>';
+                var targetCounter = edge.target.data ? edge.target.data.counterGroupMap : null;
+                var sourceCounter = edge.source.data ? edge.source.data.counterGroupMap : null;
 
+                if (targetCounter || sourceCounter) {
+                  if (targetCounter) {
+                    bodyEL += '<li><span class="popoverSectionKey">Start Node:</span> ';
+                  }
+
+                  if (targetCounter && targetCounter.FileSystemCounters
+                      && targetCounter.FileSystemCounters.counterInfoMap
+                      && targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN) {
+                    bodyEL += '<li><span class="popoverKey">HDFS Bytes Written:</span> '
+                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN.value
+                        + '</li>';
+                  }
+
+                  if (targetCounter && targetCounter["org.apache.hadoop.mapred.Task$Counter"]
+                      && targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap) {
+                    bodyEL += '<li><span class="popoverKey">Reduce Output Records:</span> '
+                        + targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value
+                        + '</li>';
+                  }
+
+                  if (sourceCounter) {
+                    bodyEL += '<li><span class="popoverSectionKey">Destination Node:</span> ';
+                  }
+
+                  if (sourceCounter && sourceCounter["org.apache.hadoop.mapred.Task$Counter"]
+                      && sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap) {
+                    bodyEL += '<li><span class="popoverKey">Map Input Records:</span> '
+                        + sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value
+                        + '</li>';
+                  }
+
+                  if (sourceCounter && targetCounter.FileSystemCounters
+                      && targetCounter.FileSystemCounters.counterInfoMap
+                      && targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
+                    bodyEL += '<li><span class="popoverKey">HDFS Bytes Read:</span> '
+                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value
+                        + '</li>';
+                  }
+
+                  return bodyEL + '</ul></div>';
+                }
+              }
+
+              return '<div class="popoverTitle" id="counter-popover-body">'
+                  + 'Counter Information Not Available </div>';
+          },
+          trigger: 'manual'
+        }).click(function (e) {
+          $('path.edge').not(this).popover('hide');
+          var popover = $("#counter-popover-title" + i);
+          $(this).popover((popover.length != 0)? 'hide' : 'show');
+
+          popover = $("#counter-popover-title" + i);
+          if (popover && popover.parent() && popover.parent().parent()) {
+            popover = popover.parent().parent();
+          }
+
+          popover.css({
+            top: e.pageY - popover.height(),
+            left: e.pageX - popover.width() / 2
+          });
+        });
+      });
 
       $('.node circle.anchor').click(function(e) {
         // Hide all popover but the one just clicked.
