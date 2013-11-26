@@ -19,7 +19,7 @@ limitations under the License.
  * graphs. Graph nodes may be created from arbitrary javascript objects, provided a suitable 'getId'
  * and 'getParentIds' functions are defined.
  */
-define(['lib/jquery', './core'], function($, Ambrose) {
+define(['lib/jquery', './core', './pigscript'], function($, Ambrose, PigScript) {
   /**
    * Creates graph nodes from data and initializes indices for node access.
    */
@@ -32,6 +32,7 @@ define(['lib/jquery', './core'], function($, Ambrose) {
       self.addNode({
         id: self.getId(d),
         data: d,
+        runtime: self.runtime
       });
     });
 
@@ -114,57 +115,13 @@ define(['lib/jquery', './core'], function($, Ambrose) {
      */
     init: function(params) {
       this.data = params.data;
+      this.runtime = params.runtime;
       this.getId = params.getId || function(d) { return d.id; };
       this.getParentIds = params.getParentIds || function(d) { return d.parentIds; };
       this.script = params.script;
 
-      this.createScriptDiv(this.script);
+      if (params.runtime == "pig") { PigScript.createScriptDiv(this.script); }
       _initNodes.call(this);
-    },
-
-    /**
-     * Create the div used for script view.
-     */
-    createScriptDiv : function(script) {
-      $('#scriptDiv').draggable({
-        handle: '#scriptDivTitle'
-      }).resizable();
-
-      var scriptCtn = document.getElementById('scriptContent');
-      var titleEl = document.createElement('div');
-      titleEl.className = "modal-header";
-      titleEl.id = "scriptDivTitle";
-      titleEl.innerHTML = "Pig Script";
-
-      var scriptCloseBtn = document.createElement('button');
-      scriptCloseBtn.className = "close";
-      scriptCloseBtn.innerHTML = "X";
-      scriptCloseBtn.onclick = function() {
-        $("#scriptDiv").toggleClass('hidden', true);
-      };
-
-      var scriptRefreshBtn = document.createElement('button');
-      scriptRefreshBtn.className = "close";
-      scriptRefreshBtn.innerHTML = "&#8635;&nbsp;&nbsp;";
-      scriptRefreshBtn.onclick = function() {
-        $(".jobScript").css("background-color", "white");
-        if ($("#scriptDivBody").length > 0) {
-          $('#scriptDivBody').animate({scrollTop: 0}, 500);
-        }
-      };
-
-      titleEl.appendChild(scriptCloseBtn);
-      titleEl.appendChild(scriptRefreshBtn);
-      scriptCtn.appendChild(titleEl);
-
-      var bodyEl = document.createElement('div');
-      if (script == null) {
-        script = "Script is not ready, please refresh the page.";
-      } else {
-        bodyEl.id = "scriptDivBody";
-      }
-      bodyEl.innerHTML = script;
-      scriptCtn.appendChild(bodyEl);
     },
 
     /**

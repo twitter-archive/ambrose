@@ -19,8 +19,8 @@ limitations under the License.
  * events from an Ambrose server. The Workflow acts as a controller and owner of job
  * state. Callbacks may be bound to events triggered on the Workflow to react to state changes.
  */
-define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
-  $, URI, Ambrose, Client, Graph
+define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript'], function(
+  $, URI, Ambrose, Client, Graph, PigScript
 ) {
   // Maximum number of consecutive client failures before event polling is stopped.
   var MAX_CLIENT_FAILURES = 10;
@@ -123,17 +123,19 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         var jobsByName = self.jobsByName = {};
         var jobsById = self.jobsById = {};
         var script = null;
+        var runtime = null;
 
         // initialize job indices
         $.each(data, function(i, node) {
           // retrieve job from node
           var job = node.job;
+          runtime =  job.runtime;
 
           // Clean the DAG job data for correct animation dispaly.
           if (job.mapReduceJobState) { job.mapReduceJobState = null; }
           if (job.counterGroupMap) { job.counterGroupMap = null; }
           if (job.configuration) {
-            if (!script && job.configuration["pig.script"]) {
+            if (runtime === "pig" && !script && job.configuration["pig.script"]) {
               script = job.configuration["pig.script"];
             }
             job.configuration = null;
@@ -181,6 +183,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         // build job graph and sort
         var graph = self.graph = Graph({
           data: jobs,
+          runtime : runtime,
           script: script,
           getId: function(d) { return d.name; },
           getParentIds: function(d) { return d.parentNames; },
@@ -292,19 +295,8 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           var id = event.id;
           var type = event.type;
           var data = event.payload;
-
-          if ($("#scriptDivBody").length == 0 && event.payload.job && event.payload.job.configuration
-              && event.payload.job.configuration["pig.script"]) {
-            var scriptContentEl = document.getElementById("scriptContent");
-            var scriptTitleEl = document.getElementById('scriptDivTitle');
-
-             var scriptBodyEl = document.createElement('div');
-             scriptBodyEl.id = "scriptDivBody";
-             scriptBodyEl.innerHTML = event.payload.job.configuration["pig.script"];
-
-             scriptContentEl.innerHTML = "";
-             scriptContentEl.appendChild(scriptTitleEl);
-             scriptContentEl.appendChild(scriptBodyEl);
+          if (event.payload && event.payload.job && event.payload.job.runtime == "pig") {
+            PigScript.updateScript(event);
           }
 
           if (!id || !type || !data) {

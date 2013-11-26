@@ -68,3 +68,7 @@ h2 { margin: 1em 0px; }
 }
 
 .hidden { opacity : 0; }
+.highLightWhite { background-color: white; }
+.highLightYellow { background-color: #FFFF80; }
+.highLightGreen { background-color: #80FFAE; }
+.highLightBlue { background-color: #80DFFF; }

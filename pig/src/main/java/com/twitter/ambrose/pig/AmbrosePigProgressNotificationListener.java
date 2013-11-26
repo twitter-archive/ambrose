@@ -295,7 +295,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     job.setJobStats(stats);
-    //job.setConfiguration(jobConfProperties);
     jobs.add(job);
   }
 
@@ -320,7 +319,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     try {
       String id = pigJob.getId();
       RunningJob runningJob = jobClientLocal.getJob(id);
-
       Properties jobConfProperties = getJobConfFromFile(runningJob);
 
       if (runningJob == null) {
@@ -334,9 +332,10 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       if (jobConfProperties != null && jobConfProperties.size() > 0) {
         pigJob.setConfiguration(jobConfProperties);
       }
-      pigJob.setMapReduceJobState(new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
+      pigJob.setMapReduceJobState(
+          new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
     } catch (IOException e) {
-      log.error("Error getting job info.", e);
+      log.warn("Error occurred when retrieving job progress info. ", e);
     }
   }
 
@@ -358,17 +357,11 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
       for (Map.Entry<String, String> entry : conf) {
         if (entry.getKey().equals("pig.script")) {
-          String script = StringUtils.newStringUtf8(Base64.decodeBase64(entry.getValue()));
-
-          int lineCounter = 1;
-          script = "<div class=\"jobScript\" id=\"scriptLine" + lineCounter + "\">"
-              + "<span class=\"lineNumber\">" + lineCounter + "</span>" + script;
-          while (script.contains("\n")) {
-            lineCounter++;
-            script = script.replaceFirst("\n", "</div><div class=\"jobScript\" id=\"scriptLine"
-                + lineCounter + "\">" + "<span class=\"lineNumber\">" + lineCounter + "</span>");
-          }
-          jobConfProperties.setProperty(entry.getKey(), script + "</div>");
+          // It seems that javascript side is not reading \n character properly, replace it with
+          // <newLine> and then send over the string.
+          jobConfProperties.setProperty(entry.getKey(),
+              StringUtils.newStringUtf8(Base64.decodeBase64(entry.getValue())).replaceAll(
+                  "\n", "<newLine>"));
         } else if (entry.getKey().equals("pig.mapPlan")
             || entry.getKey().equals("pig.reducePlan")) {
           jobConfProperties.setProperty(entry.getKey(),
@@ -378,11 +371,10 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         }
       }
     } catch (FileNotFoundException e) {
-      log.error("Configuration file not found for old jobs, nothing to worry about.");
+      log.warn("Configuration file not found for old jobsflows.");
     } catch (IOException e) {
-      log.error("Error occurred getting job info.", e);
+      log.warn("Error occurred when retrieving configuration info.", e);
     }
-
     return jobConfProperties;
   }
 

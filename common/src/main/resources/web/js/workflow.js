@@ -22,13 +22,11 @@ require([
       .appendTo($('<li>').appendTo(workflowDropdown));
 
     $("#moreOptions").toggleClass("hidden", true);
-    var showScriptAction = $('<a href="#">')
-    .appendTo($('<li>').appendTo(scriptViewDropdown));
+    var showScriptAction = $('<a href="#">').appendTo($('<li>').appendTo(scriptViewDropdown));
     showScriptAction.text('Show Script');
     showScriptAction.click(function(event) {
       $("#scriptDiv").toggleClass('hidden', false);
     });
-
 
     // load jobs and poll for events
     if (params.replay) {
