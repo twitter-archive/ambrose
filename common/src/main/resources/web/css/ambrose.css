@@ -51,24 +51,25 @@ h2 { margin: 1em 0px; }
 #scriptDiv {
   height: 200px;
   width: 500px;
-  position:absolute;
+  position: fixed;
   left:400px;
   top:200px;
   padding-left: 10px;
   padding-top: 5px;
 }
 #scriptContent { height:100%; width:100%; }
-#scriptDivTitle { font-weight:bold; }
+#scriptDivTitle { font-weight:bold; padding-right: 70px; cursor: move; }
+#scriptTitleBtn1 { margin-right: -60px; margin-top: -22px; }
+#scriptTitleBtn2 { margin-right: -40px; margin-top: -22px; }
 #scriptDivBody { width:100%;  height:calc(100% - 40px); overflow: auto; }
+#scriptPopoverName { width: 100%; overflow:hidden; display: block; white-space: nowrap; text-overflow: ellipsis;}
 .lineNumber {
   display: inline-block;
   font-weight: bold;
   text-align: left;
+  background-color: whitesmoke;
   width: 30px;
 }
+.aliasM, .aliasC, .aliasR { vertical-align: super; top: -0.5em; font-size: 80%; font-weight:bold; }
 
 .hidden { opacity : 0; }
-.highLightWhite { background-color: white; }
-.highLightYellow { background-color: #FFFF80; }
-.highLightGreen { background-color: #80FFAE; }
-.highLightBlue { background-color: #80DFFF; }

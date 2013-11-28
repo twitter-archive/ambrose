@@ -123,6 +123,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
         var jobsByName = self.jobsByName = {};
         var jobsById = self.jobsById = {};
         var script = null;
+        var jobName = null;
         var runtime = null;
 
         // initialize job indices
@@ -137,6 +138,9 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
           if (job.configuration) {
             if (runtime === "pig" && !script && job.configuration["pig.script"]) {
               script = job.configuration["pig.script"];
+            }
+            if (runtime === "pig" && !jobName && job.configuration["mapred.job.name"]) {
+              jobName = job.configuration["mapred.job.name"];
             }
             job.configuration = null;
           }
@@ -185,6 +189,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
           data: jobs,
           runtime : runtime,
           script: script,
+          jobName: jobName,
           getId: function(d) { return d.name; },
           getParentIds: function(d) { return d.parentNames; },
         });
@@ -463,6 +468,14 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
       if (prev != null) prev.mouseover = false;
       if (job != null) job.mouseover = true;
       this.current.mouseover = job;
+
+      // Handle script highlighting
+      if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
+        PigScript.highlineScript(prev, "scriptCancel");
+        PigScript.highlineScript(this.current.selected, "scriptClicked");
+        PigScript.highlineScript(job, "scriptHovered");
+      }
+
       //console.debug('Job mouse over:', job, prev);
       this.trigger('jobMouseOver', [job, prev]);
       return job;
@@ -485,6 +498,12 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
       if (job === prev) job = null;
       else if (job != null) job.selected = true;
       this.current.selected = job;
+
+      // Handle script highlighting
+      if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
+        PigScript.highlineScript(prev, "scriptCancel");
+        PigScript.highlineScript(job, "scriptClicked");
+      }
       this.trigger('jobSelected', [job, prev]);
       return job;
     },

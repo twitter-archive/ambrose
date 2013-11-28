@@ -17,9 +17,9 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../pigscript',
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core',
         'lib/bootstrap', 'lib/jquery-ui'],
-        function($, _, d3, Ambrose, View, PigScript) {
+        function($, _, d3, Ambrose, View) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
   function isReal(node) { return !(node.pseudo); }
@@ -178,10 +178,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../pigsc
       var groupDelta = 1 / groupCount;
       var groupOffset = groupDelta / 2;
 
-      // Currently only show the More Options dropdown if the user is running pig script.
+      // Currently only show the "Show Script" Button if the user is running pig script.
       if (graph.runtime === "pig") {
-        var moreOptionsEl = document.getElementById("moreOptions");
-        moreOptionsEl.innerHTML = 'More Options <b class="caret"></b>';
         $("#moreOptions").toggleClass("hidden", false);
       }
 
@@ -401,9 +399,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../pigsc
 
     handleMouseInteraction: function(jobs) {
       var nodes = jobs.map(function(j) { return j.node; });
-      if (nodes[0] && nodes[0].runtime == "pig") {
-        PigScript.highlineScript(this.params.colors, nodes[0]);
-      }
       this.updateNodeGroupsFill(this.selectNodeGroups(nodes));
     },
 
@@ -559,8 +554,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../pigsc
       function fill(node) {
         var job = node.data;
         var status = job.status || '';
+
         if (job.mouseover) { return colors.mouseover; }
         if (job.selected) { return colors.selected; }
+
         return colors[status.toLowerCase()] || colors.pending;
       }
 

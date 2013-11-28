@@ -118,9 +118,8 @@ define(['lib/jquery', './core', './pigscript'], function($, Ambrose, PigScript) 
       this.runtime = params.runtime;
       this.getId = params.getId || function(d) { return d.id; };
       this.getParentIds = params.getParentIds || function(d) { return d.parentIds; };
-      this.script = params.script;
 
-      if (params.runtime == "pig") { PigScript.createScriptDiv(this.script); }
+      if (params.runtime == "pig") { PigScript.createScriptDiv(params.script, params.jobName); }
       _initNodes.call(this);
     },
 

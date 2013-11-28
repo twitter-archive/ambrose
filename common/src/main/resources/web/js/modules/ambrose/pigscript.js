@@ -19,15 +19,16 @@ limitations under the License.
  * display it properly.
  */
 define(['lib/jquery'], function($) {
-  return {
-    testing : function() {
-      alert('testing');
-    },
+  var scriptSelected = "#FFFF80"; // Yellow
+  var scriptClicked = "#FFD880";
+  var scriptClickedMark = "#AAAAAA";
+  var scriptUntouched = "#F5F5F5";
 
+  return {
     /**
      * Create the div used for script view.
      */
-    createScriptDiv : function(script) {
+    createScriptDiv : function(script, jobName) {
       var self = this;
       $('#scriptDiv').draggable({
         handle: '#scriptDivTitle'
@@ -37,22 +38,25 @@ define(['lib/jquery'], function($) {
       var titleEl = document.createElement('div');
       titleEl.className = "modal-header";
       titleEl.id = "scriptDivTitle";
-      titleEl.innerHTML = "Pig Script";
+      if (!jobName) { jobName = "Pig Script" }
+      titleEl.innerHTML = '<span id="scriptPopoverName">' + jobName + '</span>';
 
       var scriptCloseBtn = document.createElement('button');
       scriptCloseBtn.className = "close";
-      scriptCloseBtn.innerHTML = "X";
+      scriptCloseBtn.id = "scriptTitleBtn1";
+      scriptCloseBtn.innerHTML = "&times;";
       scriptCloseBtn.onclick = function() {
         $("#scriptDiv").toggleClass('hidden', true);
       };
 
       var scriptRefreshBtn = document.createElement('button');
       scriptRefreshBtn.className = "close";
-      scriptRefreshBtn.innerHTML = "&#8635;&nbsp;&nbsp;";
+      scriptRefreshBtn.id = "scriptTitleBtn2";
+      scriptRefreshBtn.innerHTML = "&#8635;";
       scriptRefreshBtn.onclick = function() {
-        $(".jobScript").css("background-color", "white");
+        self.clearScript();
         if ($("#scriptDivBody").length > 0) {
-          $('#scriptDivBody').animate({scrollTop: 0}, 500);
+          $('#scriptDivBody').scrollTop(0);
         }
       };
 
@@ -78,6 +82,8 @@ define(['lib/jquery'], function($) {
           && event.payload.job.configuration["pig.script"]) {
           var scriptContentEl = document.getElementById("scriptContent");
           var scriptTitleEl = document.getElementById('scriptDivTitle');
+          var scriptNameEl = document.getElementById("scriptPopoverName");
+          scriptNameEl.innerHTML = event.payload.job.configuration["mapred.job.name"];
 
           var scriptBodyEl = document.createElement('div');
           scriptBodyEl.id = "scriptDivBody";
@@ -91,28 +97,35 @@ define(['lib/jquery'], function($) {
 
     renderScript : function(script) {
       var lineCounter = 1;
-      script = '<div class="jobScript" id="scriptLine' + lineCounter + '">'
-          + '<span class="lineNumber">' + lineCounter + "</span>" + script;
+      //debugger
+      script = '<table><tr class="jobScript" id="scriptLine' + lineCounter + '">'
+          + '<td class="lineNumber">' + lineCounter + '</td>'
+          + '<td class="aliasM">&nbsp;</td>'
+          + '<td class="aliasC">&nbsp;</td>'
+          + '<td class="aliasR">&nbsp;</td><td>' + script;
 
       while (script.indexOf("<newLine>") != -1) {
         lineCounter++;
-        script = script.replace('<newLine>', '</div><div class="jobScript" id="scriptLine'
-            + lineCounter + '">' + '<span class="lineNumber">' + lineCounter + '</span>');
+        script = script.replace('<newLine>', '</td></tr><tr class="jobScript" id="scriptLine' + lineCounter + '">'
+            + '<td class="lineNumber">' + lineCounter + '</td>'
+            + '<td class="aliasM">&nbsp;</td>'
+            + '<td class="aliasC">&nbsp;</td>'
+            + '<td class="aliasR">&nbsp;</td><td>');
       }
 
-      return script + "</div>";
+      return script + "</td></tr></table>";
     },
 
     /**
      * Handles the mouse interaction, and highlight the part of the script that corresponds to
      * the alias of the node hovered over.
      */
-    highlineScript : function(colors, node) {
-      $(".jobScript").css("background-color", "white");
+    highlineScript : function(job, mouseAction) {
+      if (!job) return ; // null check
 
-      if (node.data && node.data.configuration && node.data.configuration["pig.alias.location"]) {
+      if (job.configuration && job.configuration["pig.alias.location"]) {
         // Aliases are in order of M:...C:... R:...
-        var aliases = node.data.configuration["pig.alias.location"].split(/(?=[A-Z]:)/);
+        var aliases = job.configuration["pig.alias.location"].split(/(?=[A-Z]:)/);
         var minLineNum = 10000; // Should be a large enough initial value.
 
         for (var i = 0; i < aliases.length; i++) {
@@ -121,13 +134,37 @@ define(['lib/jquery'], function($) {
           if (lines != null) {
             for (var j = 0; j < lines.length; j++) {
               var lineNum = Number(lines[j].substring(1, lines[j].length - 1));
-              // Highlights Mapper, Reducer and Combiner using different color.
-              if (group === "M") {
-                $("#scriptLine" + lineNum).css("background-color", colors.scriptHighlightMap);
+              var lineDiv = $("#scriptLine" + lineNum);
+              if (mouseAction == "scriptClicked") {
+                lineDiv.css("background-color", scriptClicked);
+                $("#scriptLine" + lineNum + " .lineNumber")
+                .css("background-color", scriptClickedMark);
+              } else if (mouseAction == "scriptHovered") {
+                lineDiv.css("background-color", scriptSelected);
+              } else {
+                lineDiv.css("background-color", 'white');
+                $("#scriptLine" + lineNum + " .lineNumber")
+                .css("background-color", scriptUntouched);
+              }
+
+              if (group === "C") {
+                if (mouseAction == "scriptClicked") {
+                  $("#scriptLine" + lineNum + " .aliasC").html("C");
+                } else if (mouseAction == "scriptCancel") {
+                  $("#scriptLine" + lineNum + " .aliasC").html("&nbsp;");
+                }
+              } else if (group === "M") {
+                if (mouseAction == "scriptClicked") {
+                  $("#scriptLine" + lineNum + " .aliasM").html("M");
+                } else if (mouseAction == "scriptCancel") {
+                  $("#scriptLine" + lineNum + " .aliasM").html("&nbsp;");
+                }
               } else if (group === "R") {
-                $("#scriptLine" + lineNum).css("background-color", colors.scriptHighlightReduce);
-              } else if (group === "C") {
-                $("#scriptLine" + lineNum).css("background-color", colors.scriptHighlightCombine);
+                if (mouseAction == "scriptClicked") {
+                  $("#scriptLine" + lineNum + " .aliasR").html("R");
+                } else if (mouseAction == "scriptCancel") {
+                  $("#scriptLine" + lineNum + " .aliasR").html("&nbsp;");
+                }
               }
               if (lineNum < minLineNum) { minLineNum = lineNum; }
             }
@@ -137,9 +174,20 @@ define(['lib/jquery'], function($) {
         if ($('#scriptLine' + minLineNum).length > 0) {
           var scrollValue =
             $('#scriptLine' + minLineNum).offset().top - $('#scriptLine1').offset().top;
-          $('#scriptDivBody').animate({scrollTop: scrollValue}, 500);
+          $('#scriptDivBody').scrollTop(scrollValue);
         }
       }
+    },
+
+    /**
+     * Clear all the highlighting of the script.
+     */
+    clearScript : function() {
+      $(".jobScript").css("background-color", "white");
+      $(".lineNumber").css("background-color", "white");
+      $(".aliasM").html("&nbsp;");
+      $(".aliasC").html("&nbsp;");
+      $(".aliasR").html("&nbsp;");
     }
   };
 });

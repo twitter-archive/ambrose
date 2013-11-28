@@ -17,12 +17,11 @@ require([
 
     // install workflow actions
     var workflowDropdown = $('#workflow-dropdown');
-    var scriptViewDropdown = $('#script-view-dropdown');
     var playbackAction = $('<a href="#">')
       .appendTo($('<li>').appendTo(workflowDropdown));
 
-    $("#moreOptions").toggleClass("hidden", true);
-    var showScriptAction = $('<a href="#">').appendTo($('<li>').appendTo(scriptViewDropdown));
+    var showScriptAction = $('#moreOptions');
+    showScriptAction.toggleClass("hidden", true);
     showScriptAction.text('Show Script');
     showScriptAction.click(function(event) {
       $("#scriptDiv").toggleClass('hidden', false);
