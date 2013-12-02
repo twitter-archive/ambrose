@@ -49,14 +49,16 @@ h2 { margin: 1em 0px; }
 #popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
 
 #scriptDiv {
-  height: 200px;
+  height: 300px;
   width: 500px;
-  position: fixed;
-  left:400px;
-  top:200px;
+  position:fixed !important;
   padding-left: 10px;
   padding-top: 5px;
+  left:400px;
+  top:100px;
+  font-family: monospace;
 }
+
 #scriptContent { height:100%; width:100%; }
 #scriptDivTitle { font-weight:bold; padding-right: 70px; cursor: move; }
 #scriptTitleBtn1 { margin-right: -60px; margin-top: -22px; }

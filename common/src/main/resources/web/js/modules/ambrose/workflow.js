@@ -471,9 +471,9 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
 
       // Handle script highlighting
       if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
-        PigScript.highlineScript(prev, "scriptCancel");
-        PigScript.highlineScript(this.current.selected, "scriptClicked");
-        PigScript.highlineScript(job, "scriptHovered");
+        PigScript.highlineScript(prev, "scriptCancel", false);
+        PigScript.highlineScript(this.current.selected, "scriptClicked", false);
+        PigScript.highlineScript(job, "scriptHovered", false);
       }
 
       //console.debug('Job mouse over:', job, prev);
@@ -501,8 +501,8 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
 
       // Handle script highlighting
       if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
-        PigScript.highlineScript(prev, "scriptCancel");
-        PigScript.highlineScript(job, "scriptClicked");
+        PigScript.highlineScript(prev, "scriptCancel", false);
+        PigScript.highlineScript(job, "scriptClicked", true);
       }
       this.trigger('jobSelected', [job, prev]);
       return job;

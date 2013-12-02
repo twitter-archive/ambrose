@@ -32,7 +32,9 @@ define(['lib/jquery'], function($) {
       var self = this;
       $('#scriptDiv').draggable({
         handle: '#scriptDivTitle'
-      }).resizable();
+      }).resizable({
+         handles: 'n, e, s, w, ne, se, sw, nw'
+      });
 
       var scriptCtn = document.getElementById('scriptContent');
       var titleEl = document.createElement('div');
@@ -120,7 +122,7 @@ define(['lib/jquery'], function($) {
      * Handles the mouse interaction, and highlight the part of the script that corresponds to
      * the alias of the node hovered over.
      */
-    highlineScript : function(job, mouseAction) {
+    highlineScript : function(job, mouseAction, scrollTo) {
       if (!job) return ; // null check
 
       if (job.configuration && job.configuration["pig.alias.location"]) {
@@ -171,7 +173,7 @@ define(['lib/jquery'], function($) {
           }
         }
 
-        if ($('#scriptLine' + minLineNum).length > 0) {
+        if (scrollTo && $('#scriptLine' + minLineNum).length > 0) {
           var scrollValue =
             $('#scriptLine' + minLineNum).offset().top - $('#scriptLine1').offset().top;
           $('#scriptDivBody').scrollTop(scrollValue);
@@ -184,7 +186,7 @@ define(['lib/jquery'], function($) {
      */
     clearScript : function() {
       $(".jobScript").css("background-color", "white");
-      $(".lineNumber").css("background-color", "white");
+      $(".lineNumber").css("background-color", scriptUntouched);
       $(".aliasM").html("&nbsp;");
       $(".aliasC").html("&nbsp;");
       $(".aliasR").html("&nbsp;");
