@@ -73,5 +73,6 @@ h2 { margin: 1em 0px; }
   width: 30px;
 }
 .aliasM, .aliasC, .aliasR { vertical-align: super; top: -0.5em; font-size: 80%; font-weight:bold; }
+.aliasR { padding-right:5px; }
 
 .hidden { opacity : 0; }
