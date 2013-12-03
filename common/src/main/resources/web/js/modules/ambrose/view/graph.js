@@ -76,8 +76,12 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
      */
     init: function(workflow, container, params) {
       var self = this;
+
       self.arcValueMax = 0;
       self.arcValueMin = 0;
+
+      // Rescale the edges based on the option chosen, default option.
+      self.rescaleOption = "hdfsBytesWritten";
 
       self.workflow = workflow;
       self.container = container = $(container);
@@ -117,9 +121,18 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             .startAngle(0).endAngle(function(a) { return a; }),
           reduce: d3.svg.arc()
             .innerRadius(0).outerRadius(dim.node.progress.reduce.radius)
-            .startAngle(0).endAngle(function(a) { return a; }),
-        },
+            .startAngle(0).endAngle(function(a) { return a; })
+        }
       };
+
+      $(".edgeScaleOpt").each(function () {
+        $(this).click(function(){
+          self.rescaleOption = this.id;
+          self.arcValueMax = 0;
+          self.arcValueMin = 0;
+          self.rescaleEdges();
+        });
+      });
 
       // create scale for magnitude
       var magDomain = [10, 100, 1000, 10000];
@@ -320,7 +333,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
                 if (targetCounter || sourceCounter) {
                   if (targetCounter) {
-                    bodyEL += '<li><span class="popoverSectionKey">Start Node:</span> ';
+                    bodyEL += '<li><span class="popoverSectionKey">Source Node:</span> ';
                   }
 
                   if (targetCounter && targetCounter.FileSystemCounters
@@ -416,22 +429,49 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
     rescaleEdges : function() {
       // Rescales the width of the edges based on the counter/metrics we want.
-      function rescaleEdgesWidth(data, i, rescaleOption) {
+      function rescaleEdgesWidth(targetData, sourceData, i, rescaleOption) {
         if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
           return self.edgeMinWidth + "px";
-        } else if (rescaleOption === "hdfsBytesWritten") {
-          if (data && data.metrics && data.metrics.hdfsBytesWritten) {
-            var w = data.metrics.hdfsBytesWritten;
-            return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth)
-                / (self.arcValueMax - self.arcValueMin) * (w - self.arcValueMin)) + "px";
-          }
+        } else if (rescaleOption === "hdfsBytesWritten"
+            && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
+          return calculateWidth(targetData.metrics.hdfsBytesWritten);
+        } else if (self.rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
+            && targetData.metrics.reduceOutputRecords) {
+          return calculateWidth(targetData.metrics.reduceOutputRecords);
+        } else if (self.rescaleOption === "mapInputRecords" && sourceData && sourceData.metrics
+            && sourceData.metrics.mapInputRecords) {
+          return calculateWidth(sourceData.metrics.mapInputRecords);
+        } else if (self.rescaleOption === "hdfsBytesRead" && sourceData
+            && sourceData.counterGroupMap
+            && sourceData.counterGroupMap.FileSystemCounters
+            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap
+            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
+          return calculateWidth(
+              sourceData.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value);
         }
         return "1px";
       }
 
-      function rescaleEdgesColor(data, i, rescaleOption) {
+      function calculateWidth(w) {
+       return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth)
+           / (self.arcValueMax - self.arcValueMin) * (w - self.arcValueMin)) + "px"
+      }
+
+      function rescaleEdgesColor(targetData, sourceData, i, rescaleOption) {
         if (rescaleOption === "hdfsBytesWritten"
-          && data && data.metrics && data.metrics.hdfsBytesWritten) {
+            && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
+          return colors.nodeEdgeScaled;
+        } else if (self.rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
+            && targetData.metrics.reduceOutputRecords) {
+          return colors.nodeEdgeScaled;
+        } else if (self.rescaleOption === "mapInputRecords" && sourceData && sourceData.metrics
+            && sourceData.metrics.mapInputRecords) {
+          return colors.nodeEdgeScaled;
+        } else if (self.rescaleOption === "hdfsBytesRead" && sourceData
+            && sourceData.counterGroupMap
+            && sourceData.counterGroupMap.FileSystemCounters
+            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap
+            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
           return colors.nodeEdgeScaled;
         }
         return colors.nodeEdgeDefault;
@@ -456,14 +496,23 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       var nodes = graph.nodes.concat(graph.pseudoNodes);
       var g = this.selectAllNodeGroups(nodes);
 
-      // Rescale the edges based on the option chosen.
-      var rescaleOption = "hdfsBytesWritten";
-
       // Find the current max and min for all the available hdfsBytesWritten value.
       g.each(function(node, i) {
-        if (rescaleOption === "hdfsBytesWritten" && node.data.metrics
+        if (self.rescaleOption === "hdfsBytesWritten" && node.data.metrics
             && node.data.metrics.hdfsBytesWritten) {
           setMaxMinArcValue(self, node.data.metrics.hdfsBytesWritten);
+        } else if (self.rescaleOption === "reduceOutputRecords" && node.data.metrics
+            && node.data.metrics.reduceOutputRecords) {
+          setMaxMinArcValue(self, node.data.metrics.reduceOutputRecords);
+        } else if (self.rescaleOption === "mapInputRecords" && node.data.metrics
+            && node.data.metrics.mapInputRecords) {
+          setMaxMinArcValue(self, node.data.metrics.mapInputRecords);
+        } else if (self.rescaleOption === "hdfsBytesRead" && node.data.counterGroupMap
+            && node.data.counterGroupMap.FileSystemCounters
+            && node.data.counterGroupMap.FileSystemCounters.counterInfoMap
+            && node.data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
+          setMaxMinArcValue(self,
+              node.data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value);
         }
       });
 
@@ -472,10 +521,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         d3.select(this).selectAll('path.edge').data(node.edges)
           .transition().duration(duration)
           .attr("stroke-width", function(d, i) {
-            return rescaleEdgesWidth(d.target.data, i, rescaleOption);
+            return rescaleEdgesWidth(d.target.data, d.source.data, i, self.rescaleOption);
           })
           .attr("stroke", function(d, i) {
-            return rescaleEdgesColor(d.target.data, i, rescaleOption);
+            return rescaleEdgesColor(d.target.data, d.source.data, i, self.rescaleOption);
           })
       });
     },

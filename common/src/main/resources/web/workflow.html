@@ -47,7 +47,20 @@
                 </ul>
               </li>
             </ul>
+
             <ul class="nav pull-right">
+              <li class="dropdown">
+                <a ref="#" data-toggle="dropdown" class="dropdown-toggle">
+                  Settings <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu2">
+                  <li role="presentation" class="dropdown-header">Edge Scaled By</li>
+                  <li><a href="#" class="edgeScaleOpt" id="hdfsBytesWritten">Source HDFS Bytes Written</a></li>
+                  <li><a href="#" class="edgeScaleOpt" id="reduceOutputRecords">Source Reduce Output Records</a></li>
+                  <li><a href="#" class="edgeScaleOpt" id="mapInputRecords">Destination Map Input Records</a></li>
+                  <li><a href="#" class="edgeScaleOpt" id="hdfsBytesRead">Destination HDFS Bytes Read</a></li>
+                </ul>
+              </li>
               <li><a target="_blank" href="https://github.com/twitter/ambrose">About</a></li>
             </ul>
           </div>
