@@ -307,7 +307,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           placement: 'top',
           container : 'body',
           html: 'true',
-          title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>',
+          title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>'
+            + '<button id="edgePopoverCloseBtn'  + i
+            + '" class="close" style="margin-top: -20px;">&times;</button>',
           content : function (){
               // Create the popover body section based on the node.
               var edge = this.__data__;
@@ -325,14 +327,14 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
                       && targetCounter.FileSystemCounters.counterInfoMap
                       && targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN) {
                     bodyEL += '<li><span class="popoverKey">HDFS Bytes Written:</span> '
-                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN.value
+                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN.value.commafy()
                         + '</li>';
                   }
 
                   if (targetCounter && targetCounter["org.apache.hadoop.mapred.Task$Counter"]
                       && targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap) {
                     bodyEL += '<li><span class="popoverKey">Reduce Output Records:</span> '
-                        + targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value
+                        + targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value.commafy()
                         + '</li>';
                   }
 
@@ -343,7 +345,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
                   if (sourceCounter && sourceCounter["org.apache.hadoop.mapred.Task$Counter"]
                       && sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap) {
                     bodyEL += '<li><span class="popoverKey">Map Input Records:</span> '
-                        + sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value
+                        + sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value.commafy()
                         + '</li>';
                   }
 
@@ -351,7 +353,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
                       && targetCounter.FileSystemCounters.counterInfoMap
                       && targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
                     bodyEL += '<li><span class="popoverKey">HDFS Bytes Read:</span> '
-                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value
+                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value.commafy()
                         + '</li>';
                   }
 
@@ -359,14 +361,18 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
                 }
               }
 
-              return '<div class="popoverTitle" id="counter-popover-body">'
-                  + 'Counter Information Not Available </div>';
+              return '<ul><li><span class="popoverKey">'
+                  + 'Counter Information Not Available </span></li></ul>';
           },
           trigger: 'manual'
-        }).click(function (e) {
+        }).hover(function (e) {
           $('path.edge').not(this).popover('hide');
           var popover = $("#counter-popover-title" + i);
-          $(this).popover((popover.length != 0)? 'hide' : 'show');
+          $(this).popover('show');
+
+          $("#edgePopoverCloseBtn" + i).click(function(e) {
+            $('path.edge').popover('hide');
+          });
 
           popover = $("#counter-popover-title" + i);
           if (popover && popover.parent() && popover.parent().parent()) {
