@@ -50,3 +50,6 @@ h2 { margin: 1em 0px; }
 .dropdown-header { padding-top:5px; padding-bottom:5px; padding-left : 20px; font-size:11pt; font-weight:bold; }
 
 #popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
+.greyText { color: #dddddd !important; }
+.icon-ok { padding-right: 5px; }
+

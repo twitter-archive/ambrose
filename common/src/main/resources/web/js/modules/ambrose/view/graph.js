@@ -125,9 +125,20 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         }
       };
 
+      // Grey out not selected scaling options
+      $(".edgeScaleOpt").toggleClass("greyText", true);
+      $(".edgeScaleOpt .icon-ok").remove();
+      $("#" + self.rescaleOption).toggleClass("greyText", false);
+      $("#" + self.rescaleOption).prepend('<i class="icon-ok"></i>');
+
       $(".edgeScaleOpt").each(function () {
         $(this).click(function(){
           self.rescaleOption = this.id;
+          $(".edgeScaleOpt").toggleClass("greyText", true);
+          $(".edgeScaleOpt .icon-ok").remove();
+          $("#" + self.rescaleOption).toggleClass("greyText", false);
+          $("#" + self.rescaleOption).prepend('<i class="icon-ok"></i>');
+
           self.arcValueMax = 0;
           self.arcValueMin = 0;
           self.rescaleEdges();
@@ -142,7 +153,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
       self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
-      // Ensure we resize appropriately
+      // Ensure we resize appropriately.
       $(window).resize(function() {
         // Remove the popover before resize, otherwise there will be more than 1 popover.
         $(".popover").remove();
@@ -374,8 +385,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
                 }
               }
 
-              return '<ul><li><span class="popoverKey">'
-                  + 'Counter Information Not Available </span></li></ul>';
+              return '<div style="padding-left:10px;">Counter Information Not Available.</div>';
           },
           trigger: 'manual'
         }).hover(function (e) {
@@ -498,17 +508,17 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Find the current max and min for all the available hdfsBytesWritten value.
       g.each(function(node, i) {
-        if (self.rescaleOption === "hdfsBytesWritten" && node.data.metrics
-            && node.data.metrics.hdfsBytesWritten) {
+        if (node.children.length != 0 && self.rescaleOption === "hdfsBytesWritten"
+            && node.data.metrics && node.data.metrics.hdfsBytesWritten) {
           setMaxMinArcValue(self, node.data.metrics.hdfsBytesWritten);
-        } else if (self.rescaleOption === "reduceOutputRecords" && node.data.metrics
-            && node.data.metrics.reduceOutputRecords) {
+        } else if (node.children.length != 0 && self.rescaleOption === "reduceOutputRecords"
+             && node.data.metrics && node.data.metrics.reduceOutputRecords) {
           setMaxMinArcValue(self, node.data.metrics.reduceOutputRecords);
-        } else if (self.rescaleOption === "mapInputRecords" && node.data.metrics
-            && node.data.metrics.mapInputRecords) {
+        } else if (node.parents.length != 0 && self.rescaleOption === "mapInputRecords"
+            && node.data.metrics && node.data.metrics.mapInputRecords) {
           setMaxMinArcValue(self, node.data.metrics.mapInputRecords);
-        } else if (self.rescaleOption === "hdfsBytesRead" && node.data.counterGroupMap
-            && node.data.counterGroupMap.FileSystemCounters
+        } else if (node.parents.length != 0 && self.rescaleOption === "hdfsBytesRead"
+            && node.data.counterGroupMap && node.data.counterGroupMap.FileSystemCounters
             && node.data.counterGroupMap.FileSystemCounters.counterInfoMap
             && node.data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
           setMaxMinArcValue(self,
