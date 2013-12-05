@@ -144,7 +144,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core',
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
         self.handleJobsUpdated([job]);
       });
-      workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
+      workflow.on('jobSelected jobMouseOver', function(event, job, prev, selected) {
         self.handleMouseInteraction($.grep([prev, job], function(j) { return j != null; }));
       });
     },
@@ -180,7 +180,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core',
 
       // Currently only show the "Show Script" Button if the user is running pig script.
       if (graph.runtime === "pig") {
-        $("#moreOptions").toggleClass("hidden", false);
+        $("#showScript").toggleClass("hidden", false);
       }
 
       $.each(groups, function(i, group) {

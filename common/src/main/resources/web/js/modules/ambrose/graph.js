@@ -19,7 +19,7 @@ limitations under the License.
  * graphs. Graph nodes may be created from arbitrary javascript objects, provided a suitable 'getId'
  * and 'getParentIds' functions are defined.
  */
-define(['lib/jquery', './core', './pigscript'], function($, Ambrose, PigScript) {
+define(['lib/jquery', './core'], function($, Ambrose) {
   /**
    * Creates graph nodes from data and initializes indices for node access.
    */
@@ -118,8 +118,6 @@ define(['lib/jquery', './core', './pigscript'], function($, Ambrose, PigScript) 
       this.runtime = params.runtime;
       this.getId = params.getId || function(d) { return d.id; };
       this.getParentIds = params.getParentIds || function(d) { return d.parentIds; };
-
-      if (params.runtime == "pig") { PigScript.createScriptDiv(params.script, params.jobName); }
       _initNodes.call(this);
     },
 

@@ -19,8 +19,8 @@ limitations under the License.
  * events from an Ambrose server. The Workflow acts as a controller and owner of job
  * state. Callbacks may be bound to events triggered on the Workflow to react to state changes.
  */
-define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript'], function(
-  $, URI, Ambrose, Client, Graph, PigScript
+define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
+  $, URI, Ambrose, Client, Graph
 ) {
   // Maximum number of consecutive client failures before event polling is stopped.
   var MAX_CLIENT_FAILURES = 10;
@@ -122,8 +122,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
         var jobs = self.jobs = [];
         var jobsByName = self.jobsByName = {};
         var jobsById = self.jobsById = {};
-        var script = null;
-        var jobName = null;
         var runtime = null;
 
         // initialize job indices
@@ -135,15 +133,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
           // Clean the DAG job data for correct animation dispaly.
           if (job.mapReduceJobState) { job.mapReduceJobState = null; }
           if (job.counterGroupMap) { job.counterGroupMap = null; }
-          if (job.configuration) {
-            if (runtime === "pig" && !script && job.configuration["pig.script"]) {
-              script = job.configuration["pig.script"];
-            }
-            if (runtime === "pig" && !jobName && job.configuration["mapred.job.name"]) {
-              jobName = job.configuration["mapred.job.name"];
-            }
-            job.configuration = null;
-          }
+          if (job.configuration) { job.configuration = null; }
           if (job.metrics) { job.metrics = null; }
 
           jobs.push(job);
@@ -188,8 +178,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
         var graph = self.graph = Graph({
           data: jobs,
           runtime : runtime,
-          script: script,
-          jobName: jobName,
           getId: function(d) { return d.name; },
           getParentIds: function(d) { return d.parentNames; },
         });
@@ -300,9 +288,8 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
           var id = event.id;
           var type = event.type;
           var data = event.payload;
-          if (event.payload && event.payload.job && event.payload.job.runtime == "pig") {
-            PigScript.updateScript(event);
-          }
+
+          self.trigger('jobpolled', [data]);
 
           if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
@@ -469,15 +456,8 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
       if (job != null) job.mouseover = true;
       this.current.mouseover = job;
 
-      // Handle script highlighting
-      if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
-        PigScript.highlineScript(prev, "scriptCancel", false);
-        PigScript.highlineScript(this.current.selected, "scriptClicked", false);
-        PigScript.highlineScript(job, "scriptHovered", false);
-      }
-
       //console.debug('Job mouse over:', job, prev);
-      this.trigger('jobMouseOver', [job, prev]);
+      this.trigger('jobMouseOver', [job, prev, this.current.selected]);
       return job;
     },
 
@@ -499,11 +479,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph', './pigscript']
       else if (job != null) job.selected = true;
       this.current.selected = job;
 
-      // Handle script highlighting
-      if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
-        PigScript.highlineScript(prev, "scriptCancel", false);
-        PigScript.highlineScript(job, "scriptClicked", true);
-      }
       this.trigger('jobSelected', [job, prev]);
       return job;
     },

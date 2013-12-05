@@ -18,30 +18,66 @@ limitations under the License.
  * This module defines the functions related to pig-script view. It helps to render pig script and
  * display it properly.
  */
-define(['lib/jquery'], function($) {
-  var scriptSelected = "#FFFF80"; // Yellow
-  var scriptClicked = "#FFD880";
-  var scriptClickedMark = "#AAAAAA";
-  var scriptUntouched = "#F5F5F5";
+define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
+  // ScriptView ctor
+  var ScriptView = View.ScriptView = function(workflow) {
+    return new View.ScriptView.fn.init(workflow);
+  };
 
-  return {
+   /**
+   * ProgressBar prototype.
+   */
+  ScriptView.fn = ScriptView.prototype = {
+    /**
+     * Constructor.
+     * @param workflow the Workflow instance to bind to.
+     * @param container the DOM element in which to render the view.
+     */
+    init: function(workflow) {
+      this.params = $.extend(true, {}, View.Theme, null);
+      var self = this;
+      var colors = this.params.colors;
+      self.createScriptDiv(colors);
+
+      // Update the script view if needed.
+      workflow.on('jobpolled', function(event, data) {
+        if (data && data.job && data.job.runtime == "pig") {
+          self.updateScript(data);
+        }
+      });
+
+      workflow.on('jobMouseOver', function(event, job, prev, selected) {
+        if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
+          self.highlineScript(colors, prev, "scriptCancel", false);
+          self.highlineScript(colors, selected, "scriptClicked", false);
+          self.highlineScript(colors, job, "scriptHovered", false);
+        }
+      });
+
+      workflow.on('jobSelected', function(event, job, prev) {
+        if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
+          self.highlineScript(colors, prev, "scriptCancel", false);
+          self.highlineScript(colors, job, "scriptClicked", true);
+        }
+      });
+    },
+
     /**
      * Create the div used for script view.
      */
-    createScriptDiv : function(script, jobName) {
+    createScriptDiv : function(colors) {
       var self = this;
       $('#scriptDiv').draggable({
         handle: '#scriptDivTitle'
       }).resizable({
-         handles: 'n, e, s, w, ne, se, sw, nw'
+        handles: 'n, e, s, w, ne, se, sw, nw'
       });
 
       var scriptCtn = document.getElementById('scriptContent');
       var titleEl = document.createElement('div');
       titleEl.className = "modal-header";
       titleEl.id = "scriptDivTitle";
-      if (!jobName) { jobName = "Pig Script" }
-      titleEl.innerHTML = '<span id="scriptPopoverName">' + jobName + '</span>';
+      titleEl.innerHTML = '<span id="scriptPopoverName">' + "Pig Script" + '</span>';
 
       var scriptCloseBtn = document.createElement('button');
       scriptCloseBtn.className = "close";
@@ -56,7 +92,7 @@ define(['lib/jquery'], function($) {
       scriptRefreshBtn.id = "scriptTitleBtn2";
       scriptRefreshBtn.innerHTML = "&#8635;";
       scriptRefreshBtn.onclick = function() {
-        self.clearScript();
+        self.clearScript(colors);
         if ($("#scriptDivBody").length > 0) {
           $('#scriptDivBody').scrollTop(0);
         }
@@ -67,39 +103,33 @@ define(['lib/jquery'], function($) {
       scriptCtn.appendChild(titleEl);
 
       var bodyEl = document.createElement('div');
-      if (script == null) {
-        script = "Script is not ready, please refresh the page.";
-      } else {
-        bodyEl.id = "scriptDivBody";
-        script = self.renderScript(script);
-      }
-      bodyEl.innerHTML = script;
+      bodyEl.innerHTML = "Script is not ready, please refresh the page.";
       scriptCtn.appendChild(bodyEl);
     },
 
-    updateScript : function(event) {
+    updateScript : function(data) {
       var self = this;
 
-      if ($("#scriptDivBody").length == 0 && event.payload.job && event.payload.job.configuration
-          && event.payload.job.configuration["pig.script"]) {
-          var scriptContentEl = document.getElementById("scriptContent");
-          var scriptTitleEl = document.getElementById('scriptDivTitle');
-          var scriptNameEl = document.getElementById("scriptPopoverName");
-          scriptNameEl.innerHTML = event.payload.job.configuration["mapred.job.name"];
+      if ($("#scriptDivBody").length == 0 && data.job && data.job.configuration
+          && data.job.configuration["pig.script"]) {
+        var scriptContentEl = document.getElementById("scriptContent");
+        var scriptTitleEl = document.getElementById('scriptDivTitle');
+        var scriptNameEl = document.getElementById("scriptPopoverName");
+        scriptNameEl.innerHTML = data.job.configuration["mapred.job.name"];
 
-          var scriptBodyEl = document.createElement('div');
-          scriptBodyEl.id = "scriptDivBody";
-          scriptBodyEl.innerHTML = self.renderScript(event.payload.job.configuration["pig.script"]);
+        var scriptBodyEl = document.createElement('div');
+        scriptBodyEl.id = "scriptDivBody";
+        scriptBodyEl.innerHTML = self.renderScript(data.job.configuration["pig.script"]);
 
-          scriptContentEl.innerHTML = "";
-          scriptContentEl.appendChild(scriptTitleEl);
-          scriptContentEl.appendChild(scriptBodyEl);
+        scriptContentEl.innerHTML = "";
+        scriptContentEl.appendChild(scriptTitleEl);
+        scriptContentEl.appendChild(scriptBodyEl);
       }
     },
 
     renderScript : function(script) {
       var lineCounter = 1;
-      //debugger
+
       script = '<table><tr class="jobScript" id="scriptLine' + lineCounter + '">'
           + '<td class="lineNumber">' + lineCounter + '</td>'
           + '<td class="aliasM">&nbsp;</td>'
@@ -108,7 +138,8 @@ define(['lib/jquery'], function($) {
 
       while (script.indexOf("<newLine>") != -1) {
         lineCounter++;
-        script = script.replace('<newLine>', '</td></tr><tr class="jobScript" id="scriptLine' + lineCounter + '">'
+        script = script.replace('<newLine>', '</td></tr><tr class="jobScript" id="scriptLine'
+            + lineCounter + '">'
             + '<td class="lineNumber">' + lineCounter + '</td>'
             + '<td class="aliasM">&nbsp;</td>'
             + '<td class="aliasC">&nbsp;</td>'
@@ -122,7 +153,7 @@ define(['lib/jquery'], function($) {
      * Handles the mouse interaction, and highlight the part of the script that corresponds to
      * the alias of the node hovered over.
      */
-    highlineScript : function(job, mouseAction, scrollTo) {
+    highlineScript : function(colors, job, mouseAction, scrollTo) {
       if (!job) return ; // null check
 
       if (job.configuration && job.configuration["pig.alias.location"]) {
@@ -138,15 +169,15 @@ define(['lib/jquery'], function($) {
               var lineNum = Number(lines[j].substring(1, lines[j].length - 1));
               var lineDiv = $("#scriptLine" + lineNum);
               if (mouseAction == "scriptClicked") {
-                lineDiv.css("background-color", scriptClicked);
+                lineDiv.css("background-color", colors.scriptClicked);
                 $("#scriptLine" + lineNum + " .lineNumber")
-                .css("background-color", scriptClickedMark);
+                .css("background-color", colors.scriptLineSelected);
               } else if (mouseAction == "scriptHovered") {
-                lineDiv.css("background-color", scriptSelected);
+                lineDiv.css("background-color", colors.scriptHovered);
               } else {
                 lineDiv.css("background-color", 'white');
                 $("#scriptLine" + lineNum + " .lineNumber")
-                .css("background-color", scriptUntouched);
+                .css("background-color", colors.scriptLineNum);
               }
 
               if (group === "C") {
@@ -175,7 +206,7 @@ define(['lib/jquery'], function($) {
 
         if (scrollTo && $('#scriptLine' + minLineNum).length > 0) {
           var scrollValue =
-            $('#scriptLine' + minLineNum).offset().top - $('#scriptLine1').offset().top;
+              $('#scriptLine' + minLineNum).offset().top - $('#scriptLine1').offset().top;
           $('#scriptDivBody').scrollTop(scrollValue);
         }
       }
@@ -184,12 +215,16 @@ define(['lib/jquery'], function($) {
     /**
      * Clear all the highlighting of the script.
      */
-    clearScript : function() {
+    clearScript : function(colors) {
       $(".jobScript").css("background-color", "white");
-      $(".lineNumber").css("background-color", scriptUntouched);
+      $(".lineNumber").css("background-color", colors.scriptLineNum);
       $(".aliasM").html("&nbsp;");
       $(".aliasC").html("&nbsp;");
       $(".aliasR").html("&nbsp;");
     }
   };
+
+  // bind prototype to ctor
+  ScriptView.fn.init.prototype = ScriptView.fn;
+  return ScriptView;
 });

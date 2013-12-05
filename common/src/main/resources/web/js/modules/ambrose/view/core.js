@@ -29,6 +29,12 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
   var nodeEdgeDefault = d3.rgb(170, 170, 170);
   var nodeEdgeScaled = d3.rgb(170, 170, 170).darker();
 
+  // Script View Colors
+  var scriptHovered = "#FFFF80"; // Yellow
+  var scriptClicked = "#FFD880"; // Orange
+  var scriptLineSelected = "#AAAAAA";
+  var scriptLineNum = "#F5F5F5";
+
   return Ambrose.View = {
     Theme: {
       colors: {
@@ -39,7 +45,11 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
         selected: selected,
         mouseover: mouseover,
         nodeEdgeDefault: nodeEdgeDefault,
-        nodeEdgeScaled: nodeEdgeScaled
+        nodeEdgeScaled: nodeEdgeScaled,
+        scriptHovered : scriptHovered,
+        scriptClicked : scriptClicked,
+        scriptLineSelected : scriptLineSelected,
+        scriptLineNum : scriptLineNum
       },
       palettes: {
         queued: colorbrewer.Greys,
