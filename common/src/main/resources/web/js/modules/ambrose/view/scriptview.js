@@ -155,6 +155,7 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
      */
     highlineScript : function(colors, job, mouseAction, scrollTo) {
       if (!job) return ; // null check
+      var self = this;
 
       if (job.configuration && job.configuration["pig.alias.location"]) {
         // Aliases are in order of M:...C:... R:...
@@ -175,29 +176,14 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
               } else if (mouseAction == "scriptHovered") {
                 lineDiv.css("background-color", colors.scriptHovered);
               } else {
+                // On Cancel, unhighlight the lines.
                 lineDiv.css("background-color", 'white');
                 $("#scriptLine" + lineNum + " .lineNumber")
                 .css("background-color", colors.scriptLineNum);
               }
 
-              if (group === "C") {
-                if (mouseAction == "scriptClicked") {
-                  $("#scriptLine" + lineNum + " .aliasC").html("C");
-                } else if (mouseAction == "scriptCancel") {
-                  $("#scriptLine" + lineNum + " .aliasC").html("&nbsp;");
-                }
-              } else if (group === "M") {
-                if (mouseAction == "scriptClicked") {
-                  $("#scriptLine" + lineNum + " .aliasM").html("M");
-                } else if (mouseAction == "scriptCancel") {
-                  $("#scriptLine" + lineNum + " .aliasM").html("&nbsp;");
-                }
-              } else if (group === "R") {
-                if (mouseAction == "scriptClicked") {
-                  $("#scriptLine" + lineNum + " .aliasR").html("R");
-                } else if (mouseAction == "scriptCancel") {
-                  $("#scriptLine" + lineNum + " .aliasR").html("&nbsp;");
-                }
+              if (group === "C" || group === "M"  || group === "R") {
+                self.setAliasType(group, mouseAction, lineNum);
               }
               if (lineNum < minLineNum) { minLineNum = lineNum; }
             }
@@ -205,10 +191,21 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
         }
 
         if (scrollTo && $('#scriptLine' + minLineNum).length > 0) {
-          var scrollValue =
-              $('#scriptLine' + minLineNum).offset().top - $('#scriptLine1').offset().top;
+          var scrollValue = $('#scriptLine' + minLineNum).offset().top
+              - $('#scriptLine1').offset().top;
           $('#scriptDivBody').scrollTop(scrollValue);
         }
+      }
+    },
+
+    /**
+     * Toggle the alias type on/off for a line based on the mouse action.
+     */
+    setAliasType : function(aliasType, mouseAction, lineNum) {
+      if (mouseAction == "scriptClicked") {
+        $("#scriptLine" + lineNum + " .alias" + aliasType).html(aliasType);
+      } else if (mouseAction == "scriptCancel") {
+        $("#scriptLine" + lineNum + " .alias" + aliasType).html("&nbsp;");
       }
     },
 
@@ -224,7 +221,7 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
     }
   };
 
-  // bind prototype to ctor
+  // Bind prototype to ctor
   ScriptView.fn.init.prototype = ScriptView.fn;
   return ScriptView;
 });
