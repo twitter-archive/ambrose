@@ -21,7 +21,6 @@
 package impatient;
 
 import java.util.Properties;
-
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.hadoop.HadoopFlowConnector;

@@ -6,7 +6,7 @@
   <parent>
     <groupId>com.twitter.ambrose</groupId>
     <artifactId>ambrose</artifactId>
-    <version>0.2.8</version>
+    <version>0.2.9-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -17,9 +17,6 @@
     <repository>
       <id>conjars.org</id>
       <url>http://conjars.org/repo</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
     </repository>
   </repositories>
 
@@ -77,7 +74,6 @@
       <groupId>cascading</groupId>
       <artifactId>cascading-platform</artifactId>
       <version>2.5.0-wip-77</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -93,9 +89,9 @@
               <goal>single</goal>
             </goals>
             <configuration>
-                <descriptorRefs>
-                  <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
+              <descriptors>
+                <descriptor>src/main/assembly/bin.xml</descriptor>
+              </descriptors>
             </configuration>
           </execution>
         </executions>
