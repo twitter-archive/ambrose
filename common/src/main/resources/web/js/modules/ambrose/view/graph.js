@@ -328,6 +328,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       $("path.pseudoEdge").each(function (i, edge) {
         $(this).popover({
+          placement: "top",
           container : 'body',
           html: 'true',
           title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>',
@@ -400,14 +401,12 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             popover = popover.parent().parent();
           }
 
-          popover.toggleClass("right", false);
           var top = edgeAreaTop + (targetHeight/2) - popover.height();
           // -50 px to count the height of the nab bar.
           if (e.target.getBoundingClientRect().top + (targetHeight/2) -50 < popover.height()) {
+            popover.toggleClass("top", false);
             popover.toggleClass("bottom", true);
             top = edgeAreaTop + (targetHeight/2);
-          } else {
-            popover.toggleClass("top", true);
           }
 
           popover.css({
