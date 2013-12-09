@@ -455,12 +455,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Reset to update the width of the previous edges.
       this.rescaleEdges();
-      this.createPseudoEdges();
-    },
-
-    createPseudoEdges : function () {
-
-      //alert("hi");
     },
 
     rescaleEdges : function() {
@@ -603,17 +597,21 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // create out-bound edges from each node
       g.each(function(node, i) {
+        function calcD(edge, i) {
+          var p0 = edge.source,
+              p3 = edge.target,
+              m = (p0.x + p3.x) / 2,
+              p = [p0, {x: m, y: p0.y}, {x: m, y: p3.y}, p3],
+              p = p.map(projection);
+          return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
+        };
+
         d3.select(this).selectAll('path.edge').data(node.edges).enter()
           .append('svg:path').attr('class', 'edge')
           .attr("stroke-width", "1px")
           .attr("stroke", colors.nodeEdgeDefault)
           .attr('d', function(edge, i) {
-            var p0 = edge.source,
-            p3 = edge.target,
-            m = (p0.x + p3.x) / 2,
-            p = [p0, {x: m, y: p0.y}, {x: m, y: p3.y}, p3],
-            p = p.map(projection);
-            return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
+            return calcD(edge, i);
           });
 
         d3.select(this).selectAll('path.pseudoEdge').data(node.edges).enter()
@@ -621,12 +619,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           .attr("stroke-width", self.edgeMaxWidth)
           .attr("stroke", "transparent")
           .attr('d', function(edge, i) {
-            var p0 = edge.source,
-            p3 = edge.target,
-            m = (p0.x + p3.x) / 2,
-            p = [p0, {x: m, y: p0.y}, {x: m, y: p3.y}, p3],
-            p = p.map(projection);
-            return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
+            return calcD(edge, i);
           });
       });
 
