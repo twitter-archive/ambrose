@@ -32,7 +32,7 @@ h2 { margin: 1em 0px; }
 .ambrose-view-chord {}
 
 /* Graph view */
-.ambrose-view-graph path.edge { fill: none; }
+.ambrose-view-graph path.edge, .ambrose-view-graph path.pseudoEdge { fill: none; }
 .ambrose-view-graph path.progress {}
 .ambrose-view-graph path.map { fill: #0e90d2; }
 .ambrose-view-graph path.reduce { fill: #FF7800; }
@@ -50,6 +50,6 @@ h2 { margin: 1em 0px; }
 .dropdown-header { padding-top:5px; padding-bottom:5px; padding-left : 20px; font-size:11pt; font-weight:bold; }
 
 #popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
-.greyText { color: #dddddd !important; }
+.greyText { color: #cccccc !important; }
 .icon-ok { padding-right: 5px; }
 

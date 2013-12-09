@@ -326,14 +326,11 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         });
       });
 
-      $("path.edge").each(function (i, edge) {
+      $("path.pseudoEdge").each(function (i, edge) {
         $(this).popover({
-          placement: 'top',
           container : 'body',
           html: 'true',
-          title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>'
-            + '<button id="edgePopoverCloseBtn'  + i
-            + '" class="close" style="margin-top: -20px;">&times;</button>',
+          title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>',
           content : function (){
               // Create the popover body section based on the node.
               var edge = this.__data__;
@@ -388,24 +385,47 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
               return '<div style="padding-left:10px;">Counter Information Not Available.</div>';
           },
           trigger: 'manual'
-        }).hover(function (e) {
-          $('path.edge').not(this).popover('hide');
+        }).mouseover(function (e) {
+          var edge = this;
+          var edgeAreaTop = $(this).offset().top;
+          var edgeAreaLeft = $(this).offset().left;
+          var targetHeight = e.target.getBoundingClientRect().height;
+          var targetWidth = e.target.getBoundingClientRect().width;
           var popover = $("#counter-popover-title" + i);
+          $('path.pseudoEdge').not(this).popover('hide');
           $(this).popover('show');
-
-          $("#edgePopoverCloseBtn" + i).click(function(e) {
-            $('path.edge').popover('hide');
-          });
 
           popover = $("#counter-popover-title" + i);
           if (popover && popover.parent() && popover.parent().parent()) {
             popover = popover.parent().parent();
           }
 
+          popover.toggleClass("right", false);
+          var top = edgeAreaTop + (targetHeight/2) - popover.height();
+          // -50 px to count the height of the nab bar.
+          if (e.target.getBoundingClientRect().top + (targetHeight/2) -50 < popover.height()) {
+            popover.toggleClass("bottom", true);
+            top = edgeAreaTop + (targetHeight/2);
+          } else {
+            popover.toggleClass("top", true);
+          }
+
           popover.css({
-            top: e.pageY - popover.height(),
-            left: e.pageX - popover.width() / 2
+            top: top,
+            left: edgeAreaLeft + (targetWidth/2) - (popover.width()/2)
           });
+
+          $(popover).mouseleave(function(e) {
+            var newTarget = e.relatedTarget|| e.toElement;
+            if (newTarget.getAttribute("class") != "pseudoEdge") {
+              $('path.pseudoEdge').popover('hide');
+            }
+          });
+        }).mouseleave(function(e){
+          var newTarget = e.relatedTarget|| e.toElement;
+          if (!($(newTarget).hasClass("popover") || $(".popover").find(newTarget).length > 0)) {
+            $('path.pseudoEdge').popover('hide');
+          }
         });
       });
 
@@ -435,6 +455,12 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Reset to update the width of the previous edges.
       this.rescaleEdges();
+      this.createPseudoEdges();
+    },
+
+    createPseudoEdges : function () {
+
+      //alert("hi");
     },
 
     rescaleEdges : function() {
@@ -442,6 +468,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       function rescaleEdgesWidth(targetData, sourceData, i, rescaleOption) {
         if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
           return self.edgeMinWidth + "px";
+        } else if (rescaleOption === "noEdgeScaling") {
+          return "2px";
         } else if (rescaleOption === "hdfsBytesWritten"
             && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
           return calculateWidth(targetData.metrics.hdfsBytesWritten);
@@ -468,7 +496,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       }
 
       function rescaleEdgesColor(targetData, sourceData, i, rescaleOption) {
-        if (rescaleOption === "hdfsBytesWritten"
+        if (rescaleOption === "noEdgeScaling" && targetData) {
+          return colors.nodeEdgeScaled;
+        } else if (rescaleOption === "hdfsBytesWritten"
             && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
           return colors.nodeEdgeScaled;
         } else if (self.rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
@@ -535,7 +565,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           })
           .attr("stroke", function(d, i) {
             return rescaleEdgesColor(d.target.data, d.source.data, i, self.rescaleOption);
-          })
+          });
       });
     },
 
@@ -577,6 +607,19 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           .append('svg:path').attr('class', 'edge')
           .attr("stroke-width", "1px")
           .attr("stroke", colors.nodeEdgeDefault)
+          .attr('d', function(edge, i) {
+            var p0 = edge.source,
+            p3 = edge.target,
+            m = (p0.x + p3.x) / 2,
+            p = [p0, {x: m, y: p0.y}, {x: m, y: p3.y}, p3],
+            p = p.map(projection);
+            return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
+          });
+
+        d3.select(this).selectAll('path.pseudoEdge').data(node.edges).enter()
+          .append('svg:path').attr('class', 'pseudoEdge')
+          .attr("stroke-width", self.edgeMaxWidth)
+          .attr("stroke", "transparent")
           .attr('d', function(edge, i) {
             var p0 = edge.source,
             p3 = edge.target,
