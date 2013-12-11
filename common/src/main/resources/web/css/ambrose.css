@@ -48,7 +48,7 @@ h2 { margin: 1em 0px; }
 .popover .popover-content { padding: 0px; padding-top : 5px; padding-right : 12px; margin: 0px; border: 0px; }
 #popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
 
-#scriptDiv {
+.scriptDiv {
   height: 300px;
   width: 500px;
   position:fixed !important;
@@ -59,19 +59,24 @@ h2 { margin: 1em 0px; }
   font-family: monospace;
 }
 
-#scriptContent { height:100%; width:100%; }
-#scriptDivTitle { font-weight:bold; padding-right: 70px; cursor: move; }
-#scriptTitleBtn1 { margin-right: -60px; margin-top: -22px; }
-#scriptTitleBtn2 { margin-right: -40px; margin-top: -22px; }
-#scriptDivBody { width:100%;  height:calc(100% - 40px); overflow: auto; }
-#scriptPopoverName { width: 100%; overflow:hidden; display: block; white-space: nowrap; text-overflow: ellipsis;}
+.scriptContent { height:100%; width:100%; }
+.scriptDivTitle { font-weight:bold; padding-right: 70px; cursor: move; }
+.scriptDivTitle .scriptTitleCloseBtn { margin-right: -60px; margin-top: -22px; }
+.scriptDivTitle .scriptTitleRefreshBtn { margin-right: -40px; margin-top: -22px; }
+.scriptDivBody { width:100%;  height:calc(100% - 40px); overflow: auto; }
+.scriptPopoverName { width: 100%; overflow:hidden; display: block; white-space: nowrap; text-overflow: ellipsis;}
 .lineNumber {
   display: inline-block;
   font-weight: bold;
   text-align: left;
-  background-color: whitesmoke;
+  background-color: #F5F5F5;
   width: 30px;
 }
+
+.scriptLine.hovered, .scriptLine.hovered.selected { background-color: #FFFF80; }
+.scriptLine.selected { background-color: #FFD880; }
+.lineNumber.selected { background-color: #AAAAAA; }
+
 .aliasM, .aliasC, .aliasR { vertical-align: super; top: -0.5em; font-size: 80%; font-weight:bold; }
 .aliasR { padding-right:5px; }
 

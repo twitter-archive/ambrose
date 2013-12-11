@@ -17,8 +17,7 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core',
-        'lib/bootstrap', 'lib/jquery-ui'],
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap'],
         function($, _, d3, Ambrose, View) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
@@ -144,7 +143,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core',
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
         self.handleJobsUpdated([job]);
       });
-      workflow.on('jobSelected jobMouseOver', function(event, job, prev, selected) {
+      workflow.on('jobSelected jobMouseOver', function(event, job, prev, hoveredJob, selectedJob) {
         self.handleMouseInteraction($.grep([prev, job], function(j) { return j != null; }));
       });
     },
@@ -177,11 +176,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core',
       var groupCount = groups.length;
       var groupDelta = 1 / groupCount;
       var groupOffset = groupDelta / 2;
-
-      // Currently only show the "Show Script" Button if the user is running pig script.
-      if (graph.runtime === "pig") {
-        $("#showScript").toggleClass("hidden", false);
-      }
 
       $.each(groups, function(i, group) {
         var x = i * groupDelta + groupOffset;

@@ -46,7 +46,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
         self.updateTableRows([job], 350);
       });
-      workflow.on('jobSelected jobMouseOver', function(event, job, prev, selected) {
+      workflow.on('jobSelected jobMouseOver', function(event, job, prev, hoveredJob, selectedJob) {
         var jobs = [];
         if (prev) jobs.push(prev);
         if (job) jobs.push(job);

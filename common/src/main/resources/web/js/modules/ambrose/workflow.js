@@ -122,13 +122,11 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         var jobs = self.jobs = [];
         var jobsByName = self.jobsByName = {};
         var jobsById = self.jobsById = {};
-        var runtime = null;
 
         // initialize job indices
         $.each(data, function(i, node) {
           // retrieve job from node
           var job = node.job;
-          runtime =  job.runtime;
 
           // Clean the DAG job data for correct animation dispaly.
           if (job.mapReduceJobState) { job.mapReduceJobState = null; }
@@ -177,7 +175,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         // build job graph and sort
         var graph = self.graph = Graph({
           data: jobs,
-          runtime : runtime,
           getId: function(d) { return d.name; },
           getParentIds: function(d) { return d.parentNames; },
         });
@@ -289,7 +286,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           var type = event.type;
           var data = event.payload;
 
-          self.trigger('jobpolled', [data]);
+          self.trigger('jobPolled', [data]);
 
           if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
@@ -457,7 +454,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       this.current.mouseover = job;
 
       //console.debug('Job mouse over:', job, prev);
-      this.trigger('jobMouseOver', [job, prev, this.current.selected]);
+      this.trigger('jobMouseOver', [job, prev, this.current.mouseover, this.current.selected]);
       return job;
     },
 
@@ -479,7 +476,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       else if (job != null) job.selected = true;
       this.current.selected = job;
 
-      this.trigger('jobSelected', [job, prev]);
+      this.trigger('jobSelected', [job, prev, this.current.mouseover, this.current.selected]);
       return job;
     },
 

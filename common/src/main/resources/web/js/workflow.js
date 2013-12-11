@@ -14,19 +14,12 @@ require([
     var progressBar = Ambrose.View.ProgressBar(workflow, $('#ambrose-view-progress-bar'));
     var graph = Ambrose.View.Graph(workflow, $('#ambrose-view-graph'));
     var table = Ambrose.View.Table(workflow, $('#ambrose-view-table'));
-    var scriptview = Ambrose.View.ScriptView(workflow);
+    var script = Ambrose.View.Script(workflow);
 
     // install workflow actions
     var workflowDropdown = $('#workflow-dropdown');
     var playbackAction = $('<a href="#">')
       .appendTo($('<li>').appendTo(workflowDropdown));
-
-    var showScriptAction = $('#showScript');
-    showScriptAction.toggleClass("hidden", true);
-    showScriptAction.text('Show Script');
-    showScriptAction.click(function(event) {
-      $("#scriptDiv").toggleClass('hidden', false);
-    });
 
     // load jobs and poll for events
     if (params.replay) {

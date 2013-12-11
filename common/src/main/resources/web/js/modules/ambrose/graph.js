@@ -32,7 +32,6 @@ define(['lib/jquery', './core'], function($, Ambrose) {
       self.addNode({
         id: self.getId(d),
         data: d,
-        runtime: self.runtime
       });
     });
 
@@ -115,7 +114,6 @@ define(['lib/jquery', './core'], function($, Ambrose) {
      */
     init: function(params) {
       this.data = params.data;
-      this.runtime = params.runtime;
       this.getId = params.getId || function(d) { return d.id; };
       this.getParentIds = params.getParentIds || function(d) { return d.parentIds; };
       _initNodes.call(this);
