@@ -128,12 +128,14 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
       // Ensure we resize appropriately
-      $(window).resize(function() {
+      $(window).resize(function(e) {
         // Remove the popover before resize, otherwise there will be more than 1 popover.
-        $(".popover").remove();
-        self.resetView();
-        self.handleJobsLoaded();
-        self.rescaleEdges();
+        if (!(e.target && e.target.classList.contains("ambrose-view-script"))) {
+          $(".popover").remove();
+          self.resetView();
+          self.handleJobsLoaded();
+          self.rescaleEdges();
+        }
       });
 
       // bind event workflow handlers
@@ -143,7 +145,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
         self.handleJobsUpdated([job]);
       });
-      workflow.on('jobSelected jobMouseOver', function(event, job, prev, hoveredJob, selectedJob) {
+      workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
         self.handleMouseInteraction($.grep([prev, job], function(j) { return j != null; }));
       });
     },

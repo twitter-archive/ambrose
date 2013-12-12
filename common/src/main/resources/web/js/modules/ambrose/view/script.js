@@ -36,39 +36,29 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
       var self = this;
       self.createScriptDiv();
 
-      // Create script button and hide it by default.
-      var showScriptAction = $('#showScript');
-      showScriptAction.toggleClass("hidden", true);
-      showScriptAction.text('Show Script');
-      showScriptAction.click(function(event) {
-        $(".scriptDiv").toggleClass('hidden', false);
-      });
-
       // Update the script view if needed.
       workflow.on('jobPolled', function(event, data) {
         if (data && data.job && data.job.runtime == "pig") {
           // Unhide Script Button
-          showScriptAction.toggleClass("hidden", false);
+          self.showScriptAction.toggleClass("hidden", false);
           self.updateScript(data);
         }
       });
 
       // Handle mouse interaction.
-      workflow.on('jobMouseOver', function(event, job, prev, hoveredJob, selectedJob) {
-        self.clearScript();
-        if ((hoveredJob && hoveredJob.runtime == "pig")
-            || (selectedJob && selectedJob.runtime == "pig")) {
-          self.highlightScript(hoveredJob, 'mouseOver', false);
-          self.highlightScript(selectedJob, 'mouseClick', false);
+      workflow.on('jobMouseOver', function(event, job, prev) {
+        self.unhighlightScript();
+        if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
+          self.highlightScript(job, 'mouseOver', false);
+          self.highlightScript(workflow.current.selected, 'mouseClick', false);
         }
       });
 
-      workflow.on('jobSelected', function(event, job, prev, hoveredJob, selectedJob) {
-        self.clearScript();
-        if ((hoveredJob && hoveredJob.runtime == "pig")
-            || (selectedJob && selectedJob.runtime == "pig")) {
-          self.highlightScript(hoveredJob, 'mouseOver', false);
-          self.highlightScript(selectedJob, 'mouseClick', true);
+      workflow.on('jobSelected', function(event, job, prev) {
+        self.unhighlightScript();
+        if ((job && job.runtime == "pig") || (prev && prev.runtime == "pig")) {
+          self.highlightScript(workflow.current.mouseover, 'mouseOver', false);
+          self.highlightScript(job, 'mouseClick', true);
         }
       });
     },
@@ -78,8 +68,20 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
      */
     createScriptDiv : function() {
       var self = this;
+
       self.scriptDiv = $('<div />').appendTo('body');
-      self.scriptDiv.addClass("modal hidden scriptDiv");
+      self.scriptDiv.addClass("modal hidden ambrose-view-script");
+
+      // Create Show Script button on the page.
+      if (!self.showScriptAction) {
+        self.showScriptAction = $("<a />").appendTo($('<li />').appendTo($('.nav.leftList')));
+        self.showScriptAction.toggleClass("hidden", true);
+        self.showScriptAction.text('Show Script');
+        self.showScriptAction.click(function(event) {
+          self.scriptDiv.toggleClass('hidden', false);
+        });
+      }
+
       var $scriptContent = $('<div />').appendTo(self.scriptDiv);
       $scriptContent.addClass('scriptContent');
 
@@ -91,28 +93,28 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
 
       var $titleEl = $('<div />').appendTo($scriptContent);
       $titleEl.addClass('modal-header scriptDivTitle');
-      $titleEl.html('<span class="scriptPopoverName">' + "Pig Script" + '</span>');
+      self.scriptNameEl = $('<span />').appendTo($titleEl).addClass('scriptName');
 
       var $scriptCloseBtn = $('<button />').appendTo($titleEl);
       $scriptCloseBtn.addClass('close scriptTitleCloseBtn');
       $scriptCloseBtn.html('&times;');
       $scriptCloseBtn.click(function() {
-        $(".scriptDiv").toggleClass('hidden', true);
+        self.scriptDiv.toggleClass('hidden', true);
       });
 
       var $scriptRefreshBtn = $('<button />').appendTo($titleEl);
       $scriptRefreshBtn.addClass('close scriptTitleRefreshBtn');
       $scriptRefreshBtn.html('&#8635;');
       $scriptRefreshBtn.click(function() {
-        self.clearScript();
+        self.unhighlightScript();
         if (self.scriptDiv && self.scriptDiv.find('.scriptLoaded').length > 0) {
-          self.scriptDiv.find('.scriptDivBody').eq(0).scrollTop(0);
+          self.scriptBodyEl.scrollTop(0);
         }
       });
 
-      var $bodyEl = $('<div />').appendTo($scriptContent);
-      $bodyEl.addClass('scriptDivBody');
-      $bodyEl.html("Script is not ready, please refresh the page.");
+      self.scriptBodyEl = $('<div />').appendTo($scriptContent);
+      self.scriptBodyEl.addClass('scriptDivBody');
+      self.scriptBodyEl.html("Script is not ready, please refresh the page.");
     },
 
     /**
@@ -124,13 +126,11 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
           && data.job && data.job.configuration
           && data.job.configuration["pig.script"]) {
         // Update Script Title.
-        var $scriptNameEl = self.scriptDiv.find('.scriptPopoverName').eq(0);
-        $scriptNameEl.html(data.job.configuration["mapred.job.name"]);
+        self.scriptNameEl.html(data.job.configuration["mapred.job.name"]);
 
         // Update the script body section with the actual script.
-        var $scriptBodyEl = self.scriptDiv.find('.scriptDivBody').eq(0);
-        $scriptBodyEl.addClass("scriptLoaded");
-        $scriptBodyEl.html(self.renderScript(data.job.configuration["pig.script"]));
+        self.scriptBodyEl.addClass("scriptLoaded");
+        self.scriptBodyEl.html(self.renderScript(data.job.configuration["pig.script"]));
       }
     },
 
@@ -139,6 +139,7 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
      */
     renderScript : function(script) {
       var lineCounter = 1;
+      script = script.b64_to_utf8();
 
       script = '<table><tr class="scriptLine">'
           + '<td class="lineNumber">' + lineCounter + '</td>'
@@ -146,9 +147,9 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
           + '<td class="aliasC">&nbsp;</td>'
           + '<td class="aliasR">&nbsp;</td><td>' + script;
 
-      while (script.indexOf("<newLine>") != -1) {
+      while (script.indexOf("\n") != -1) {
         lineCounter++;
-        script = script.replace('<newLine>', '</td></tr><tr class="scriptLine">'
+        script = script.replace('\n', '</td></tr><tr class="scriptLine">'
             + '<td class="lineNumber">' + lineCounter + '</td>'
             + '<td class="aliasM">&nbsp;</td>'
             + '<td class="aliasC">&nbsp;</td>'
@@ -172,7 +173,8 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
       if (job.configuration && job.configuration["pig.alias.location"]) {
         // Aliases are in order of M:...C:... R:...
         var aliases = job.configuration["pig.alias.location"].split(/(?=[A-Z]:)/);
-        var minLineNum = 10000; // Should be a large enough initial value.
+        // Initialize the minLineNum to max int.
+        var minLineNum = Number.MAX_VALUE;
 
         for (var i = 0; i < aliases.length; i++) {
           var group = aliases[i].substring(0, 1);
@@ -181,7 +183,7 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
             for (var j = 0; j < lines.length; j++) {
               var lineNum = Number(lines[j].substring(1, lines[j].length - 1));
 
-              var $selectedLine = self.scriptDiv.find('.scriptLine').eq(lineNum - 1);
+              var $selectedLine = self.scriptBodyEl.find('.scriptLine').eq(lineNum - 1);
               // If the line doesn't exist in the script (script not long enough to show this line).
               if (!$selectedLine) { return; }
 
@@ -196,15 +198,15 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
                 }
               }
 
-              if (lineNum < minLineNum) { minLineNum = lineNum; }
+              if (lineNum < minLineNum && lineNum > 0) { minLineNum = lineNum; }
             }
           }
         }
 
-        if (scrollTo && self.scriptDiv.find(".scriptLine").eq(minLineNum - 1).length > 0) {
-          var scrollValue = self.scriptDiv.find(".scriptLine").eq(minLineNum - 1).offset().top
-              - self.scriptDiv.find(".scriptLine").eq(0).offset().top;
-          $('.scriptDivBody').scrollTop(scrollValue);
+        if (scrollTo && self.scriptBodyEl.find(".scriptLine").eq(minLineNum - 1).length > 0) {
+          var scrollValue = self.scriptBodyEl.find(".scriptLine").eq(minLineNum - 1).offset().top
+              - self.scriptBodyEl.find(  ".scriptLine").eq(0).offset().top;
+          self.scriptBodyEl.scrollTop(scrollValue);
         }
       }
     },
@@ -216,25 +218,25 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
       var self = this;
       if (self.scriptDiv) {
         if (job.selected) {
-          self.scriptDiv.find(".alias" + aliasType).eq(lineNum - 1).html(aliasType);
+          self.scriptBodyEl.find(".alias" + aliasType).eq(lineNum - 1).html(aliasType);
         } else if (!job.mouseover) {
-          self.scriptDiv.find(".alias" + aliasType).eq(lineNum - 1).html("&nbsp;");
+          self.scriptBodyEl.find(".alias" + aliasType).eq(lineNum - 1).html("&nbsp;");
         }
       }
     },
 
     /**
-     * Clear all the highlighting of the script.
+     * Clear all the highlighting of the script by removing the classes and reset alias to a space.
      */
-    clearScript : function() {
+    unhighlightScript : function() {
       var self = this;
       if (self.scriptDiv) {
-        self.scriptDiv.find('.scriptLine').toggleClass("selected", false);
-        self.scriptDiv.find('.scriptLine').toggleClass("hovered", false);
-        self.scriptDiv.find('.lineNumber').toggleClass("selected", false);
-        self.scriptDiv.find(".aliasM").html("&nbsp;");
-        self.scriptDiv.find(".aliasC").html("&nbsp;");
-        self.scriptDiv.find(".aliasR").html("&nbsp;");
+        self.scriptBodyEl.find('.scriptLine').toggleClass("selected", false);
+        self.scriptBodyEl.find('.scriptLine').toggleClass("hovered", false);
+        self.scriptBodyEl.find('.lineNumber').toggleClass("selected", false);
+        self.scriptBodyEl.find(".aliasM").html("&nbsp;");
+        self.scriptBodyEl.find(".aliasC").html("&nbsp;");
+        self.scriptBodyEl.find(".aliasR").html("&nbsp;");
       }
     }
   };

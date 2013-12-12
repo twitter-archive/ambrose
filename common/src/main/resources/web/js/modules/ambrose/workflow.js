@@ -454,7 +454,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       this.current.mouseover = job;
 
       //console.debug('Job mouse over:', job, prev);
-      this.trigger('jobMouseOver', [job, prev, this.current.mouseover, this.current.selected]);
+      this.trigger('jobMouseOver', [job, prev]);
       return job;
     },
 
@@ -476,7 +476,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       else if (job != null) job.selected = true;
       this.current.selected = job;
 
-      this.trigger('jobSelected', [job, prev, this.current.mouseover, this.current.selected]);
+      this.trigger('jobSelected', [job, prev]);
       return job;
     },
 

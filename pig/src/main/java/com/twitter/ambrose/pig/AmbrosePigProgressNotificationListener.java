@@ -356,13 +356,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       conf.addResource(inputStream);
 
       for (Map.Entry<String, String> entry : conf) {
-        if (entry.getKey().equals("pig.script")) {
-          // It seems that javascript side is not reading \n character properly, replace it with
-          // <newLine> and then send over the string.
-          jobConfProperties.setProperty(entry.getKey(),
-              StringUtils.newStringUtf8(Base64.decodeBase64(entry.getValue())).replaceAll(
-                  "\n", "<newLine>"));
-        } else if (entry.getKey().equals("pig.mapPlan")
+        if (entry.getKey().equals("pig.mapPlan")
             || entry.getKey().equals("pig.reducePlan")) {
           jobConfProperties.setProperty(entry.getKey(),
               ObjectSerializer.deserialize(entry.getValue()).toString());
