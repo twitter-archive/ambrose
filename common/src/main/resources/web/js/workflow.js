@@ -11,9 +11,15 @@ require([
     // initialize workflow and views
     console.info('Creating default workflow');
     var workflow = Ambrose.Workflow();
+    var $graphContainer = $('#ambrose-view-graph');
+    // Rescale the edges based on the option chosen, default option.
+    workflow.rescaleOption = "hdfsBytesWritten";
+
     var progressBar = Ambrose.View.ProgressBar(workflow, $('#ambrose-view-progress-bar'));
-    var graph = Ambrose.View.Graph(workflow, $('#ambrose-view-graph'));
+    var graph = Ambrose.View.Graph(workflow, $graphContainer);
     var table = Ambrose.View.Table(workflow, $('#ambrose-view-table'));
+    var nodePopover = Ambrose.View.NodePopover(workflow, $graphContainer);
+    var edgePopover = Ambrose.View.EdgePopover(workflow, $graphContainer, graph);
 
     // install workflow actions
     var workflowDropdown = $('#workflow-dropdown');

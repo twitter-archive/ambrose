@@ -17,8 +17,8 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/bootstrap'], function(
-  $, _, d3, Ambrose, View
+define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-data', 'lib/bootstrap'], function(
+  $, _, d3, Ambrose, View, JobData
 ) {
 
   // utility functions
@@ -80,10 +80,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       self.arcValueMax = 0;
       self.arcValueMin = 0;
 
-      // Rescale the edges based on the option chosen, default option.
-      self.rescaleOption = "hdfsBytesWritten";
-
       self.workflow = workflow;
+
       self.container = container = $(container);
       self.params = $.extend(true, {
         dimensions: {
@@ -124,26 +122,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
             .startAngle(0).endAngle(function(a) { return a; })
         }
       };
-
-      // Grey out not selected scaling options
-      $(".edgeScaleOpt").toggleClass("greyText", true);
-      $(".edgeScaleOpt .icon-ok").remove();
-      $("#" + self.rescaleOption).toggleClass("greyText", false);
-      $("#" + self.rescaleOption).prepend('<i class="icon-ok"></i>');
-
-      $(".edgeScaleOpt").each(function () {
-        $(this).click(function(){
-          self.rescaleOption = this.id;
-          $(".edgeScaleOpt").toggleClass("greyText", true);
-          $(".edgeScaleOpt .icon-ok").remove();
-          $("#" + self.rescaleOption).toggleClass("greyText", false);
-          $("#" + self.rescaleOption).prepend('<i class="icon-ok"></i>');
-
-          self.arcValueMax = 0;
-          self.arcValueMin = 0;
-          self.rescaleEdges();
-        });
-      });
 
       // create scale for magnitude
       var magDomain = [10, 100, 1000, 10000];
@@ -247,6 +225,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         });
       });
 
+      // this.workflow.scaleOption = 'hdfsBytesWritten2';
       var graph = this.workflow.graph;
       var nodes = graph.nodes.concat(graph.pseudoNodes).sort(function(a, b) {
         return b.topologicalGroupIndex - a.topologicalGroupIndex;
@@ -255,183 +234,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       this.removeNodeGroups(g);
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
-
-      // Display Popover.
-      $(".node circle.anchor").each(function (i, node) {
-        $(this).popover({
-          placement : function (context, source) {
-            // Place the popover on the left if there is enough space.
-            var position = $(source).position();
-
-            if (position.left > 300) { return "left"; }
-            return "right";
-          },
-          title : function (){
-            // Create the popover title section based on the node.
-            var titleEL = '<span class="popoverTitle">Job id undefined</span>';
-            var node = this;
-
-            if (node.__data__.data.mapReduceJobState) {
-              var mrJobState = node.__data__.data.mapReduceJobState;
-              titleEL = '<a target="_blank" href="'
-                + mrJobState.trackingURL + '"> ' + mrJobState.jobId + ' </a>';
-            }
-            return titleEL;
-          },
-          content: function (){
-            // Create the popover body section based on the node.
-            var node = this;
-            if (!node.__data__.data) { return '<span class="popoverTitle">Job details unavailable</span>'; }
-            var data = node.__data__.data;
-            var bodyEL = '<div id="popoverBody"><ul>';
-
-            if (data.status) {
-              bodyEL += '<li><span class="popoverKey">Status:</span> ' + data.status + '</li>';
-            }
-
-            if (data.aliases) {
-              bodyEL += '<li><span class="popoverKey">Aliases:</span> ' + data.aliases.join(', ')
-                + '</li>';
-            }
-
-            if (data.features) {
-              bodyEL += '<li><span class="popoverKey">Features:</span> ' + data.features.join(', ')
-                + '</li>';
-            }
-
-            if (data.mapReduceJobState) {
-              var mrJobState = data.mapReduceJobState;
-              if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
-                var startTime = mrJobState.jobStartTime;
-                var lastUpdateTime = mrJobState.jobLastUpdateTime;
-                bodyEL += '<li><span class="popoverKey">Duration:</span> '
-                  + Ambrose.calculateElapsedTime(startTime, lastUpdateTime) + '</li>';
-              }
-
-              if (mrJobState.totalMappers) {
-                bodyEL += '<li><span class="popoverKey">Mappers:</span> '
-                  + mrJobState.totalMappers + '</li>';
-              }
-
-              if (mrJobState.totalReducers) {
-                bodyEL += '<li><span class="popoverKey">Reducers:</span> '
-                  + mrJobState.totalReducers + '</li>';
-              }
-            }
-
-            return bodyEL + '</ul></div>';
-          },
-          container : 'body',
-          html : 'true'
-        });
-      });
-
-      $("path.pseudoEdge").each(function (i, edge) {
-        $(this).popover({
-          placement: "top",
-          container : 'body',
-          html: 'true',
-          title: '<div class="popoverTitle" id="counter-popover-title' + i + '"> Counters </div>',
-          content : function (){
-              // Create the popover body section based on the node.
-              var edge = this.__data__;
-              if (edge) {
-                var bodyEL = '<div id="popoverBody"><ul>';
-                var targetCounter = edge.target.data ? edge.target.data.counterGroupMap : null;
-                var sourceCounter = edge.source.data ? edge.source.data.counterGroupMap : null;
-
-                if (targetCounter || sourceCounter) {
-                  if (targetCounter) {
-                    bodyEL += '<li><span class="popoverSectionKey">Source Node:</span> ';
-                  }
-
-                  if (targetCounter && targetCounter.FileSystemCounters
-                      && targetCounter.FileSystemCounters.counterInfoMap
-                      && targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN) {
-                    bodyEL += '<li><span class="popoverKey">HDFS Bytes Written:</span> '
-                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN.value.commafy()
-                        + '</li>';
-                  }
-
-                  if (targetCounter && targetCounter["org.apache.hadoop.mapred.Task$Counter"]
-                      && targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap) {
-                    bodyEL += '<li><span class="popoverKey">Reduce Output Records:</span> '
-                        + targetCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value.commafy()
-                        + '</li>';
-                  }
-
-                  if (sourceCounter) {
-                    bodyEL += '<li><span class="popoverSectionKey">Destination Node:</span> ';
-                  }
-
-                  if (sourceCounter && sourceCounter["org.apache.hadoop.mapred.Task$Counter"]
-                      && sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap) {
-                    bodyEL += '<li><span class="popoverKey">Map Input Records:</span> '
-                        + sourceCounter["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value.commafy()
-                        + '</li>';
-                  }
-
-                  if (sourceCounter && targetCounter.FileSystemCounters
-                      && targetCounter.FileSystemCounters.counterInfoMap
-                      && targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
-                    bodyEL += '<li><span class="popoverKey">HDFS Bytes Read:</span> '
-                        + targetCounter.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value.commafy()
-                        + '</li>';
-                  }
-
-                  return bodyEL + '</ul></div>';
-                }
-              }
-
-              return '<div style="padding-left:10px;">Counter Information Not Available.</div>';
-          },
-          trigger: 'manual'
-        }).mouseover(function (e) {
-          var edge = this;
-          var edgeAreaTop = $(this).offset().top;
-          var edgeAreaLeft = $(this).offset().left;
-          var targetHeight = e.target.getBoundingClientRect().height;
-          var targetWidth = e.target.getBoundingClientRect().width;
-          var popover = $("#counter-popover-title" + i);
-          $('path.pseudoEdge').not(this).popover('hide');
-          $(this).popover('show');
-
-          popover = $("#counter-popover-title" + i);
-          if (popover && popover.parent() && popover.parent().parent()) {
-            popover = popover.parent().parent();
-          }
-
-          var top = edgeAreaTop + (targetHeight/2) - popover.height();
-          // -50 px to count the height of the nab bar.
-          if (e.target.getBoundingClientRect().top + (targetHeight/2) -50 < popover.height()) {
-            popover.toggleClass("top", false);
-            popover.toggleClass("bottom", true);
-            top = edgeAreaTop + (targetHeight/2);
-          }
-
-          popover.css({
-            top: top,
-            left: edgeAreaLeft + (targetWidth/2) - (popover.width()/2)
-          });
-
-          $(popover).mouseleave(function(e) {
-            var newTarget = e.relatedTarget|| e.toElement;
-            if (newTarget.getAttribute("class") != "pseudoEdge") {
-              $('path.pseudoEdge').popover('hide');
-            }
-          });
-        }).mouseleave(function(e){
-          var newTarget = e.relatedTarget|| e.toElement;
-          if (!($(newTarget).hasClass("popover") || $(".popover").find(newTarget).length > 0)) {
-            $('path.pseudoEdge').popover('hide');
-          }
-        });
-      });
-
-      $('.node circle.anchor').click(function(e) {
-        // Hide all popover but the one just clicked.
-        $('.node circle.anchor').not(this).popover('hide');
-      });
     },
 
     handleJobsUpdated: function(jobs) {
@@ -466,13 +268,13 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         } else if (rescaleOption === "hdfsBytesWritten"
             && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
           return calculateWidth(targetData.metrics.hdfsBytesWritten);
-        } else if (self.rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
+        } else if (rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
             && targetData.metrics.reduceOutputRecords) {
           return calculateWidth(targetData.metrics.reduceOutputRecords);
-        } else if (self.rescaleOption === "mapInputRecords" && sourceData && sourceData.metrics
+        } else if (rescaleOption === "mapInputRecords" && sourceData && sourceData.metrics
             && sourceData.metrics.mapInputRecords) {
           return calculateWidth(sourceData.metrics.mapInputRecords);
-        } else if (self.rescaleOption === "hdfsBytesRead" && sourceData
+        } else if (self.workflow.rescaleOption === "hdfsBytesRead" && sourceData
             && sourceData.counterGroupMap
             && sourceData.counterGroupMap.FileSystemCounters
             && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap
@@ -492,19 +294,16 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         if (rescaleOption === "noEdgeScaling" && targetData) {
           return colors.nodeEdgeScaled;
         } else if (rescaleOption === "hdfsBytesWritten"
-            && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
+            && JobData.getHDFSWrittenFromMetrics(targetData)) {
           return colors.nodeEdgeScaled;
-        } else if (self.rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
-            && targetData.metrics.reduceOutputRecords) {
+        } else if (self.workflow.rescaleOption === "reduceOutputRecords"
+            && JobData.getReduceOutputRecordsFromMetrics(targetData)) {
           return colors.nodeEdgeScaled;
-        } else if (self.rescaleOption === "mapInputRecords" && sourceData && sourceData.metrics
-            && sourceData.metrics.mapInputRecords) {
+        } else if (self.workflow.rescaleOption === "mapInputRecords"
+            && JobData.getMapInputRecordsFromMetrics(sourceData)) {
           return colors.nodeEdgeScaled;
-        } else if (self.rescaleOption === "hdfsBytesRead" && sourceData
-            && sourceData.counterGroupMap
-            && sourceData.counterGroupMap.FileSystemCounters
-            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap
-            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
+        } else if (self.workflow.rescaleOption === "hdfsBytesRead"
+          && JobData.getHDFSReadFromCounter(sourceData)) {
           return colors.nodeEdgeScaled;
         }
         return colors.nodeEdgeDefault;
@@ -529,23 +328,21 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
       var nodes = graph.nodes.concat(graph.pseudoNodes);
       var g = this.selectAllNodeGroups(nodes);
 
-      // Find the current max and min for all the available hdfsBytesWritten value.
+      // Find the current max and min for all the available metrics value.
       g.each(function(node, i) {
-        if (node.children.length != 0 && self.rescaleOption === "hdfsBytesWritten"
-            && node.data.metrics && node.data.metrics.hdfsBytesWritten) {
-          setMaxMinArcValue(self, node.data.metrics.hdfsBytesWritten);
-        } else if (node.children.length != 0 && self.rescaleOption === "reduceOutputRecords"
-             && node.data.metrics && node.data.metrics.reduceOutputRecords) {
-          setMaxMinArcValue(self, node.data.metrics.reduceOutputRecords);
-        } else if (node.parents.length != 0 && self.rescaleOption === "mapInputRecords"
-            && node.data.metrics && node.data.metrics.mapInputRecords) {
-          setMaxMinArcValue(self, node.data.metrics.mapInputRecords);
-        } else if (node.parents.length != 0 && self.rescaleOption === "hdfsBytesRead"
-            && node.data.counterGroupMap && node.data.counterGroupMap.FileSystemCounters
-            && node.data.counterGroupMap.FileSystemCounters.counterInfoMap
-            && node.data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
-          setMaxMinArcValue(self,
-              node.data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value);
+        var data = node.data;
+        if (node.children.length != 0 && self.workflow.rescaleOption === "hdfsBytesWritten"
+            && JobData.getHDFSWrittenFromMetrics(data)) {
+          setMaxMinArcValue(self, JobData.getHDFSWrittenFromMetrics(data));
+        } else if (node.children.length != 0 && self.workflow.rescaleOption === "reduceOutputRecords"
+             && JobData.getReduceOutputRecordsFromMetrics(data)) {
+          setMaxMinArcValue(self, JobData.getReduceOutputRecordsFromMetrics(data));
+        } else if (node.parents.length != 0 && self.workflow.rescaleOption === "mapInputRecords"
+            && JobData.getMapInputRecordsFromMetrics(data)) {
+          setMaxMinArcValue(self, JobData.getMapInputRecordsFromMetrics(data));
+        } else if (node.parents.length != 0 && self.workflow.rescaleOption === "hdfsBytesRead"
+            && JobData.getHDFSReadFromCounter(data)) {
+          setMaxMinArcValue(self, JobData.getHDFSReadFromCounter(data));
         }
       });
 
@@ -554,10 +351,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
         d3.select(this).selectAll('path.edge').data(node.edges)
           .transition().duration(duration)
           .attr("stroke-width", function(d, i) {
-            return rescaleEdgesWidth(d.target.data, d.source.data, i, self.rescaleOption);
+            return rescaleEdgesWidth(d.target.data, d.source.data, i, self.workflow.rescaleOption);
           })
           .attr("stroke", function(d, i) {
-            return rescaleEdgesColor(d.target.data, d.source.data, i, self.rescaleOption);
+            return rescaleEdgesColor(d.target.data, d.source.data, i, self.workflow.rescaleOption);
           });
       });
     },
@@ -596,7 +393,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // create out-bound edges from each node
       g.each(function(node, i) {
-        function calcD(edge, i) {
+        function calcEdgeControlPoints(edge, i) {
           var p0 = edge.source,
               p3 = edge.target,
               m = (p0.x + p3.x) / 2,
@@ -610,7 +407,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           .attr("stroke-width", "1px")
           .attr("stroke", colors.nodeEdgeDefault)
           .attr('d', function(edge, i) {
-            return calcD(edge, i);
+            return calcEdgeControlPoints(edge, i);
           });
 
         d3.select(this).selectAll('path.pseudoEdge').data(node.edges).enter()
@@ -618,7 +415,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
           .attr("stroke-width", self.edgeMaxWidth)
           .attr("stroke", "transparent")
           .attr('d', function(edge, i) {
-            return calcD(edge, i);
+            return calcEdgeControlPoints(edge, i);
           });
       });
 
