@@ -188,7 +188,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         });
 
         self.trigger('jobsLoaded', [jobs, textStatus, null]);
-        self.trigger('dagCreated', [jobs, textStatus, null]);
       };
 
       // initiate request

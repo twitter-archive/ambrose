@@ -234,6 +234,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       this.removeNodeGroups(g);
       this.createNodeGroups(g);
       this.updateNodeGroups(g);
+
+      // Create popovers
+      this.workflow.trigger('dagCreated', [this.workflow.jobs]);
     },
 
     handleJobsUpdated: function(jobs) {

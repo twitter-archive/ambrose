@@ -38,7 +38,8 @@ define(['lib/jquery'], function($) {
     },
 
     getReduceOutputRecords : function(data) {
-      if (data && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"]
+      if (data && data.counterGroupMap
+          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"]
           && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap
           && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS
           && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value) {
@@ -55,7 +56,8 @@ define(['lib/jquery'], function($) {
     },
 
     getMapInputRecords : function(data) {
-      if (data && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"]
+      if (data && data.counterGroupMap
+          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"]
           && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap
           && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS
           && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value) {
@@ -79,6 +81,6 @@ define(['lib/jquery'], function($) {
         return data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value;
       }
       return null;
-    },
+    }
   };
 });
