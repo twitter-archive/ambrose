@@ -54,7 +54,13 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
             .attr('id', 'status_' + id).addClass('status'))
           .text(id)
           .click(function() {
+            // Reset the keys and status when clicked on a different status.
+            self.currentStartKey = '';
+            self.nextStartKey = '';
+            self.prevStartKeys = [];
             self.setStatus(id);
+
+            // Get the workflows
             self.loadFlows();
           });
       });
