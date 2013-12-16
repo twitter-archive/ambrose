@@ -136,13 +136,13 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
             }
 
             if (targetData.counterGroupMap || sourceData.counterGroupMap) {
-              var bodyEL = $('<div>', { 'class': 'popoverBody'});
+              var bodyEL = $('<div class="popoverBody">');
               var counterList = $('<ul>').appendTo(bodyEL);
 
               // Source Node Counters
               if (targetData) {
                 var $targetData = $('<ul>', { 'class': 'counterList'}).appendTo(counterList);
-                $('<li>', { 'class': 'counterListTitle', 'text': 'Source Node(<-):' }).appendTo($targetData);
+                $('<li>', { 'class': 'counterListTitle', 'text': 'Source Node:' }).appendTo($targetData);
 
                 if (JobData.getHDFSWrittenFromCounter(targetData)) {
                   var item = $('<li>').appendTo($targetData);
@@ -159,7 +159,7 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
 
               if (sourceData) {
                 var $sourceData = $('<ul>', { 'class': 'counterList'}).appendTo(counterList);
-                $('<li>', { 'class': 'counterListTitle', 'text': 'Destination Node(->):' }).appendTo($sourceData);
+                $('<li>', { 'class': 'counterListTitle', 'text': 'Destination Node:' }).appendTo($sourceData);
 
                 if (JobData.getMapInputRecords(sourceData)) {
                    var item = $('<li>').appendTo($sourceData);

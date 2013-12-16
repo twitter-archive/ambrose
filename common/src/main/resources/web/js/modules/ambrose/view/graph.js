@@ -20,7 +20,6 @@ limitations under the License.
 define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-data', 'lib/bootstrap'], function(
   $, _, d3, Ambrose, View, JobData
 ) {
-
   // utility functions
   function isPseudo(node) { return node.pseudo; }
   function isReal(node) { return !(node.pseudo); }
@@ -131,13 +130,16 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
       self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
-      // Ensure we resize appropriately.
-      $(window).resize(function() {
-        // Remove the popover before resize, otherwise there will be more than 1 popover.
-        $(".popover").remove();
-        self.resetView();
-        self.handleJobsLoaded();
-        self.rescaleEdges();
+      // Ensure we resize appropriately
+      $(window).resize(function(e) {
+        // Prevent the DAG from flashing when the script div is resized.
+        if (!(e.target && e.target.classList && e.target.classList.contains("ambrose-view-script"))) {
+          // Remove the popover before resize, otherwise there will be more than 1 popover.
+          $(".popover").remove();
+          self.resetView();
+          self.handleJobsLoaded();
+          self.rescaleEdges();
+        }
       });
 
       // bind event workflow handlers
@@ -180,6 +182,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       var groupCount = groups.length;
       var groupDelta = 1 / groupCount;
       var groupOffset = groupDelta / 2;
+
       $.each(groups, function(i, group) {
         var x = i * groupDelta + groupOffset;
 
@@ -531,8 +534,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       function fill(node) {
         var job = node.data;
         var status = job.status || '';
-        if (job.mouseover) return colors.mouseover;
-        if (job.selected) return colors.selected;
+
+        if (job.mouseover) { return colors.mouseover; }
+        if (job.selected) { return colors.selected; }
+
         return colors[status.toLowerCase()] || colors.pending;
       }
 

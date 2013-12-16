@@ -22,9 +22,14 @@ import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 import com.twitter.ambrose.service.StatsWriteService;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
@@ -32,6 +37,7 @@ import org.apache.hadoop.mapred.TaskReport;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
 import org.apache.pig.impl.plan.OperatorKey;
+import org.apache.pig.impl.util.ObjectSerializer;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
 import org.apache.pig.tools.pigstats.PigProgressNotificationListener;
@@ -39,7 +45,9 @@ import org.apache.pig.tools.pigstats.PigStats;
 import org.apache.pig.tools.pigstats.ScriptState;
 import org.apache.pig.tools.pigstats.PigStats.JobGraph;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +131,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
           successorNodeList.add(successorNode);
         }
       }
-
       node.setSuccessors(successorNodeList);
     }
 
@@ -272,7 +279,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    * Collects statistics from JobStats and builds a nested Map of values.
    */
   private void addCompletedJobStats(PigJob job, JobStats stats) {
-
     // put the job conf into a Properties object so we can serialize them
     Properties jobConfProperties = new Properties();
     if (stats.getInputs() != null && stats.getInputs().size() > 0 &&
@@ -289,7 +295,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     job.setJobStats(stats);
-    job.setConfiguration(jobConfProperties);
     jobs.add(job);
   }
 
@@ -314,6 +319,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     try {
       String id = pigJob.getId();
       RunningJob runningJob = jobClientLocal.getJob(id);
+      Properties jobConfProperties = getJobConfFromFile(runningJob);
+
       if (runningJob == null) {
         log.warn("Couldn't find job status for jobId=" + pigJob.getId());
         return;
@@ -328,18 +335,47 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       }
       TaskReport[] mapTaskReport = jobClientLocal.getMapTaskReports(jobID);
       TaskReport[] reduceTaskReport = jobClientLocal.getReduceTaskReports(jobID);
-      pigJob.setMapReduceJobState(new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
-
-      Properties jobConfProperties = new Properties();
-      Configuration conf = jobClientLocal.getConf();
-      for (Map.Entry<String, String> entry : conf) {
-        jobConfProperties.setProperty(entry.getKey(), entry.getValue());
+      if (jobConfProperties != null && jobConfProperties.size() > 0) {
+        pigJob.setConfiguration(jobConfProperties);
       }
-      pigJob.setConfiguration(jobConfProperties);
-
+      pigJob.setMapReduceJobState(
+          new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport));
     } catch (IOException e) {
-      log.error("Error getting job info.", e);
+      log.warn("Error occurred when retrieving job progress info. ", e);
     }
+  }
+
+  /**
+   * Get the configurations at the beginning of the job flow, it will contain information
+   * about the map/reduce plan and decoded pig script.
+   * @param runningJob
+   * @return Properties - configuration properties of the job
+   */
+  private Properties getJobConfFromFile(RunningJob runningJob) {
+    Properties jobConfProperties = new Properties();
+    try {
+      log.info("RunningJob Configuration File location: " + runningJob.getJobFile());
+      Path path = new Path(runningJob.getJobFile());
+      Configuration conf = new Configuration(false);
+      FileSystem fileSystem = FileSystem.get(new Configuration());
+      InputStream inputStream = fileSystem.open(path);
+      conf.addResource(inputStream);
+
+      for (Map.Entry<String, String> entry : conf) {
+        if (entry.getKey().equals("pig.mapPlan")
+            || entry.getKey().equals("pig.reducePlan")) {
+          jobConfProperties.setProperty(entry.getKey(),
+              ObjectSerializer.deserialize(entry.getValue()).toString());
+        } else {
+          jobConfProperties.setProperty(entry.getKey(), entry.getValue());
+        }
+      }
+    } catch (FileNotFoundException e) {
+      log.warn("Configuration file not found for old jobsflows.");
+    } catch (IOException e) {
+      log.warn("Error occurred when retrieving configuration info.", e);
+    }
+    return jobConfProperties;
   }
 
   private static String[] toArray(String string) {

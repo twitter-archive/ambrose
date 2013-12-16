@@ -54,7 +54,13 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
             .attr('id', 'status_' + id).addClass('status'))
           .text(id)
           .click(function() {
+            // Reset the keys and status when clicked on a different status.
+            self.currentStartKey = '';
+            self.nextStartKey = '';
+            self.prevStartKeys = [];
             self.setStatus(id);
+
+            // Get the workflows
             self.loadFlows();
           });
       });
@@ -63,8 +69,12 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
       $('#user-form').submit(function() {
         self.setUser($('#user-field').val()); self.loadFlows(); return false;
       });
-      $('#page-prev-link').click(function() { self.prevPage(); });
-      $('#page-next-link').click(function() { self.nextPage(); });
+      $('#page-prev-link').click(function() {
+        if (!$('#page-prev-link').hasClass("disabled")) { self.prevPage(); }
+      });
+      $('#page-next-link').click(function() {
+        if (!$('#page-next-link').hasClass("disabled")) { self.nextPage(); }
+      });
 
       // set default values
       self.setStatus('running');
@@ -185,9 +195,9 @@ define(['lib/jquery', './core', './client'], function($, Ambrose, Client) {
         $('#page-next-link').addClass('disabled');
       }
       if (self.prevStartKeys.length > 0) {
-        $('#page-next-link').removeClass('disabled');
+        $('#page-prev-link').removeClass('disabled');
       } else {
-        $('#page-next-link').addClass('disabled');
+        $('#page-prev-link').addClass('disabled');
       }
       return this;
     },

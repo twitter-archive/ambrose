@@ -20,6 +20,7 @@ require([
     var table = Ambrose.View.Table(workflow, $('#ambrose-view-table'));
     var nodePopover = Ambrose.View.NodePopover(workflow, $graphContainer);
     var edgePopover = Ambrose.View.EdgePopover(workflow, $graphContainer, graph);
+    var script = Ambrose.View.Script(workflow);
 
     // install workflow actions
     var workflowDropdown = $('#workflow-dropdown');
@@ -39,4 +40,5 @@ require([
       workflow.jumpToEnd();
     }
   });
+
 });

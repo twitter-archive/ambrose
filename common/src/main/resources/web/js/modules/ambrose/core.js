@@ -36,6 +36,10 @@ define(['lib/jquery'], function($) {
     return this.replace(separatorAlphaPattern, toUpper);
   };
 
+  String.prototype.b64_to_utf8 = function() {
+    return decodeURIComponent(escape(window.atob(this)));
+  };
+
   // find max value within array
   Array.prototype.max = function() {
     return Math.max.apply(Math, this);
