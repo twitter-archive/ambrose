@@ -112,7 +112,7 @@ define(['lib/jquery', 'lib/d3', '../core', './core'], function(
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
         self.handleJobUpdated(350);
       });
-      workflow.on('jobSelected jobMouseOver', function(event, job) {
+      workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
         self.handleJobUpdated();
       });
     },

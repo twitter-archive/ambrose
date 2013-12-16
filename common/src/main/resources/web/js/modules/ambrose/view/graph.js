@@ -129,8 +129,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // Ensure we resize appropriately
       $(window).resize(function(e) {
-        // Remove the popover before resize, otherwise there will be more than 1 popover.
+        // Prevent the DAG from flashing when the script div is resized.
         if (!(e.target && e.target.classList && e.target.classList.contains("ambrose-view-script"))) {
+          // Remove the popover before resize, otherwise there will be more than 1 popover.
           $(".popover").remove();
           self.resetView();
           self.handleJobsLoaded();

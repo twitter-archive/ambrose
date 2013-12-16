@@ -73,8 +73,8 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
       self.scriptDiv.addClass("modal hidden ambrose-view-script");
 
       // Create Show Script button on the page.
-      if (!self.showScriptAction) {
-        self.showScriptAction = $("<a />").appendTo($('<li />').appendTo($('.nav.leftList')));
+      if ($('#ambrose-navbar li.ambrose-view-script-show a').length == 0) {
+        self.showScriptAction = $("<a />").appendTo($('<li class="ambrose-view-script-show"/>').appendTo($('#ambrose-navbar ul.nav:eq(0)')));
         self.showScriptAction.toggleClass("hidden", true);
         self.showScriptAction.text('Show Script');
         self.showScriptAction.click(function(event) {
@@ -137,26 +137,26 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
     /**
      * Create a table to display the script.
      */
-    renderScript : function(script) {
+    renderScript : function(scriptEncoded) {
       var lineCounter = 1;
-      script = script.b64_to_utf8();
+      scriptEncoded = scriptEncoded.b64_to_utf8();
 
-      script = '<table><tr class="scriptLine">'
+      scriptEncoded = '<table><tr class="scriptLine">'
           + '<td class="lineNumber">' + lineCounter + '</td>'
           + '<td class="aliasM">&nbsp;</td>'
           + '<td class="aliasC">&nbsp;</td>'
-          + '<td class="aliasR">&nbsp;</td><td>' + script;
+          + '<td class="aliasR">&nbsp;</td><td>' + scriptEncoded;
 
-      while (script.indexOf("\n") != -1) {
+      while (scriptEncoded.indexOf("\n") != -1) {
         lineCounter++;
-        script = script.replace('\n', '</td></tr><tr class="scriptLine">'
+        scriptEncoded = scriptEncoded.replace('\n', '</td></tr><tr class="scriptLine">'
             + '<td class="lineNumber">' + lineCounter + '</td>'
             + '<td class="aliasM">&nbsp;</td>'
             + '<td class="aliasC">&nbsp;</td>'
             + '<td class="aliasR">&nbsp;</td><td>');
       }
 
-      return script + "</td></tr></table>";
+      return scriptEncoded + "</td></tr></table>";
     },
 
     /**
@@ -231,8 +231,7 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
     unhighlightScript : function() {
       var self = this;
       if (self.scriptDiv) {
-        self.scriptBodyEl.find('.scriptLine').toggleClass("selected", false);
-        self.scriptBodyEl.find('.scriptLine').toggleClass("hovered", false);
+        self.scriptBodyEl.find('.scriptLine').toggleClass("selected", false).toggleClass("hovered", false);
         self.scriptBodyEl.find('.lineNumber').toggleClass("selected", false);
         self.scriptBodyEl.find(".aliasM").html("&nbsp;");
         self.scriptBodyEl.find(".aliasC").html("&nbsp;");
