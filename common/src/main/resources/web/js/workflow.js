@@ -14,6 +14,7 @@ require([
     var progressBar = Ambrose.View.ProgressBar(workflow, $('#ambrose-view-progress-bar'));
     var graph = Ambrose.View.Graph(workflow, $('#ambrose-view-graph'));
     var table = Ambrose.View.Table(workflow, $('#ambrose-view-table'));
+    var script = Ambrose.View.Script(workflow);
 
     // install workflow actions
     var workflowDropdown = $('#workflow-dropdown');
@@ -33,4 +34,5 @@ require([
       workflow.jumpToEnd();
     }
   });
+
 });

@@ -10,6 +10,7 @@
     <meta name="author" content="Twitter">
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/ambrose.css" rel="stylesheet">
+    <link href="css/jquery-ui.css" rel="stylesheet">
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -22,10 +23,10 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
   </head>
-  <body>
 
+  <body>
     <!-- navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-inverse navbar-fixed-top" id="ambrose-navbar">
       <div class="navbar-inner">
         <div class="container-fluid">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -59,7 +60,6 @@
       <div class="row-fluid">
         <div class="span12" id="ambrose-view-progress-bar"></div>
       </div>
-
       <div class="row-fluid" id="diagrams">
         <div class="span12" id="ambrose-view-graph"></div>
       </div>
@@ -77,6 +77,5 @@
     <script src="js/lib/require.js"></script>
     <script src="js/require-config.js"></script>
     <script src="js/workflow.js"></script>
-
   </body>
 </html>

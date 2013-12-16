@@ -6,6 +6,7 @@ var REQUIREJS_CONFIG = {
   },
   shim: {
     'lib/jquery': { exports: 'jQuery' },
+    'lib/jquery-ui': { exports: 'jQuery' },
     'lib/underscore': { exports: '_' },
     'lib/uri': { deps: ['lib/jquery'], exports: 'URI' },
     'lib/bootstrap': { deps: ['lib/jquery'], exports: 'bootstrap' },

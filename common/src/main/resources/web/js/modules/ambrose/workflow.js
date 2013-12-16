@@ -285,6 +285,9 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           var id = event.id;
           var type = event.type;
           var data = event.payload;
+
+          self.trigger('jobPolled', [data]);
+
           if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
             return;
@@ -449,6 +452,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       if (prev != null) prev.mouseover = false;
       if (job != null) job.mouseover = true;
       this.current.mouseover = job;
+
       //console.debug('Job mouse over:', job, prev);
       this.trigger('jobMouseOver', [job, prev]);
       return job;
@@ -471,6 +475,7 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       if (job === prev) job = null;
       else if (job != null) job.selected = true;
       this.current.selected = job;
+
       this.trigger('jobSelected', [job, prev]);
       return job;
     },

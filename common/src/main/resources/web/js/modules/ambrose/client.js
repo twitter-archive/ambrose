@@ -128,7 +128,7 @@ define(['lib/jquery', 'lib/uri', './core'], function($, URI, Ambrose) {
       if (lastEventId == null) lastEventId = -1;
       return this.sendRequest(this.eventsUri, {
         workflowId: workflowId,
-        lastEventId: lastEventId,
+        lastEventId: lastEventId
       });
     },
   };

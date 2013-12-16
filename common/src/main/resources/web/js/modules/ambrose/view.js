@@ -23,6 +23,7 @@ define([
   './view/table',
   './view/chord',
   './view/graph',
+  './view/script',
 ], function(View) {
   return View;
 });
