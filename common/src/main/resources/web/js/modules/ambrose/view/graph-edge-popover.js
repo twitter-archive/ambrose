@@ -40,18 +40,17 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
       var navBar = $('.nav.pull-right');
       self.container = graphContainer;
       self.hoveredEdge = null;
-      self.navCreated = false;
 
       // Create edge popover after the dag is created.
       workflow.on('dagCreated', function(event, jobs) {
         if (jobs && jobs.length > 0 && jobs[0].runtime == 'pig') {
           // Create settings nav bar only if the job is a pig job.
           // This will change if more setting items are added.
-          if (!self.navCreated) {
-            self.navCreated = true;
+          if ($('#ambrose-navbar .settingsDropdown a').length == 0) {
             self.createSettingsDropdown(navBar);
             self.addSettingsClickEvents(graph, navBar, workflow);
           }
+          graphContainer.find('path.pseudoEdge').css("cursor", "pointer");
           self.createEdgePopoverForPig(graphContainer);
         }
       });
@@ -61,7 +60,7 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
      * Generate the Settings dropdown on demand.
      */
     createSettingsDropdown: function(navBar) {
-      var dropDownList = $('<li>', { 'class': 'dropdown'});
+      var dropDownList = $('<li class="dropdown settingsDropdown">');
       navBar.prepend(dropDownList);
       var dropdownToggleEL = $('<a>', { 'class': 'dropdown-toggle', 'ref' : '#', 'data-toggle': 'dropdown'}).appendTo(dropDownList);
       $('<span>', {'text': 'Settings'}).appendTo(dropdownToggleEL);
@@ -114,6 +113,76 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
      * Edge popover for pig scripts.
      */
     createEdgePopoverForPig : function(graphContainer) {
+      function getContent(edgeObj) {
+        // Create the popover body section based on the node.
+        var edge = edgeObj.__data__;
+
+        var targetData = null;
+        var sourceData = null;
+        if (edge) {
+          targetData = edge.target.data;
+          if (edge.target.pseudo) { targetData =  edge.target.targetData; }
+          sourceData = edge.source.data;
+          if (edge.source.pseudo) { sourceData =  edge.source.sourceData; }
+        }
+
+        if (targetData.counterGroupMap || sourceData.counterGroupMap) {
+          var bodyEL = $('<div class="popoverBody">');
+          var counterList = $('<ul>');
+
+          // Source Node Counters
+          if (targetData) {
+            var $targetData = $('<ul class="counterList">');
+
+            if (JobData.getHDFSWrittenFromCounter(targetData)) {
+              var item = $('<li>').appendTo($targetData);
+              $('<span>', { 'class': 'popoverKey', 'text' : 'HDFS Bytes Written: '}).appendTo(item);
+              $('<span>', { 'text': JobData.getHDFSWrittenFromCounter(targetData).commafy() }).appendTo(item);
+            }
+
+            if (JobData.getReduceOutputRecords(targetData)) {
+              var item = $('<li>').appendTo($targetData);
+              $('<span>', { 'class': 'popoverKey', 'text': 'Reduce Output Records: '} ).appendTo(item);
+              $('<span>', { 'text': JobData.getReduceOutputRecords(targetData).commafy() }).appendTo(item);
+            }
+
+            if ($targetData.find('li').length > 0) {
+              $targetData.prepend($('<li>', { 'class': 'counterListTitle', 'text': 'Source Node:' }));
+              $targetData.appendTo(counterList);
+            }
+          }
+
+          if (sourceData) {
+            var $sourceData = $('<ul class="counterList">');
+
+            if (JobData.getMapInputRecords(sourceData)) {
+              var item = $('<li>').appendTo($sourceData);
+              $('<span>', { 'class': 'popoverKey', 'text' : 'Map Input Records: '} ).appendTo(item);
+              $('<span>', { 'text': JobData.getMapInputRecords(sourceData).commafy() }).appendTo(item);
+            }
+
+            if (JobData.getHDFSReadFromCounter(sourceData)) {
+              var item = $('<li>').appendTo($sourceData);
+              $('<span>', { 'class': 'popoverKey', 'text' : 'HDFS Bytes Read: '} ).appendTo(item);
+              $('<span>', { 'text': JobData.getHDFSReadFromCounter(sourceData).commafy() }).appendTo(item);
+            }
+
+            if ($sourceData.find('li').length > 0) {
+              $sourceData.prepend($('<li>', { 'class': 'counterListTitle', 'text': 'Destination Node:' }));
+              $sourceData.appendTo(counterList);
+            }
+          }
+
+          if (counterList.find('.counterList').length > 0) {
+            counterList.appendTo(bodyEL);
+            return bodyEL;
+          }
+        }
+        return $('<div>', {
+          'style': 'padding-top:5px; padding-bottom:10px; padding-left:10px;',
+          'text': 'Counter information not available.'});
+      }
+
       graphContainer.find("path.pseudoEdge").each(function (i, edge) {
         $(this).popover({
           // Set the placement to "top", so width of the popover can be accurately measured.
@@ -121,68 +190,21 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
           container : 'body',
           html: 'true',
           title: function () {
-            return $('<div>', { id: 'counter-popover-title' + i, 'class': 'popoverTitle',
+            return  $('<div>', { id: 'counter-popover-title' + i, 'class': 'popoverTitle',
               text: 'Counters'});
           },
           content : function (){
-            // Create the popover body section based on the node.
-            var edge = this.__data__;
-
-            var targetData = null;
-            var sourceData = null;
-            if (edge) {
-              targetData = edge.target.data;
-              sourceData = edge.source.data;
-            }
-
-            if (targetData.counterGroupMap || sourceData.counterGroupMap) {
-              var bodyEL = $('<div class="popoverBody">');
-              var counterList = $('<ul>').appendTo(bodyEL);
-
-              // Source Node Counters
-              if (targetData) {
-                var $targetData = $('<ul>', { 'class': 'counterList'}).appendTo(counterList);
-                $('<li>', { 'class': 'counterListTitle', 'text': 'Source Node:' }).appendTo($targetData);
-
-                if (JobData.getHDFSWrittenFromCounter(targetData)) {
-                  var item = $('<li>').appendTo($targetData);
-                  $('<span>', { 'class': 'popoverKey', 'text' : 'HDFS Bytes Written: '}).appendTo(item);
-                  $('<span>', { 'text': JobData.getHDFSWrittenFromCounter(targetData).commafy() }).appendTo(item);
-                }
-
-                if (JobData.getReduceOutputRecords(targetData)) {
-                  var item = $('<li>').appendTo($targetData);
-                  $('<span>', { 'class': 'popoverKey', 'text': 'Reduce Output Records: '} ).appendTo(item);
-                  $('<span>', { 'text': JobData.getReduceOutputRecords(targetData).commafy() }).appendTo(item);
-                }
-              }
-
-              if (sourceData) {
-                var $sourceData = $('<ul>', { 'class': 'counterList'}).appendTo(counterList);
-                $('<li>', { 'class': 'counterListTitle', 'text': 'Destination Node:' }).appendTo($sourceData);
-
-                if (JobData.getMapInputRecords(sourceData)) {
-                   var item = $('<li>').appendTo($sourceData);
-                   $('<span>', { 'class': 'popoverKey', 'text' : 'Map Input Records: '} ).appendTo(item);
-                   $('<span>', { 'text': JobData.getMapInputRecords(sourceData).commafy() }).appendTo(item);
-                }
-
-                if (JobData.getHDFSReadFromCounter(sourceData)) {
-                  var item = $('<li>').appendTo($sourceData);
-                  $('<span>', { 'class': 'popoverKey', 'text' : 'HDFS Bytes Read: '} ).appendTo(item);
-                  $('<span>', { 'text': JobData.getHDFSReadFromCounter(sourceData).commafy() }).appendTo(item);
-                }
-              }
-              return bodyEL;
-            }
-            return $('<div>', { 'style': 'padding-left:10px;', 'text': 'Counter Information Not Available.'});
+            return getContent(this);
           },
           trigger: 'manual'
-        }).mouseover(function (e) {
+        }).click(function (e) {
           // Since the edge takes up a rectangular space and Twitter Popover can't find the
           // center of the section to place the popover, we will handle the trigger manually.
           var edge = this;
           var $this = $(this);
+
+          // Hide all other edge popover.
+          graphContainer.find('path.pseudoEdge').not(edge).popover('hide');
 
           // Find the top/left position of the edge and height/width of the edge area.
           var edgeAreaTop = $this.offset().top;
@@ -190,13 +212,15 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
           var targetHeight = e.target.getBoundingClientRect().height;
           var targetWidth = e.target.getBoundingClientRect().width;
 
-          // Hide all other edge popover.
-          graphContainer.find('path.pseudoEdge').not(edge).popover('hide');
-          // If the previous hovered edge is the same one, don't do anything.
-          if (self.hoveredEdge == edge) { return ; }
+          // If the previous hovered edge is the same one, hide popover and return.
+          if (self.hoveredEdge == edge) {
+            $(self.hoveredEdge).popover('hide');
+            self.hoveredEdge = null;
+            return ;
+          }
 
           // Show the new popover and update the current hovered edge to this edge.
-          $(this).popover('show');
+          $(edge).popover('show');
           self.hoveredEdge = edge;
 
           // After the popover is display, select the title of the popover, then get the whole
@@ -219,23 +243,6 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
             top: top,
             left: edgeAreaLeft + (targetWidth/2) - (popover.width()/2)
           });
-
-          // When mouseleave the edge, hide the popover if the new target is not a pseudoedge.
-          popover.mouseleave(function(e) {
-            var newTarget = e.relatedTarget|| e.toElement;
-            if (newTarget && newTarget.getAttribute("class") != "pseudoEdge") {
-              graphContainer.find('path.pseudoEdge').popover('hide');
-              self.hoveredEdge = null;
-            }
-          });
-        }).mouseleave(function(e){
-          // When mouseleave the edge element, check if the new target is the popover itself;
-          // If so, don't hide the popover.
-          var newTarget = e.relatedTarget|| e.toElement;
-          if (!($(newTarget).hasClass("popover") || $(".popover").find(newTarget).length > 0)) {
-            graphContainer.find('path.pseudoEdge').popover('hide');
-            self.hoveredEdge = null;
-          }
         });
       });
     }

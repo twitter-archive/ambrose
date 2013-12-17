@@ -272,28 +272,25 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
         } else if (rescaleOption === "noEdgeScaling") {
           return "2px";
         } else if (rescaleOption === "hdfsBytesWritten"
-            && targetData && targetData.metrics && targetData.metrics.hdfsBytesWritten) {
-          return calculateWidth(targetData.metrics.hdfsBytesWritten);
-        } else if (rescaleOption === "reduceOutputRecords" && targetData && targetData.metrics
-            && targetData.metrics.reduceOutputRecords) {
-          return calculateWidth(targetData.metrics.reduceOutputRecords);
-        } else if (rescaleOption === "mapInputRecords" && sourceData && sourceData.metrics
-            && sourceData.metrics.mapInputRecords) {
-          return calculateWidth(sourceData.metrics.mapInputRecords);
-        } else if (self.workflow.rescaleOption === "hdfsBytesRead" && sourceData
-            && sourceData.counterGroupMap
-            && sourceData.counterGroupMap.FileSystemCounters
-            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap
-            && sourceData.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ) {
-          return calculateWidth(
-              sourceData.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value);
+            && JobData.getHDFSWrittenFromMetrics(targetData)) {
+          return calculateWidth(JobData.getHDFSWrittenFromMetrics(targetData));
+        } else if (rescaleOption === "reduceOutputRecords"
+            && JobData.getReduceOutputRecordsFromMetrics(targetData)) {
+          return calculateWidth(JobData.getReduceOutputRecordsFromMetrics(targetData));
+        } else if (rescaleOption === "mapInputRecords"
+            && JobData.getMapInputRecordsFromMetrics(sourceData)) {
+          return calculateWidth(JobData.getMapInputRecordsFromMetrics(sourceData));
+        } else if (self.workflow.rescaleOption === "hdfsBytesRead"
+            && JobData.getHDFSReadFromCounter(sourceData)) {
+          return calculateWidth(JobData.getHDFSReadFromCounter(sourceData));
         }
         return "1px";
       }
 
       function calculateWidth(w) {
-       return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth)
-           / (self.arcValueMax - self.arcValueMin) * (w - self.arcValueMin)) + "px"
+        if (w == 0) { return '1px';}
+        return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth)
+            / (self.arcValueMax - self.arcValueMin) * (w - self.arcValueMin)) + "px"
       }
 
       function rescaleEdgesColor(targetData, sourceData, i, rescaleOption) {
@@ -337,13 +334,19 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       // Find the current max and min for all the available metrics value.
       g.each(function(node, i) {
         var data = node.data;
+        // Use target data for output data calculation of an edge.
+        if (node.pseudo) { data =  node.targetData; }
         if (node.children.length != 0 && self.workflow.rescaleOption === "hdfsBytesWritten"
             && JobData.getHDFSWrittenFromMetrics(data)) {
           setMaxMinArcValue(self, JobData.getHDFSWrittenFromMetrics(data));
         } else if (node.children.length != 0 && self.workflow.rescaleOption === "reduceOutputRecords"
              && JobData.getReduceOutputRecordsFromMetrics(data)) {
           setMaxMinArcValue(self, JobData.getReduceOutputRecordsFromMetrics(data));
-        } else if (node.parents.length != 0 && self.workflow.rescaleOption === "mapInputRecords"
+        }
+
+        // Use source data for input data calculation of an edge.
+        if (node.pseudo) { data =  node.sourceData; }
+        if (node.parents.length != 0 && self.workflow.rescaleOption === "mapInputRecords"
             && JobData.getMapInputRecordsFromMetrics(data)) {
           setMaxMinArcValue(self, JobData.getMapInputRecordsFromMetrics(data));
         } else if (node.parents.length != 0 && self.workflow.rescaleOption === "hdfsBytesRead"
@@ -357,10 +360,28 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
         d3.select(this).selectAll('path.edge').data(node.edges)
           .transition().duration(duration)
           .attr("stroke-width", function(d, i) {
-            return rescaleEdgesWidth(d.target.data, d.source.data, i, self.workflow.rescaleOption);
+            var targetData = d.target.data;
+            if (d.target.pseudo) {
+              targetData =  d.target.targetData;
+            }
+
+            var sourceData = d.source.data;
+            if (d.source.pseudo) {
+              sourceData =  d.source.sourceData;
+            }
+            return rescaleEdgesWidth(targetData, sourceData, i, self.workflow.rescaleOption);
           })
           .attr("stroke", function(d, i) {
-            return rescaleEdgesColor(d.target.data, d.source.data, i, self.workflow.rescaleOption);
+            var targetData = d.target.data;
+            if (d.target.pseudo) {
+              targetData =  d.target.targetData;
+            }
+
+            var sourceData = d.source.data;
+            if (d.source.pseudo) {
+              sourceData =  d.source.sourceData;
+            }
+            return rescaleEdgesColor(targetData, sourceData, i, self.workflow.rescaleOption);
           });
       });
     },
@@ -418,7 +439,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
 
         d3.select(this).selectAll('path.pseudoEdge').data(node.edges).enter()
           .append('svg:path').attr('class', 'pseudoEdge')
-          .attr("stroke-width", self.edgeMaxWidth)
+          .attr("stroke-width", self.edgeMaxWidth / 2)
           .attr("stroke", "transparent")
           .attr('d', function(edge, i) {
             return calcEdgeControlPoints(edge, i);

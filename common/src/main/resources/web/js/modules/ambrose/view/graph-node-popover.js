@@ -41,6 +41,7 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
       // Create node popover after the dag is created.
       workflow.on('dagCreated', function(event, jobs) {
         if (jobs && jobs.length > 0 && jobs[0].runtime == 'pig') {
+          graphContainer.find('.node circle.anchor').css("cursor", "pointer");
           self.createNodePopoverForPig(graphContainer);
         }
       });
@@ -50,79 +51,83 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
      * Create the node popover for a pig script.
      */
     createNodePopoverForPig: function(graphContainer) {
+      function getPlacment(source) {
+        // Place the popover on the left if there is enough space.
+        var position = $(source).position();
+        if (position.left > 300) { return "left"; }
+        return "right";
+      }
+
+      function getTitle(node) {
+        if (node.__data__.data.mapReduceJobState) {
+          var mrJobState = node.__data__.data.mapReduceJobState;
+          return $('<a>', { 'target': '_blank', 'href': mrJobState.trackingURL, 'text': mrJobState.jobId });
+        } else {
+          return $('<span>', { 'class': 'popoverTitle', 'text': 'Job id undefined'});
+        }
+      }
+
+      function getContent(node) {
+        // Create the popover body section based on the node.
+        if (!node.__data__.data) {
+          return $('<span>', {
+            'class': 'popoverTitle', 'style': 'margin-left:10px', 'text': 'Job details unavailable'});
+        }
+
+        var data = node.__data__.data;
+        var bodyEL = $('<div>', { 'class': 'popoverBody'});
+        var jobInfoList = $('<ul>').appendTo(bodyEL);
+
+        if (data.status) {
+          var item = $('<li>').appendTo(jobInfoList);
+          $('<span>', { 'class': 'popoverKey', 'text': 'Status: '}).appendTo(item);
+          $('<span>', { 'text': data.status }).appendTo(item);
+        }
+
+        if (data.aliases) {
+          var item = $('<li>').appendTo(jobInfoList);
+          $('<span>', { 'class': 'popoverKey', 'text': 'Aliases: '}).appendTo(item);
+          $('<span>', { 'text': data.aliases.join(', ') }).appendTo(item);
+        }
+
+        if (data.features) {
+          var item = $('<li>').appendTo(jobInfoList);
+          $('<span>', { 'class': 'popoverKey', 'text': 'Features: '}).appendTo(item);
+          $('<span>', { 'text': data.features.join(', ') }).appendTo(item);
+        }
+
+        if (data.mapReduceJobState) {
+          var mrJobState = data.mapReduceJobState;
+          if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
+            var startTime = mrJobState.jobStartTime;
+            var lastUpdateTime = mrJobState.jobLastUpdateTime;
+
+            var item = $('<li>').appendTo(jobInfoList);
+            $('<span>', { 'class': 'popoverKey', 'text' : 'Duration: '}).appendTo(item);
+            $('<span>', { 'text': Ambrose.calculateElapsedTime(startTime, lastUpdateTime) }).appendTo(item);
+          }
+
+          if (mrJobState.totalMappers) {
+            var item = $('<li>').appendTo(jobInfoList);
+            $('<span>', { 'class': 'popoverKey', 'text' : 'Mappers: '}).appendTo(item);
+            $('<span>', { 'text': mrJobState.totalMappers }).appendTo(item);
+          }
+
+          if (mrJobState.totalReducers) {
+            var item = $('<li>').appendTo(jobInfoList);
+            $('<span>', { 'class': 'popoverKey', 'text' : 'Reducers: '}).appendTo(item);
+            $('<span>', { 'text': mrJobState.totalReducers }).appendTo(item);
+          }
+        }
+        return bodyEL;
+      }
+
       // Display Popover.
       graphContainer.find(".node circle.anchor").each(function (i, node) {
         $(this).popover({
-          placement : function (context, source) {
-            // Place the popover on the left if there is enough space.
-            var position = $(source).position();
-            if (position.left > 300) { return "left"; }
-            return "right";
-          },
-          title : function (){
-            var node = this;
-            if (node.__data__.data.mapReduceJobState) {
-              var mrJobState = node.__data__.data.mapReduceJobState;
-              return $('<a>', { 'target': '_blank', 'href': mrJobState.trackingURL, 'text': mrJobState.jobId });
-            } else {
-              return $('<span>', { 'class': 'popoverTitle', 'text': 'Job id undefined'});
-            }
-          },
-          content: function (){
-            // Create the popover body section based on the node.
-            var node = this;
-            if (!node.__data__.data) {
-              return $('<span>', {
-                'class': 'popoverTitle', 'style': 'margin-left:10px', 'text': 'Job details unavailable'});
-            }
-
-            var data = node.__data__.data;
-            var bodyEL = $('<div>', { 'class': 'popoverBody'});
-            var jobInfoList = $('<ul>').appendTo(bodyEL);
-
-            if (data.status) {
-              var item = $('<li>').appendTo(jobInfoList);
-              $('<span>', { 'class': 'popoverKey', 'text': 'Status: '}).appendTo(item);
-              $('<span>', { 'text': data.status }).appendTo(item);
-            }
-
-            if (data.aliases) {
-              var item = $('<li>').appendTo(jobInfoList);
-              $('<span>', { 'class': 'popoverKey', 'text': 'Aliases: '}).appendTo(item);
-              $('<span>', { 'text': data.aliases.join(', ') }).appendTo(item);
-            }
-
-            if (data.features) {
-              var item = $('<li>').appendTo(jobInfoList);
-              $('<span>', { 'class': 'popoverKey', 'text': 'Features: '}).appendTo(item);
-              $('<span>', { 'text': data.features.join(', ') }).appendTo(item);
-            }
-
-            if (data.mapReduceJobState) {
-              var mrJobState = data.mapReduceJobState;
-              if (mrJobState.jobStartTime && mrJobState.jobLastUpdateTime) {
-                var startTime = mrJobState.jobStartTime;
-                var lastUpdateTime = mrJobState.jobLastUpdateTime;
-
-                var item = $('<li>').appendTo(jobInfoList);
-                $('<span>', { 'class': 'popoverKey', 'text' : 'Duration: '}).appendTo(item);
-                $('<span>', { 'text': Ambrose.calculateElapsedTime(startTime, lastUpdateTime) }).appendTo(item);
-              }
-
-              if (mrJobState.totalMappers) {
-                var item = $('<li>').appendTo(jobInfoList);
-                $('<span>', { 'class': 'popoverKey', 'text' : 'Mappers: '}).appendTo(item);
-                $('<span>', { 'text': mrJobState.totalMappers }).appendTo(item);
-              }
-
-              if (mrJobState.totalReducers) {
-                var item = $('<li>').appendTo(jobInfoList);
-                $('<span>', { 'class': 'popoverKey', 'text' : 'Reducers: '}).appendTo(item);
-                $('<span>', { 'text': mrJobState.totalReducers }).appendTo(item);
-              }
-            }
-            return bodyEL;
-          },
+          placement : function (context, source) { return getPlacment(source); },
+          title : function (){ return getTitle(this) },
+          content: function (){ return getContent(this); },
           container : 'body',
           html : 'true'
         });
