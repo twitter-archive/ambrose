@@ -44,6 +44,7 @@
     <dependency>
       <groupId>org.apache.pig</groupId>
       <artifactId>pig</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
