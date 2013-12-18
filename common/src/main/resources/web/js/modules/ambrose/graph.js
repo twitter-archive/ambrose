@@ -77,7 +77,8 @@ define(['lib/jquery', './core'], function($, Ambrose) {
         id: child.id + ':' + parent.id + ':' + g,
         topologicalIndex: -1, // not generally useful
         topologicalGroupIndex: g,
-        data: parent.data,
+        targetData: parent.data,
+        sourceData: child.data
       });
 
       // add pseudo node to group

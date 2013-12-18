@@ -50,6 +50,7 @@ define(['lib/jquery'], function($) {
     return Math.min.apply(Math, this);
   };
 
+
   // remove value from array
   Array.prototype.remove = function(object) {
     var i = $.inArray(object, this);
@@ -62,6 +63,18 @@ define(['lib/jquery'], function($) {
     if (r.length === 1) r = '0' + r;
     return r;
   }
+
+  // Add commas to numbers.
+  String.prototype.commafy = function () {
+    return this.replace(/(^|[^\w.])(\d{4,})/g, function($0, $1, $2) {
+        return $1 + $2.replace(/\d(?=(?:\d\d\d)+(?!\d))/g, "$&,");
+    });
+  };
+
+  Number.prototype.commafy = function () {
+    return String(this).commafy();
+  };
+
 
   Number.prototype.formatTimestamp = function() {
     var date = new Date(this);

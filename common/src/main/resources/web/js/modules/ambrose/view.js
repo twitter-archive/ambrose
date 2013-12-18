@@ -23,7 +23,9 @@ define([
   './view/table',
   './view/chord',
   './view/graph',
-  './view/script',
+  './view/graph-node-popover',
+  './view/graph-edge-popover',
+  './view/script'
 ], function(View) {
   return View;
 });

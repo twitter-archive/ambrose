@@ -94,6 +94,7 @@ define(['lib/jquery', '../core', './core', 'lib/jquery-ui'], function($, Ambrose
       var $titleEl = $('<div />').appendTo($scriptContent);
       $titleEl.addClass('modal-header scriptDivTitle');
       self.scriptNameEl = $('<span />').appendTo($titleEl).addClass('scriptName');
+      self.scriptNameEl.html("Script");
 
       var $scriptCloseBtn = $('<button />').appendTo($titleEl);
       $scriptCloseBtn.addClass('close scriptTitleCloseBtn');
