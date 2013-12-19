@@ -439,7 +439,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
 
         d3.select(this).selectAll('path.pseudoEdge').data(node.edges).enter()
           .append('svg:path').attr('class', 'pseudoEdge')
-          .attr("stroke-width", self.edgeMaxWidth / 2)
+          .attr("stroke-width", self.edgeMaxWidth)
           .attr("stroke", "transparent")
           .attr('d', function(edge, i) {
             return calcEdgeControlPoints(edge, i);
@@ -471,6 +471,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       // create smaller circle and bind event handlers
       real.append('svg:circle')
         .attr('class', 'anchor')
+        .attr('id', function(node, i) {
+          return 'anchor-' + node.id;
+        })
         .attr('cx', cx)
         .attr('cy', cy)
         .attr('r', self.params.dimensions.node.radius)
