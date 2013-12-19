@@ -45,6 +45,23 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
           self.createNodePopoverForPig(graphContainer);
         }
       });
+
+      // Handle mouse actions.
+      workflow.on('jobSelected', function(event, job, prev) {
+        if (prev != null) { graphContainer.find('#anchor-' + prev.node.id).popover('hide'); }
+        if (job != null) {
+          var $popover = graphContainer.find('#anchor-' + job.node.id).popover('show');
+          var button = $('.node-popover-close-btn');
+          button.click(function (){
+            if (button && button.parent() && button.parent().parent()) {
+              button = button.parent().parent();
+            }
+            button.click(function() {
+              $popover.popover('hide');
+            });
+          });
+        }
+      });
     },
 
     /**
@@ -58,13 +75,17 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
         return "right";
       }
 
-      function getTitle(node) {
+      function getTitle(node, i) {
+        var $title = null;
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
-          return $('<a>', { 'target': '_blank', 'href': mrJobState.trackingURL, 'text': mrJobState.jobId });
+          $title = $('<div>');
+          $('<a>', { 'target': '_blank', 'href': mrJobState.trackingURL, 'text': mrJobState.jobId }).appendTo($title);
         } else {
-          return $('<span>', { 'class': 'popoverTitle', 'text': 'Job id undefined'});
+          $title = $('<span>', { 'class': 'popoverTitle', 'text': 'Job id undefined'});
         }
+        $('<button>', { 'class' : 'close node-popover-close-btn', 'html' : '&times;'}).appendTo($title);
+        return $title;
       }
 
       function getContent(node) {
@@ -126,10 +147,11 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
       graphContainer.find(".node circle.anchor").each(function (i, node) {
         $(this).popover({
           placement : function (context, source) { return getPlacment(source); },
-          title : function (){ return getTitle(this) },
+          title : function (){ return getTitle(this, i); },
           content: function (){ return getContent(this); },
           container : 'body',
-          html : 'true'
+          html : 'true',
+          trigger: 'manual'
         });
       });
 

@@ -190,8 +190,11 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
           container : 'body',
           html: 'true',
           title: function () {
-            return  $('<div>', { id: 'counter-popover-title' + i, 'class': 'popoverTitle',
+          var $title = $('<div>', { 'id' : 'counter-popover-title' + i, 'class': 'popoverTitle',
               text: 'Counters'});
+          var $close = $('<button>', { 'id' : 'counter-popover-close-btn' + i, 'class' : 'close',
+            'html' : '&times;'}).appendTo($title);
+            return $title;
           },
           content : function (){
             return getContent(this);
@@ -229,6 +232,10 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
           if (popover && popover.parent() && popover.parent().parent()) {
             popover = popover.parent().parent();
           }
+          $("#counter-popover-close-btn" + i).click(function() {
+            $(self.hoveredEdge).popover('hide');
+            self.hoveredEdge = null;
+          });
 
           // Place the popover at the center of the div.
           var top = edgeAreaTop + (targetHeight/2) - popover.height();
