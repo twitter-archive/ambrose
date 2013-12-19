@@ -33,9 +33,11 @@ h2 { margin: 1em 0px; }
 
 /* Graph view */
 .ambrose-view-graph path.edge, .ambrose-view-graph path.pseudoEdge { fill: none; }
+.ambrose-view-graph path.pseudoEdge { cursor: pointer; }
 .ambrose-view-graph path.progress {}
 .ambrose-view-graph path.map { fill: #0e90d2; }
 .ambrose-view-graph path.reduce { fill: #FF7800; }
+.ambrose-view-graph-edge-popover-default { padding: 5px 10px; }
 
 .ambrose-view-graph circle.magnitude { fill: rgba(28, 231, 231, 0.25); pointer-events: none; }
 .ambrose-view-graph circle.tic { fill: none; stroke: rgba(28, 231, 231, 0.25); stroke-width: 1px; pointer-events: none; }
@@ -50,21 +52,24 @@ h2 { margin: 1em 0px; }
   font-family: monospace;
 }
 
+/* Graph view popovers */
+.ambrose-view-graph-popover-title { font-weight: bold; font-size: 100%; }
+.ambrose-view-graph-popover-title button.close { margin-top: -3px; }
+.popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px; }
+.popoverBody .counterList { list-style: none; margin-left: -15px; margin-bottom: 5px; }
+.popoverBody .counterList li.counterListTitle { margin-left: 0px; font-weight:bold; margin-top: 0px; }
+.popoverBody .counterList li { list-style: none; margin-left: 10px; margin-top: 0px; }
+
 /* Dashboard */
 .dashboard-status { margin: 1em 0; }
 
 .popoverSectionKey { font-weight:bold; }
 .popoverKey { font-weight:bold; }
-.popoverTitle { font-weight:bold; font-size: 100%;}
 
 .dropdown-header { padding-top:5px; padding-bottom:5px; padding-left : 20px; font-size:11pt; font-weight:bold; }
 .popover .popover-content { padding: 0px; padding-top : 5px; padding-right : 12px; margin: 0px; border: 0px; overflow-y: auto;}
 
-.popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px;}
-.popoverBody .counterList { list-style: none; margin-left: -15px; margin-bottom: 5px; }
-.popoverBody .counterList li.counterListTitle { margin-left: 0px; font-weight:bold; margin-top: 0px; }
-.popoverBody .counterList li { list-style: none; margin-left: 10px; margin-top: 0px; }
-
+/* Script view */
 .ambrose-view-script .scriptContent { height:100%; width:100%; }
 .ambrose-view-script .scriptDivTitle { font-weight:bold; padding-right: 70px; cursor: move; }
 .ambrose-view-script .scriptDivTitle .scriptName {

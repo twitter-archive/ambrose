@@ -48,18 +48,11 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
 
       // Handle mouse actions.
       workflow.on('jobSelected', function(event, job, prev) {
-        if (prev != null) { graphContainer.find('#anchor-' + prev.node.id).popover('hide'); }
+        if (prev != null) {
+          graphContainer.find('#anchor-' + prev.node.id).popover('hide');
+        }
         if (job != null) {
-          var $popover = graphContainer.find('#anchor-' + job.node.id).popover('show');
-          var button = $('.node-popover-close-btn');
-          button.click(function (){
-            if (button && button.parent() && button.parent().parent()) {
-              button = button.parent().parent();
-            }
-            button.click(function() {
-              $popover.popover('hide');
-            });
-          });
+          graphContainer.find('#anchor-' + job.node.id).popover('show');
         }
       });
     },
@@ -68,6 +61,9 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
      * Create the node popover for a pig script.
      */
     createNodePopoverForPig: function(graphContainer) {
+      var self = this;
+      var $self = $(self);
+
       function getPlacment(source) {
         // Place the popover on the left if there is enough space.
         var position = $(source).position();
@@ -76,15 +72,16 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
       }
 
       function getTitle(node, i) {
-        var $title = null;
+        var $title = $('<div class="ambrose-view-graph-popover-title">');
         if (node.__data__.data.mapReduceJobState) {
           var mrJobState = node.__data__.data.mapReduceJobState;
-          $title = $('<div>');
           $('<a>', { 'target': '_blank', 'href': mrJobState.trackingURL, 'text': mrJobState.jobId }).appendTo($title);
         } else {
-          $title = $('<span>', { 'class': 'popoverTitle', 'text': 'Job id undefined'});
+          $title.text('Job id undefined');
         }
-        $('<button>', { 'class' : 'close node-popover-close-btn', 'html' : '&times;'}).appendTo($title);
+        $('<button class="close">').html('&times;').appendTo($title).click(function() {
+          $(node).popover('hide');
+        });
         return $title;
       }
 
@@ -145,10 +142,12 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
 
       // Display Popover.
       graphContainer.find(".node circle.anchor").each(function (i, node) {
-        $(this).popover({
+        var node = this;
+        var $node = $(node);
+        $node.popover({
           placement : function (context, source) { return getPlacment(source); },
-          title : function (){ return getTitle(this, i); },
-          content: function (){ return getContent(this); },
+          title : function (){ return getTitle(node, i); },
+          content: function (){ return getContent(node); },
           container : 'body',
           html : 'true',
           trigger: 'manual'
