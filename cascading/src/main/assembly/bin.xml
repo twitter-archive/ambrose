@@ -1,0 +1,83 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+  <id>bin</id>
+  <formats>
+    <format>dir</format>
+    <format>tar.gz</format>
+  </formats>
+
+  <!-- ambrose-common jar and runtime dependencies -->
+  <moduleSets>
+    <moduleSet>
+      <useAllReactorProjects>true</useAllReactorProjects>
+      <includes>
+        <include>com.twitter.ambrose:ambrose-common</include>
+      </includes>
+      <binaries>
+        <outputDirectory>lib</outputDirectory>
+        <unpack>false</unpack>
+        <dependencySets>
+          <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+              <include>org.slf4j:slf4j-api</include>
+              <include>org.slf4j:slf4j-simple</include>
+              <include>com.google.guava:guava</include>
+              <include>com.fasterxml.jackson.core:jackson-core</include>
+              <include>com.fasterxml.jackson.core:jackson-annotations</include>
+              <include>com.fasterxml.jackson.core:jackson-databind</include>
+              <include>org.mortbay.jetty:jetty</include>
+              <include>org.mortbay.jetty:jetty-util</include>
+              <include>org.mortbay.jetty:servlet-api</include>
+            </includes>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+          </dependencySet>
+        </dependencySets>
+      </binaries>
+    </moduleSet>
+  </moduleSets>
+
+  <fileSets>
+    <!-- demo -->
+    <fileSet>
+      <directory>src/main/demo</directory>
+      <outputDirectory>demo</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+    </fileSet>
+
+    <!-- documentation from parent -->
+    <fileSet>
+      <directory>${project.basedir}/..</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>README*</include>
+        <include>LICENSE*</include>
+        <include>NOTICE*</include>
+        <include>docs/**/*</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
+  <files>
+    <!-- documentation -->
+    <file>
+      <source>README.md</source>
+      <outputDirectory>/</outputDirectory>
+      <destName>README-CASCADING.md</destName>
+    </file>
+  </files>
+
+  <!-- ambrose-cascading jar -->
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <includes>
+        <include>com.twitter.ambrose:ambrose-cascading</include>
+      </includes>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+    </dependencySet>
+  </dependencySets>
+</assembly>
