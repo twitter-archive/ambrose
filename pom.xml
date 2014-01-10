@@ -92,6 +92,11 @@
         <artifactId>ambrose-hive</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-cascading</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <!-- testing -->
       <dependency>

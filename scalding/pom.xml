@@ -27,7 +27,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ambrose-cascading</artifactId>
-      <version>${project.version}</version>
     </dependency>
 
      <dependency>
