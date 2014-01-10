@@ -10,23 +10,27 @@ Ambrose provides the following in a web UI:
 * A table view of all the associated jobs, along with their current state
 * Chord and graph diagrams to visualize job dependencies and current state
 * An overall script progress bar
+* Visual weighting of jobs based on resource consumption
+* Visual weighting of vectors based on data volume
+* Script view with line highlighting (Pig only)
 
 Ambrose is built using the following front-end technologies:
 
 * [D3.js](http://d3js.org) - For diagram generation
 * [Bootstrap](http://twitter.github.com/bootstrap/) - For layout and CSS support
 
-Ambrose is designed to support any workflow runtime, but current support is limited to [Apache
-Pig](http://pig.apache.org/).
+Ambrose is designed to support any workflow runtime, but currently supports [Apache
+Pig](http://pig.apache.org/), [Hive](http://hive.apache.org/), [Cascading](http://www.cascading.org/)
+and [Scalding](https://github.com/twitter/scalding).
 
 Follow [@Ambrose](https://twitter.com/ambrose) on Twitter to stay in touch!
 
 ## Supported runtimes
 
 * [Pig](http://pig.apache.org/) - See [pig/README.md](https://github.com/twitter/ambrose/blob/master/pig/README.md)
-* [Hive](http://hive.apache.org/) See [hive/README.md](https://github.com/twitter/ambrose/blob/master/hive/README.md)
-* [Cascading](http://www.cascading.org/) - future work
-* [Scalding](https://github.com/twitter/scalding) - future work
+* [Hive](http://hive.apache.org/) - See [hive/README.md](https://github.com/twitter/ambrose/blob/master/hive/README.md)
+* [Cascading](http://www.cascading.org/) - See [cascading/README.md](https://github.com/twitter/ambrose/blob/master/cascading/README.md)
+* [Scalding](https://github.com/twitter/scalding) - See [cascading/README.md](https://github.com/twitter/ambrose/blob/master/cascading/README.md)
 * [Cascalog](https://github.com/nathanmarz/cascalog) - future work
 
 ## Examples
@@ -120,10 +124,11 @@ For more information on semantic versioning, please visit http://semver.org/.
 
 ## Authors
 
-* Bill Graham ([@billgraham](https://twitter.com/billgraham))
-* Andy Schlaikjer ([@sagemintblue](https://twitter.com/sagemintblue))
-* Gary Helmling ([@gario](https://twitter.com/gario))
-* Nicolas Belmonte ([@philogb](https://twitter.com/philogb))
+* [Bill Graham](https://github.com/billonahill) ([@billgraham](https://twitter.com/billgraham))
+* [Andy Schlaikjer](https://github.com/sagemintblue) ([@sagemintblue](https://twitter.com/sagemintblue))
+* [Gary Helmling](https://github.com/ghelmling) ([@gario](https://twitter.com/gario))
+* [Nicolas Belmonte](https://github.com/philogb) ([@philogb](https://twitter.com/philogb))
+* [Grace Zhang](https://github.com/gzhangT) ([@pkq1123](https://twitter.com/pkq1123))
 
 ## License
 

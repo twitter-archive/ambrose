@@ -54,4 +54,5 @@ AMBROSE_TIMEOUT : Number of seconds to keep the VM running after the script is c
 * More intuitive alias naming
 * Page reload is needed between two workflows
 
-
+## Authors
+* [Lorand Bendig](https://github.com/lbendig) ([@lorandbendig](https://twitter.com/lorandbendig))
