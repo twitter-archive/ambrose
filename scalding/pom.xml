@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.twitter.ambrose</groupId>
+    <artifactId>ambrose</artifactId>
+    <version>0.3.1-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <artifactId>ambrose-scalding</artifactId>
+  <name>Ambrose Scalding</name>
+
+  <dependencies>
+    <!-- ambrose -->
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ambrose-cascading</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+     <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-compiler</artifactId>
+     </dependency>
+
+     <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+     </dependency>
+
+    <dependency>
+       <groupId>com.twitter</groupId>
+       <artifactId>scalding-core_2.9.3</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-mapred</artifactId>
+    </dependency>
+
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <args>
+                <param>-unchecked</param>
+                <param>-deprecation</param>
+                <param>-encoding</param>
+                <param>utf8</param>
+              </args>
+            </configuration>
+            <goals>
+              <goal>add-source</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <configuration>
+              <args>
+                <param>-unchecked</param>
+                <param>-deprecation</param>
+                <param>-encoding</param>
+                <param>utf8</param>
+              </args>
+            </configuration>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
