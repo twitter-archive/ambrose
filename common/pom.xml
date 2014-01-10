@@ -71,6 +71,17 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapred</artifactId>
     </dependency>
+
+    <!-- hraven -->
+    <dependency>
+       <groupId>com.twitter.hraven</groupId>
+       <artifactId>hraven-core</artifactId>
+    </dependency>   
+    <dependency>
+       <groupId>org.apache.hbase</groupId>
+       <artifactId>hbase</artifactId>
+    </dependency>   
+
   </dependencies>
 
 </project>
