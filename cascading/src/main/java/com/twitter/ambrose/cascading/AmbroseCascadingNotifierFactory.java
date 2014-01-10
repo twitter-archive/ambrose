@@ -30,7 +30,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-/** Select and configure the type of listener to commincate cascading job progress to ambrose.
+/** Select and configure the type of listener to communicate cascading job progress to ambrose.
   * The two "out-of-the-box" possibilities are:
   * - Embedded server  (@see com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier) or
   * - HRaven connector (@see tter.ambrose.cascading.HRavenAmbroseCascadingNotifier)
@@ -66,100 +66,100 @@ import java.util.*;
 
 public class AmbroseCascadingNotifierFactory {
 
-    private static Logger LOG = LoggerFactory.getLogger(AmbroseCascadingNotifierFactory.class);
+  private static Logger LOG = LoggerFactory.getLogger(AmbroseCascadingNotifierFactory.class);
 
-    private static InputStream openResource(String name) {
-       if(name.startsWith("cp:")) {
-          return AmbroseCascadingNotifierFactory.class.getResourceAsStream(name.substring(3)
-                          + "/" + "ambrose-cascading.properties");
-       }
-
-       try {
-          return new FileInputStream(name);
-       }
-       catch(IOException e) {
-          LOG.warn("Failed to open property file " + name, e);
-       }
-
-        return null;
+  private static InputStream openResource(String name) {
+    if(name.startsWith("cp:")) {
+      return AmbroseCascadingNotifierFactory.class.getResourceAsStream(name.substring(3)
+            + "/" + "ambrose-cascading.properties");
     }
 
-    private static List<String> candidateList(String ... candidates) {
-       List<String> cs = new LinkedList();
-       for(String s : candidates) {
-          if(s != null && s.length() != 0) cs.add(s);
-       }
-      return cs;
+    try {
+      return new FileInputStream(name);
+    }
+    catch(IOException e) {
+      LOG.warn("Failed to open property file " + name, e);
     }
 
-    private static Properties readProperties() throws IOException {
-        Properties props = new Properties();
-        List<String> candidates = candidateList("cp:/config", "cp:", 
-                        System.getProperty("ambrose.properties"), System.getenv("AMBROSE_PROPERTIES"));
+    return null;
+  }
 
-        for(String path : candidates) {
-            InputStream is = openResource(path);
-            if(is == null) { continue; }
-            LOG.info("Reading ambrose connector properties from " + path);
-            try {
-                props.load(new InputStreamReader(is));
-            }
-            finally {
-                is.close();
-            }
-        }
+  private static List<String> candidateList(String ... candidates) {
+    List<String> cs = new LinkedList();
+    for(String s : candidates) {
+      if(s != null && s.length() != 0) cs.add(s);
+    }
+    return cs;
+  }
 
-        String overrides = System.getenv("AMBROSE_PROPERTIES_OVERRIDE");
-        if(overrides != null) {
-            for(StringTokenizer st = new StringTokenizer(overrides, ";"); st.hasMoreElements();) {
-                String kv[] = st.nextToken().trim().split("=");
-                if(kv.length == 2) props.put(kv[0], kv[1]);
-            }
-        }
+  private static Properties readProperties() throws IOException {
+    Properties props = new Properties();
+    List<String> candidates = candidateList("cp:/config", "cp:", 
+           System.getProperty("ambrose.properties"), System.getenv("AMBROSE_PROPERTIES"));
 
-        return props;
+    for(String path : candidates) {
+      InputStream is = openResource(path);
+      if(is == null) { continue; }
+      LOG.info("Reading ambrose connector properties from " + path);
+      try {
+        props.load(new InputStreamReader(is));
+      }
+      finally {
+        is.close();
+      }
     }
 
-    public static AmbroseCascadingNotifier createNotifier(Flow flow) {
-        String clazz = System.getenv("AMBROSE_NOTIFIER_CLASS");
+    String overrides = System.getenv("AMBROSE_PROPERTIES_OVERRIDE");
+    if(overrides != null) {
+      for(StringTokenizer st = new StringTokenizer(overrides, ";"); st.hasMoreElements();) {
+        String kv[] = st.nextToken().trim().split("=");
+        if(kv.length == 2) props.put(kv[0], kv[1]);
+      }
+    }
+
+    return props;
+  }
+
+  public static AmbroseCascadingNotifier createNotifier(Flow flow) {
+    String clazz = System.getenv("AMBROSE_NOTIFIER_CLASS");
+    try {
+      Properties props = readProperties();
+      if(clazz == null) { clazz = props.getProperty("ambrose.notifer.class"); }
+
+      if(clazz == null || clazz.length() == 0) {
         try {
-            Properties props = readProperties();
-            if(clazz == null) { clazz = props.getProperty("ambrose.notifer.class"); }
-
-            if(clazz == null || clazz.length() == 0) {
-                 try {
-                    Class.forName("com.twitter.hraven.datasource.FlowQueueService");
-                     clazz = "hraven";
-                    LOG.info("Using default HRaven connector");
-                 }
-                 catch(Exception e) {
-                    LOG.info("HRaven is not available. Will use embedded notifier.");
-                    clazz="embedded";
-                 }
-            }
-
-            if("none".equalsIgnoreCase(clazz)) { return null; }
-            if("embedded".equalsIgnoreCase(clazz)) {  return new EmbeddedAmbroseCascadingNotifier(); }
-            if("hraven".equalsIgnoreCase(clazz)) {
-                clazz = "com.twitter.ambrose.cascading.HRavenAmbroseCascadingNotifier";
-            }
-
-            FlowProcess fp = flow.getFlowProcess();
-            Configuration jobConf =  (fp instanceof HadoopFlowProcess)  ?
-                    ((HadoopFlowProcess) fp).getJobConf() : new Configuration();
-
-            for(Map.Entry prop : props.entrySet()) {
-                jobConf.set(prop.getKey().toString(), prop.getValue().toString());
-            }
-
-            return (AmbroseCascadingNotifier) Class.forName(clazz)
-                    .getConstructor(Configuration.class)
-                    .newInstance(jobConf);
+          Class.forName("com.twitter.hraven.datasource.FlowQueueService");
+          clazz = "hraven";
+          LOG.info("Using default HRaven connector");
         }
-        catch (Exception e) {
-            LOG.error("Failed to create ambrose notifier of type " + clazz + "."
-                    + " Ambrose will be disabled.", e);
+        catch(Exception e) {
+          LOG.info("HRaven is not available. Will use embedded notifier.");
+          clazz="embedded";
         }
-        return null;
+      }
+
+      if("none".equalsIgnoreCase(clazz)) { return null; }
+      if("embedded".equalsIgnoreCase(clazz)) {  return new EmbeddedAmbroseCascadingNotifier(); }
+      if("hraven".equalsIgnoreCase(clazz)) {
+        clazz = "com.twitter.ambrose.cascading.HRavenAmbroseCascadingNotifier";
+      }
+
+      FlowProcess fp = flow.getFlowProcess();
+      Configuration jobConf =  (fp instanceof HadoopFlowProcess)  ?
+          ((HadoopFlowProcess) fp).getJobConf() : new Configuration();
+
+      for(Map.Entry prop : props.entrySet()) {
+        jobConf.set(prop.getKey().toString(), prop.getValue().toString());
+      }
+
+      return (AmbroseCascadingNotifier) Class.forName(clazz)
+          .getConstructor(Configuration.class)
+          .newInstance(jobConf);
     }
+    catch (Exception e) {
+      LOG.error("Failed to create ambrose notifier of type " + clazz + "."
+          + " Ambrose will be disabled.", e);
+    }
+    return null;
+  }
 }

@@ -70,7 +70,7 @@
     <apache.hbase.version>0.94.t1</apache.hbase.version>
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
-    <hraven.version>0.9.6</hraven.version>
+    <twitter.hraven.version>0.9.6</twitter.hraven.version>
     <cascading.version>2.5.0-wip-77</cascading.version>
     <scalding.version>0.9.0rc4</scalding.version>
     <scala.version>2.9.2</scala.version>
@@ -220,7 +220,7 @@
       <dependency>
         <groupId>com.twitter.hraven</groupId>
         <artifactId>hraven-core</artifactId>
-        <version>${hraven.version}</version>
+        <version>${twitter.hraven.version}</version>
         <scope>provided</scope>
       </dependency>  
       <dependency>
