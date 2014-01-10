@@ -69,6 +69,9 @@
     <apache.hadoop.version>0.22.0</apache.hadoop.version>
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
+    <cascading.version>2.5.0-wip-77</cascading.version>
+    <scalding.version>0.9.0rc4</scalding.version>
+    <scala.version>2.9.2</scala.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -87,6 +90,11 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ambrose-hive</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-cascading</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -173,11 +181,13 @@
             <artifactId>jetty</artifactId>
           </exclusion>
         </exclusions>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-mapred</artifactId>
         <version>${apache.hadoop.version}</version>
+        <scope>provided</scope>
       </dependency>
 
       <!-- pig -->
@@ -203,6 +213,62 @@
         <artifactId>hive-cli</artifactId>
         <version>${apache.hive.version}</version>
       </dependency>
+
+      <!-- cascading -->
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-core</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-local</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-hadoop</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-xml</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-platform</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!-- scalding -->
+         
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-compiler</artifactId>
+        <version>${scala.version}</version>
+        <scope>compile</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+     <dependency>
+       <groupId>com.twitter</groupId>
+       <artifactId>scalding-core_2.9.3</artifactId>
+       <version>${scalding.version}</version>
+       <scope>provided</scope>
+     </dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -346,5 +412,7 @@
     <module>common</module>
     <module>pig</module>
     <module>hive</module>
+    <module>cascading</module>
+    <module>scalding</module>
   </modules>
 </project>
