@@ -26,4 +26,4 @@ Note: ```tfidfFlow``` is the Flow of the Cascading example
 
 ## Authors
 * [Ahmed Mohsen](https://github.com/Ahmed--Mohsen) ([@Ahmed__Mohsen](https://twitter.com/Ahmed__Mohsen))
-* Ahmed Eshra ([@engeshra](https://twitter.com/engeshra))
+* [Ahmed Eshra](https://github.com/engeshra) ([@engeshra](https://twitter.com/engeshra))
