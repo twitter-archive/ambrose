@@ -124,7 +124,7 @@ public class AmbroseCascadingNotifierFactory {
     String clazz = System.getenv("AMBROSE_NOTIFIER_CLASS");
     try {
       Properties props = readProperties();
-      if(clazz == null) { clazz = props.getProperty("ambrose.notifer.class"); }
+      if(clazz == null) { clazz = props.getProperty("ambrose.notifier.class"); }
 
       if(clazz == null || clazz.length() == 0) {
         try {

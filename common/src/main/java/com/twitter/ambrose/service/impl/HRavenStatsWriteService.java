@@ -50,10 +50,10 @@ import com.twitter.ambrose.util.JSONUtil;
 /** StatsWriteService to send statistics to HRaven
   * Requires that HRAVEN_HBASE_CONF_DIR environment variable be set to point to 
   * to a directory with hbase-site.xml for configuration.
-  * Also, JoobConf must contain a batch.desc property for the job name, that will
+  * Also, JobConf must contain a batch.desc property for the job name, that will
   * be used as a part of workflowid. 
-  * The subclass and override getJobConf() to return a configuration object (for lazy
-  * initialization) or use @link HRavenStatsWriteService#forJob to instantiate a 
+  * Subclass and override getJobConf() to return a configuration object (for lazy
+  * initialization) or use {@link HRavenStatsWriteService#forJob} to instantiate a 
   * service given a config.
   */
 public abstract class HRavenStatsWriteService implements StatsWriteService<Job> {
