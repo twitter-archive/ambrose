@@ -13,6 +13,14 @@
   <artifactId>ambrose-scalding</artifactId>
   <name>Ambrose Scalding</name>
 
+  <!--
+
+    The following repo hosts the work-in-progress cascading deps required by the ambrose-cascading
+    module.
+
+    TODO(Andy Schlaikjer): Remove this once updates to cascading hit maven central.
+
+  -->
   <repositories>
     <repository>
       <id>conjars.org</id>
@@ -20,98 +28,48 @@
     </repository>
   </repositories>
 
-
   <dependencies>
     <!-- ambrose -->
-
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>ambrose-cascading</artifactId>
     </dependency>
 
-     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-compiler</artifactId>
-     </dependency>
-
-     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-library</artifactId>
-     </dependency>
-
+    <!-- scala -->
     <dependency>
-       <groupId>com.twitter</groupId>
-       <artifactId>scalding-core_2.9.3</artifactId>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-compiler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
     </dependency>
 
+    <!-- scalding -->
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scalding-core_2.9.3</artifactId>
+    </dependency>
+
+    <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapred</artifactId>
     </dependency>
-
-
   </dependencies>
 
   <build>
     <plugins>
+
+      <!-- compile scala -->
       <plugin>
-          <groupId>net.alchim31.maven</groupId>
-          <artifactId>scala-maven-plugin</artifactId>
-          <version>3.0.1</version>
-        <executions>
-          <execution>
-            <id>scala-compile-first</id>
-            <phase>process-resources</phase>
-            <configuration>
-              <args>
-                <param>-unchecked</param>
-                <param>-deprecation</param>
-                <param>-encoding</param>
-                <param>utf8</param>
-              </args>
-            </configuration>
-            <goals>
-              <goal>add-source</goal>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>scala-test-compile</id>
-            <phase>process-test-resources</phase>
-            <configuration>
-              <args>
-                <param>-unchecked</param>
-                <param>-deprecation</param>
-                <param>-encoding</param>
-                <param>utf8</param>
-              </args>
-            </configuration>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
       </plugin>
 
+      <!-- compile java -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
-            <showDeprecation>true</showDeprecation>
-            <showWarnings>true</showWarnings>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-
+	<artifactId>maven-compiler-plugin</artifactId>
       </plugin>
 
     </plugins>

@@ -247,21 +247,18 @@
       </dependency>
 
       <!-- scalding -->
-         
       <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-compiler</artifactId>
         <version>${scala.version}</version>
         <scope>compile</scope>
       </dependency>
-
       <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
         <version>${scala.version}</version>
         <scope>provided</scope>
       </dependency>
-
      <dependency>
        <groupId>com.twitter</groupId>
        <artifactId>scalding-core_2.9.3</artifactId>
@@ -288,6 +285,7 @@
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
+            <showDeprecation>true</showDeprecation>
             <optimize>true</optimize>
           </configuration>
         </plugin>
@@ -310,6 +308,44 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.12</version>
+        </plugin>
+
+        <!-- scala compilation; by default scala compiled before java -->
+        <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>3.0.1</version>
+          <configuration>
+            <displayCmd>true</displayCmd>
+            <args>
+              <param>-unchecked</param>
+              <param>-deprecation</param>
+              <param>-encoding</param>
+              <param>utf8</param>
+            </args>
+          </configuration>
+          <executions>
+            <execution>
+              <id>scala-add-sources</id>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>scala-main-compile</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>scala-test-compile</id>
+              <phase>process-test-resources</phase>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <!-- package types -->
@@ -340,6 +376,20 @@
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.3</version>
+          <executions>
+            <execution>
+              <id>make-assembly</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <descriptors>
+                  <descriptor>src/main/assembly/bin.xml</descriptor>
+                </descriptors>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
