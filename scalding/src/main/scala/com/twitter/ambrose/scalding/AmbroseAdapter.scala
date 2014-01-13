@@ -16,7 +16,7 @@ limitations under the License.
 package com.twitter.ambrose.scalding
 
 import cascading.flow.Flow
-import com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier
+import com.twitter.ambrose.cascading.AmbroseCascadingNotifierFactory
 import com.twitter.scalding.Job
 import org.apache.hadoop.mapreduce.JobContext
 
@@ -31,7 +31,7 @@ trait AmbroseAdapter extends Job {
   override def buildFlow: Flow[_] = {
 
     val flow = super.buildFlow
-    val server = new EmbeddedAmbroseCascadingNotifier
+    val server = AmbroseCascadingNotifierFactory.createNotifier(flow)
 
     flow.addListener(server)
     flow.addStepListener(server)

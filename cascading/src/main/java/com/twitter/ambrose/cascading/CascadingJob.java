@@ -43,7 +43,10 @@ import cascading.stats.hadoop.HadoopStepStats;
  * It represents FlowStepJob and all related job metrics will be captured using HadoopStepStats class
  * @author Ahmed Mohsen
  */
-@JsonTypeName("cascading")
+
+// FIXME: this makes this deserialize into PigJob on the hraven side, so that it does not need
+// to be rebuilt to work with cascading
+@JsonTypeName("pig")
 public class CascadingJob extends Job{
   protected static Log LOG = LogFactory.getLog(CascadingJob.class);
 
