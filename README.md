@@ -46,7 +46,7 @@ triggered; Moving your mouse over the first row of the table will highlight that
 along with the job's node in the graph diagram. Clicking on a job in any view will select it,
 updating the highlighting of that job in all views. Clicking again on the same job will deselect it.
 
-![Ambrose workflow screenshot](img/ambrose-demo.gif)
+![Ambrose workflow screenshot](docs/img/ambrose-demo.gif)
 
 ## Quickstart
 
