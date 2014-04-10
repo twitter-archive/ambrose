@@ -319,11 +319,13 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       try {
     	  runningJob = jobClientLocal.getJob(id);
       } catch (Exception e) {
-    	  // ignore
+    	  log.warn("Exception while querying job status for jobId=" + id +" message: " + e.getMessage());
+    	  log.debug(e);
+    	  return;
       }
       
       if (runningJob == null) {
-          log.warn("Couldn't find job status for jobId=" + pigJob.getId());
+          log.warn("Couldn't find job status for jobId=" + id);
           return;
       }
       
