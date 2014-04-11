@@ -331,10 +331,12 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       
       Properties jobConfProperties = getJobConfFromFile(runningJob);
 
+      JobID jobID = null;
       try {
-        JobID jobID = runningJob.getID();
-      } catch (NullPointerException npe) {
+        jobID = runningJob.getID();
+      } catch (NullPointerException e) {
         log.warn("Couldn't get jobID for runningJob.");
+        return;
       }
       
       TaskReport[] mapTaskReport = jobClientLocal.getMapTaskReports(jobID);
