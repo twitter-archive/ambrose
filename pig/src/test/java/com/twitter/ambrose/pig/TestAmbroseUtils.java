@@ -20,7 +20,6 @@ public class TestAmbroseUtils {
     @Override
     public void initialPlanNotification(String arg0, MROperPlan arg1) {
       throw new UnsupportedOperationException("NYI");
-
     }
 
     @Override

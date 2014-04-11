@@ -19,23 +19,23 @@ public class AmbroseUtil {
   public static PigProgressNotificationListener newPPNLWithoutExceptions(final PigProgressNotificationListener ppnl) {
     return (PigProgressNotificationListener)
         Proxy.newProxyInstance(
-            AmbroseUtil.class.getClassLoader(), 
-            new Class[] {PigProgressNotificationListener.class}, 
-            new InvocationHandler() {
+          AmbroseUtil.class.getClassLoader(), 
+          new Class[] {PigProgressNotificationListener.class}, 
+          new InvocationHandler() {
 
-              @Override
-              public Object invoke(Object proxy, Method method, Object[] args)
-                  throws Throwable {
-                try {
-                  return method.invoke(ppnl, args);
-                } catch (InvocationTargetException e) {
-                  log.warn("Exception while calling " + method.getName() + 
-                      " Message:" + e.getTargetException().getLocalizedMessage() + ". Ignoring...");
-                  log.debug(e.getTargetException());
-                }
-                return null;
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args)
+                throws Throwable {
+              try {
+                return method.invoke(ppnl, args);
+              } catch (InvocationTargetException e) {
+                log.warn("Exception while calling " + method.getName() + 
+                    " Message:" + e.getTargetException().getLocalizedMessage() + ". Ignoring...");
+                log.debug(e.getTargetException());
               }
-            });
+              return null;
+            }
+          });
   }
 
 }
