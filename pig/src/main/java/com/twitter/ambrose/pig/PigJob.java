@@ -49,18 +49,11 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 public class PigJob extends Job {
   protected static Log LOG = LogFactory.getLog(PigJob.class);
 
-  private String[] aliases;
-  private String[] features;
-  private MapReduceJobState mapReduceJobState;
   private List<InputInfo> inputInfoList;
   private List<OutputInfo> outputInfoList;
 
-  private Map<String, CounterGroup> counterGroupMap;
-
   public PigJob(String[] aliases, String[] features) {
-    super();
-    this.aliases = aliases;
-    this.features = features;
+    super(aliases, features);
   }
 
   @JsonCreator
