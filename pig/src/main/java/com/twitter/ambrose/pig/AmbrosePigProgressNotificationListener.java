@@ -149,8 +149,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void jobStartedNotification(String scriptId, String assignedJobId) {
-    log.info("jobStartedNotification - jobId " + assignedJobId + ", jobGraph:\n" + getJobGraph());
-
     // for each job in the graph, check if the stats for a job with this name is found. If so, look
     // up it's scope and bind the jobId to the DAGNode with the same scope.
     for (JobStats jobStats : getJobGraph()) {
@@ -220,7 +218,6 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    */
   @Override
   public void launchCompletedNotification(String scriptId, int numJobsSucceeded) {
-
     if (workflowVersion == null) {
       log.warn("scriptFingerprint not set for this script - not saving stats." );
     } else {
@@ -318,21 +315,30 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
     try {
       String id = pigJob.getId();
-      RunningJob runningJob = jobClientLocal.getJob(id);
-      Properties jobConfProperties = getJobConfFromFile(runningJob);
-
-      if (runningJob == null) {
-        log.warn("Couldn't find job status for jobId=" + pigJob.getId());
-        return;
+      RunningJob runningJob = null;
+      try {
+    	  runningJob = jobClientLocal.getJob(id);
+      } catch (Exception e) {
+    	  log.warn("Exception while querying job status for jobId=" + id +" message: " + e.getMessage());
+    	  log.debug(e);
+    	  return;
       }
+      
+      if (runningJob == null) {
+          log.warn("Couldn't find job status for jobId=" + id);
+          return;
+      }
+      
+      Properties jobConfProperties = getJobConfFromFile(runningJob);
 
       JobID jobID = null;
       try {
         jobID = runningJob.getID();
       } catch (NullPointerException e) {
-        log.warn("Couldn't get JobID for runningId.");
+        log.warn("Couldn't get jobID for runningJob.");
         return;
       }
+      
       TaskReport[] mapTaskReport = jobClientLocal.getMapTaskReports(jobID);
       TaskReport[] reduceTaskReport = jobClientLocal.getReduceTaskReports(jobID);
       if (jobConfProperties != null && jobConfProperties.size() > 0) {
