@@ -46,7 +46,7 @@
     <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapred</artifactId>
+      <artifactId>hadoop-core</artifactId>
     </dependency>
 
     <!-- cascading -->
