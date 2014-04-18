@@ -17,12 +17,13 @@ import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 
-import com.twitter.ambrose.model.DAGNode;
+import com.google.common.collect.Maps;
 import com.twitter.ambrose.model.Event;
-import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.service.StatsWriteService;
 
-public class MapReduceUtils {
+public final class MapReduceUtils {
+  
+  private MapReduceUtils() {}
 
   static Log log = LogFactory.getLog(MapReduceUtils.class);
 
@@ -102,5 +103,11 @@ public class MapReduceUtils {
     } catch (IOException e) {
       log.error("Couldn't send event to StatsWriteService", e);
     }
+  }
+  
+  public static void pushWorkflowProgressEvent(StatsWriteService statsWriteService, String scriptId, int progress) {
+    Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
+    eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
+    pushEvent(statsWriteService, scriptId, new Event.WorkflowProgressEvent(eventData));
   }
 }
