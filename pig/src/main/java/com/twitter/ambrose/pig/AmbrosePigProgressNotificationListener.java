@@ -44,6 +44,7 @@ import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceUtils;
 import com.twitter.ambrose.service.StatsWriteService;
+import com.twitter.ambrose.util.AmbroseUtils;
 
 /**
  * PigProgressNotificationListener that collects plan and job information from within a Pig runtime,
@@ -132,7 +133,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       node.setSuccessors(successorNodeList);
     }
 
-    MapReduceUtils.sendDagNodeNameMap(statsWriteService, scriptId, dagNodeNameMap);
+    AmbroseUtils.sendDagNodeNameMap(statsWriteService, scriptId, dagNodeNameMap);
   }
 
   /**
@@ -163,7 +164,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         MapReduceUtils.addMapReduceJobState(job, jobClient);
 
         dagNodeJobIdMap.put(job.getId(), node);
-        MapReduceUtils.pushEvent(statsWriteService, scriptId, new Event.JobStartedEvent(node));
+        AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobStartedEvent(node));
       }
     }
   }
@@ -188,7 +189,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     addCompletedJobStats(node.getJob(), stats);
-    MapReduceUtils.pushEvent(statsWriteService, scriptId, new Event.JobFailedEvent(node));
+    AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobFailedEvent(node));
   }
 
   /**
@@ -206,7 +207,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     }
 
     addCompletedJobStats(node.getJob(), stats);
-    MapReduceUtils.pushEvent(statsWriteService, scriptId, new Event.JobFinishedEvent(node));
+    AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobFinishedEvent(node));
   }
 
   /**
@@ -237,7 +238,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     // first we report the scripts progress
     Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
     eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
-    MapReduceUtils.pushEvent(statsWriteService, scriptId, new Event.WorkflowProgressEvent(eventData));
+    AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.WorkflowProgressEvent(eventData));
 
     // then for each running job, we report the job progress
     for (DAGNode<PigJob> node : dagNodeNameMap.values()) {
@@ -253,7 +254,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       MapReduceUtils.addMapReduceJobState(node.getJob(), jobClient);
 
       if (node.getJob().getMapReduceJobState() != null) {       
-        MapReduceUtils.pushEvent(statsWriteService, scriptId, new Event.JobProgressEvent(node));
+        AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobProgressEvent(node));
 
         if (node.getJob().getMapReduceJobState().isComplete()) {
           completedJobIds.add(node.getJob().getId());

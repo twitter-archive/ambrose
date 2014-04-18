@@ -1,7 +1,6 @@
 package com.twitter.ambrose.model.hadoop;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
@@ -17,15 +16,11 @@ import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 
-import com.google.common.collect.Maps;
-import com.twitter.ambrose.model.Event;
-import com.twitter.ambrose.service.StatsWriteService;
-
 public final class MapReduceUtils {
   
   private MapReduceUtils() {}
 
-  static Log log = LogFactory.getLog(MapReduceUtils.class);
+  private static Log log = LogFactory.getLog(MapReduceUtils.class);
 
   private static MapReduceJobState getMapReduceJobState(String jobId, JobClient jobClient) {
     try {
@@ -87,27 +82,5 @@ public final class MapReduceUtils {
       log.warn("Error occurred when retrieving configuration info." + e.getMessage());
     }
     job.setConfiguration(jobConfProperties);
-  }
-  
-  public static void sendDagNodeNameMap(StatsWriteService statsWriteService, String scriptId, Map dagNodeNameMap) {
-    try {
-      statsWriteService.sendDagNodeNameMap(scriptId, dagNodeNameMap);
-    } catch (IOException e) {
-      log.error("Couldn't send dag to StatsWriteService", e);
-    }
-  }
-
-  public static void pushEvent(StatsWriteService statsWriteService, String scriptId, Event event) {
-    try {
-      statsWriteService.pushEvent(scriptId, event);
-    } catch (IOException e) {
-      log.error("Couldn't send event to StatsWriteService", e);
-    }
-  }
-  
-  public static void pushWorkflowProgressEvent(StatsWriteService statsWriteService, String scriptId, int progress) {
-    Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
-    eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
-    pushEvent(statsWriteService, scriptId, new Event.WorkflowProgressEvent(eventData));
   }
 }

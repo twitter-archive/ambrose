@@ -40,6 +40,7 @@ import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.MapReduceUtils;
 import com.twitter.ambrose.service.StatsWriteService;
+import com.twitter.ambrose.util.AmbroseUtils;
 
 /**
  * CascadingNotifier that collects plan and job information from within a cascading
@@ -100,7 +101,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     AmbroseCascadingGraphConverter convertor =
         new AmbroseCascadingGraphConverter((SimpleDirectedGraph) Flows.getStepGraphFrom(flow), dagNodeNameMap);
     convertor.convert();
-    MapReduceUtils.sendDagNodeNameMap(statsWriteService, null, this.dagNodeNameMap);
+    AmbroseUtils.sendDagNodeNameMap(statsWriteService, null, this.dagNodeNameMap);
   }
 
   /**
@@ -167,7 +168,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
       MapReduceUtils.addMapReduceJobState(job, jc);
 
       dagNodeJobIdMap.put(job.getId(), node);
-      MapReduceUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobStartedEvent(node));
+      AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobStartedEvent(node));
     }
   }
 
@@ -188,7 +189,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
         return;
       }
       addCompletedJobStats(node.getJob(), stats);
-      MapReduceUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobFinishedEvent(node));
+      AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobFinishedEvent(node));
   }
 
   /**
@@ -210,7 +211,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
       return false;
     }
     addCompletedJobStats(node.getJob(), stats);
-    MapReduceUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobFailedEvent(node));
+    AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobFailedEvent(node));
     return false;
   }
 
@@ -227,7 +228,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
 
     // first we report the scripts progress
     int progress = (int) (((runnigJobs * 1.0) / totalNumberOfJobs) * 100);
-    MapReduceUtils.pushWorkflowProgressEvent(statsWriteService, currentFlowId, progress);
+    AmbroseUtils.pushWorkflowProgressEvent(statsWriteService, currentFlowId, progress);
 
     //get job node
     String jobId = stats.getJobID();
@@ -245,7 +246,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     MapReduceUtils.addMapReduceJobState(node.getJob(), jc);
 
     if (node.getJob().getMapReduceJobState() != null) {
-      MapReduceUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobProgressEvent(node));
+      AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobProgressEvent(node));
       
       if (node.getJob().getMapReduceJobState().isComplete()) {
         completedJobIds.add(node.getJob().getId());
