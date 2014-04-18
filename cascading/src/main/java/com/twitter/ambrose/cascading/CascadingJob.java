@@ -16,78 +16,38 @@ limitations under the License.
 
 package com.twitter.ambrose.cascading;
 
-import java.util.Map;
 import java.util.HashMap;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.Counters.Counter;
 
-import com.twitter.ambrose.util.JSONUtil;
-import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.hadoop.CounterGroup;
-import com.twitter.ambrose.model.hadoop.MapReduceJobState;
-
 import cascading.stats.hadoop.HadoopStepStats;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.twitter.ambrose.model.Job;
+import com.twitter.ambrose.model.hadoop.CounterGroup;
+import com.twitter.ambrose.model.hadoop.MapReduceJob;
+import com.twitter.ambrose.util.JSONUtil;
+
 /**
- * Subclass of Job used to hold initialization logic and Cascading-specific bindings for a Job.
+ * Subclass of MapReduceJob used to hold initialization logic and Cascading-specific bindings for a Job.
  * It represents FlowStepJob and all related job metrics will be captured using HadoopStepStats class
  * @author Ahmed Mohsen
  */
 @JsonTypeName("cascading")
-public class CascadingJob extends Job{
+public class CascadingJob extends MapReduceJob {
   protected static Log LOG = LogFactory.getLog(CascadingJob.class);
-
-  private String[] aliases;
-  private String[] features;
-  private MapReduceJobState mapReduceJobState;
-  // TODO: inputInfoList and outputInfoList?
-
-  private Map<String, CounterGroup> counterGroupMap;
-
-  public CascadingJob(String[] aliases, String[] features) {
+  
+  public CascadingJob() {
     super();
-    this.aliases = aliases;
-    this.features = features;
-    // TODO: inputInfoList and outputInfoList?
-
   }
 
-  @JsonCreator
-  public CascadingJob(@JsonProperty("id") String id,
-                 @JsonProperty("aliases") String[] aliases,
-                 @JsonProperty("features") String[] features,
-                 @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-                 @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
-    this(aliases, features);
-    setId(id);
-    this.mapReduceJobState = mapReduceJobState;
-    this.counterGroupMap = counterGroupMap;
-  }
-
-  public String[] getAliases() { return aliases; }
-  public String[] getFeatures() { return features; }
-
-  public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
-  public void setMapReduceJobState(MapReduceJobState mapReduceJobState) {
-    this.mapReduceJobState = mapReduceJobState;
-  }
-
-  public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
-  public CounterGroup getCounterGroupInfo(String name) {
-    return counterGroupMap == null ? null : counterGroupMap.get(name);
-  }
-
-    @JsonIgnore
+  @JsonIgnore
   public void setJobStats(HadoopStepStats stats) {
     Map<String, Long> counterNameToValue = counterGroupInfoMapHelper(stats);
 
@@ -136,11 +96,24 @@ public class CascadingJob extends Job{
          counter.setValue(counterValue);
        }
      }
-     this.counterGroupMap = CounterGroup.counterGroupInfoMap(counters);
+     setCounterGroupMap(CounterGroup.counterGroupInfoMap(counters));
      return counterNameToValue;
    }
+   
+   private Double getCounterValue(Map<String, Long> counterNameToValue, MetricsCounter hjc) {
+     String[] keys = MetricsCounter.get(hjc);
+     if(counterNameToValue.get(keys[1]) == null)
+       return Double.valueOf(0.0d);
+     return (counterNameToValue.get(keys[0]) == null) ? counterNameToValue.get(keys[1]).doubleValue()
+         : counterNameToValue.get(keys[0]).doubleValue();
+   }
 
-
+   private Double getAvgCounterValue(Map<String, Long> counterNameToValue, MetricsCounter hjc, int divisor) {
+     if (divisor == 0) {
+       return Double.valueOf(0.0d);
+     }
+     return getCounterValue(counterNameToValue, hjc) / Double.valueOf((double)divisor);
+   }
 
   /**
    * This is a hack to get around how the json library requires subtype info to
@@ -161,20 +134,4 @@ public class CascadingJob extends Job{
       @JsonSubTypes.Type(value = com.twitter.ambrose.model.Job.class, name = "default"),
       @JsonSubTypes.Type(value = com.twitter.ambrose.cascading.CascadingJob.class, name = "cascading") })
   private static class AnnotationMixinClass {}
-
-  private Double getCounterValue(Map<String, Long> counterNameToValue, MetricsCounter hjc) {
-    String[] keys = MetricsCounter.get(hjc);
-    if(counterNameToValue.get(keys[1]) == null)
-      return Double.valueOf(0.0d);
-    return (counterNameToValue.get(keys[0]) == null) ? counterNameToValue.get(keys[1]).doubleValue()
-        : counterNameToValue.get(keys[0]).doubleValue();
-  }
-
-  private Double getAvgCounterValue(Map<String, Long> counterNameToValue, MetricsCounter hjc, int divisor) {
-    if (divisor == 0) {
-      return Double.valueOf(0.0d);
-    }
-    return getCounterValue(counterNameToValue, hjc) / Double.valueOf((double)divisor);
-  }
-
 }

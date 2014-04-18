@@ -20,25 +20,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
-import com.twitter.ambrose.util.JSONUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
-import com.twitter.ambrose.model.hadoop.MapReduceJobState;
+import com.twitter.ambrose.model.hadoop.MapReduceJob;
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
- * Subclass of Job used to hold initialization logic and Pig-specific bindings for a Job.
+ * Subclass of MapReduceJob used to hold initialization logic and Pig-specific bindings for a Job.
  * Encapsulates all information related to a run of a Pig job. A job might have multiple inputs and
  * outputs, as well as counters, job configuration and job metrics. Job metrics is metadata about
  * the job run that isn't set in the job configuration.
@@ -46,48 +45,27 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
  * @author billg
  */
 @JsonTypeName("pig")
-public class PigJob extends Job {
+public class PigJob extends MapReduceJob {
   protected static Log LOG = LogFactory.getLog(PigJob.class);
 
   private List<InputInfo> inputInfoList;
   private List<OutputInfo> outputInfoList;
-
-  public PigJob(String[] aliases, String[] features) {
-    super(aliases, features);
+  
+  public PigJob() {
+    super();
   }
 
   @JsonCreator
-  public PigJob(@JsonProperty("id") String id,
-                @JsonProperty("aliases") String[] aliases,
-                @JsonProperty("features") String[] features,
-                @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-                @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
-                @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
+  public PigJob(@JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
                 @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    this(aliases, features);
-    setId(id);
-    this.mapReduceJobState = mapReduceJobState;
-    this.counterGroupMap = counterGroupMap;
+    super();
     this.inputInfoList = inputInfoList;
     this.outputInfoList = outputInfoList;
   }
 
-  public String[] getAliases() { return aliases; }
-  public String[] getFeatures() { return features; }
-
-  public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
-  public void setMapReduceJobState(MapReduceJobState mapReduceJobState) {
-    this.mapReduceJobState = mapReduceJobState;
-  }
-
-  public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
-  public CounterGroup getCounterGroupInfo(String name) {
-    return counterGroupMap == null ? null : counterGroupMap.get(name);
-  }
-
   @JsonIgnore
   public void setJobStats(JobStats stats) {
-    this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
+    setCounterGroupMap(CounterGroup.counterGroupInfoMap(stats.getHadoopCounters()));
     this.inputInfoList = inputInfoList(stats.getInputs());
     this.outputInfoList = outputInfoList(stats.getOutputs());
 
