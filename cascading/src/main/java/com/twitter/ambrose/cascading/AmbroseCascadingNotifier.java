@@ -38,7 +38,7 @@ import com.google.common.collect.Maps;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.hadoop.MapReduceUtils;
+import com.twitter.ambrose.model.hadoop.MapReduceHelper;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.util.AmbroseUtils;
 
@@ -66,6 +66,8 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
   private int runnigJobs;
   private String currentFlowId;   //id of the flow being excuted
 
+  private MapReduceHelper mapReduceHelper = new MapReduceHelper();
+  
   /**
    * Initialize this class with an instance of StatsWriteService to push stats
    * to.
@@ -165,7 +167,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
       CascadingJob job = node.getJob();
       job.setId(assignedJobId);
       job.setJobStats(stats);
-      MapReduceUtils.addMapReduceJobState(job, jc);
+      mapReduceHelper.addMapReduceJobState(job, jc);
 
       dagNodeJobIdMap.put(job.getId(), node);
       AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobStartedEvent(node));
@@ -243,7 +245,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
       return;
     }
     
-    MapReduceUtils.addMapReduceJobState(node.getJob(), jc);
+    mapReduceHelper.addMapReduceJobState(node.getJob(), jc);
 
     if (node.getJob().getMapReduceJobState() != null) {
       AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobProgressEvent(node));

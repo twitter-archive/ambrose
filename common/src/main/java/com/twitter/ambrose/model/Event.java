@@ -47,7 +47,7 @@ import com.twitter.ambrose.util.JSONUtil;
 public class Event<T> {
   private static AtomicInteger NEXT_ID = new AtomicInteger();
 
-  public static enum Type { JOB_STARTED, JOB_FINISHED, JOB_FAILED, JOB_UNKNOWN, JOB_PROGRESS, WORKFLOW_PROGRESS }
+  public static enum Type { JOB_STARTED, JOB_FINISHED, JOB_FAILED, JOB_PROGRESS, WORKFLOW_PROGRESS }
 
   public static enum WorkflowProgressField {
     workflowProgress

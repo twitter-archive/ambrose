@@ -16,13 +16,16 @@ import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 
-public final class MapReduceUtils {
-  
-  private MapReduceUtils() {}
+/**
+ * 
+ * @author amokashi
+ *
+ */
+public class MapReduceHelper {
 
-  private static Log log = LogFactory.getLog(MapReduceUtils.class);
+  private static Log log = LogFactory.getLog(MapReduceHelper.class);
 
-  private static MapReduceJobState getMapReduceJobState(String jobId, JobClient jobClient) {
+  private MapReduceJobState getMapReduceJobState(String jobId, JobClient jobClient) {
     try {
       RunningJob runningJob = jobClient.getJob(jobId);
       if (runningJob == null) {
@@ -41,7 +44,13 @@ public final class MapReduceUtils {
     return null;
   }
   
-  public static void addMapReduceJobState(MapReduceJob job, JobClient jobClient) {
+  /**
+   * set the mapreduce statistics by querying the jobtracker
+   * This method only sets the mapreduce statistics if they are queried successfully
+   * @param job Mapreduce job to query mapreduce statistics for
+   * @param jobClient 
+   */
+  public void addMapReduceJobState(MapReduceJob job, JobClient jobClient) {
     MapReduceJobState state = getMapReduceJobState(job.getId(), jobClient);
     // only set if we can successfully get it
     if (state != null) {

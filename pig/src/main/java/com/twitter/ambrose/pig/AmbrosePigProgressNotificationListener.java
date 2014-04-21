@@ -42,7 +42,7 @@ import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.Workflow;
-import com.twitter.ambrose.model.hadoop.MapReduceUtils;
+import com.twitter.ambrose.model.hadoop.MapReduceHelper;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.util.AmbroseUtils;
 
@@ -65,6 +65,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private Set<String> completedJobIds = Sets.newHashSet();
   private JobClient jobClient;
   private PigStats.JobGraph jobGraph;
+  
+  private MapReduceHelper mapReduceHelper = new MapReduceHelper();
 
   /**
    * Initialize this class with an instance of StatsWriteService to push stats to.
@@ -161,7 +163,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
         PigJob job = node.getJob();
         job.setId(assignedJobId);
-        MapReduceUtils.addMapReduceJobState(job, jobClient);
+        mapReduceHelper.addMapReduceJobState(job, jobClient);
 
         dagNodeJobIdMap.put(job.getId(), node);
         AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobStartedEvent(node));
@@ -251,7 +253,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
         continue;
       }
 
-      MapReduceUtils.addMapReduceJobState(node.getJob(), jobClient);
+      mapReduceHelper.addMapReduceJobState(node.getJob(), jobClient);
 
       if (node.getJob().getMapReduceJobState() != null) {       
         AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobProgressEvent(node));

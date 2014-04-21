@@ -8,14 +8,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.collect.Maps;
 import com.twitter.ambrose.model.Event;
-import com.twitter.ambrose.model.hadoop.MapReduceUtils;
 import com.twitter.ambrose.service.StatsWriteService;
 
 public final class AmbroseUtils {
 
   private AmbroseUtils() {}
   
-  private static Log log = LogFactory.getLog(MapReduceUtils.class);
+  private static Log log = LogFactory.getLog(AmbroseUtils.class);
   
   /**
    * Handle and ignore any IOException while sending DagNodeNameMap to statsWriteService

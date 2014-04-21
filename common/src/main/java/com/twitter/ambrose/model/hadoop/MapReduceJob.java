@@ -29,8 +29,6 @@ import com.twitter.ambrose.model.Job;
  */
 @JsonTypeName("mapred")
 public class MapReduceJob extends Job {
-  private String[] aliases = {};
-  private String[] features = {};
   private MapReduceJobState mapReduceJobState;
   private Map<String, CounterGroup> counterGroupMap;
   
@@ -40,27 +38,11 @@ public class MapReduceJob extends Job {
   
   @JsonCreator
   public MapReduceJob(
-                 @JsonProperty("aliases") String[] aliases,
-                 @JsonProperty("features") String[] features,
                  @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
                  @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
     super();
-    this.aliases = aliases;
-    this.features = features;
     this.mapReduceJobState = mapReduceJobState;
     this.counterGroupMap = counterGroupMap;
-  }
-
-  public String[] getAliases() { return aliases; }
-  
-  public void setAliases(String[] aliases) {
-    this.aliases = aliases;
-  }
-
-  public String[] getFeatures() { return features; }
-
-  public void setFeatures(String[] features) {
-    this.features = features;
   }
   
   public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
