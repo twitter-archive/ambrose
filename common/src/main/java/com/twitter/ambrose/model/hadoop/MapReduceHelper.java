@@ -17,6 +17,10 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TaskReport;
 
 /**
+ * Helper utilities to get information about a mapreduce job.
+ * APIs-
+ * * Progress information of a job by communicating with jobtracker
+ * * Provides api to get configuration of the job
  * 
  * @author amokashi
  *
