@@ -31,7 +31,6 @@ public class MapReduceJobState {
   @JsonCreator
   public MapReduceJobState() { }
 
-  @SuppressWarnings("deprecation")
   public MapReduceJobState(RunningJob runningJob,
                            TaskReport[] mapTaskReport,
                            TaskReport[] reduceTaskReport) throws IOException {

@@ -1,20 +1,19 @@
 package com.twitter.ambrose.model;
 
-import com.twitter.ambrose.pig.PigJob;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.twitter.ambrose.pig.PigJob;
 
 /**
  * Unit tests for {@link com.twitter.ambrose.model.PigJobTest}.
@@ -32,9 +31,13 @@ public class PigJobTest {
     properties.setProperty("someprop", "propvalue");
     String[] aliases = new String[] { "alias1" };
     String[] features = new String[] { "feature1" };
-    pigJob = new PigJob(aliases, features);
     Map<String, Number> m = new HashMap<String, Number>();
     m.put("somemetric", 45);
+
+    pigJob = new PigJob();
+    pigJob.setAliases(aliases);
+    pigJob.setFeatures(features);
+    pigJob.setConfiguration(properties);
     pigJob.setMetrics(m);
   }
   

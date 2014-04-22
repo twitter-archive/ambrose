@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package com.twitter.ambrose.pig;
 
 import java.util.ArrayList;
@@ -20,25 +20,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
-import com.twitter.ambrose.util.JSONUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
-import com.twitter.ambrose.model.hadoop.MapReduceJobState;
+import com.twitter.ambrose.model.hadoop.MapReduceJob;
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
- * Subclass of Job used to hold initialization logic and Pig-specific bindings for a Job.
+ * Subclass of MapReduceJob used to hold initialization logic and Pig-specific bindings for a Job.
  * Encapsulates all information related to a run of a Pig job. A job might have multiple inputs and
  * outputs, as well as counters, job configuration and job metrics. Job metrics is metadata about
  * the job run that isn't set in the job configuration.
@@ -46,55 +45,33 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
  * @author billg
  */
 @JsonTypeName("pig")
-public class PigJob extends Job {
+public class PigJob extends MapReduceJob {
   protected static Log LOG = LogFactory.getLog(PigJob.class);
 
-  private String[] aliases;
-  private String[] features;
-  private MapReduceJobState mapReduceJobState;
+  private String[] aliases = {};
+  private String[] features = {};
   private List<InputInfo> inputInfoList;
   private List<OutputInfo> outputInfoList;
 
-  private Map<String, CounterGroup> counterGroupMap;
-
-  public PigJob(String[] aliases, String[] features) {
+  public PigJob() {
     super();
-    this.aliases = aliases;
-    this.features = features;
   }
 
   @JsonCreator
-  public PigJob(@JsonProperty("id") String id,
-                @JsonProperty("aliases") String[] aliases,
-                @JsonProperty("features") String[] features,
-                @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-                @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap,
-                @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
-                @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    this(aliases, features);
-    setId(id);
-    this.mapReduceJobState = mapReduceJobState;
-    this.counterGroupMap = counterGroupMap;
+  public PigJob(@JsonProperty("aliases") String[] aliases,
+    @JsonProperty("features") String[] features,
+    @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
+    @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
+    super();
+    this.aliases = aliases;
+    this.features = features;
     this.inputInfoList = inputInfoList;
     this.outputInfoList = outputInfoList;
   }
 
-  public String[] getAliases() { return aliases; }
-  public String[] getFeatures() { return features; }
-
-  public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
-  public void setMapReduceJobState(MapReduceJobState mapReduceJobState) {
-    this.mapReduceJobState = mapReduceJobState;
-  }
-
-  public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
-  public CounterGroup getCounterGroupInfo(String name) {
-    return counterGroupMap == null ? null : counterGroupMap.get(name);
-  }
-
   @JsonIgnore
   public void setJobStats(JobStats stats) {
-    this.counterGroupMap = CounterGroup.counterGroupInfoMap(stats.getHadoopCounters());
+    setCounterGroupMap(CounterGroup.counterGroupInfoMap(stats.getHadoopCounters()));
     this.inputInfoList = inputInfoList(stats.getInputs());
     this.outputInfoList = outputInfoList(stats.getOutputs());
 
@@ -122,6 +99,18 @@ public class PigJob extends Job {
     setMetrics(metrics);
   }
 
+  public String[] getAliases() { return aliases; }
+
+  public void setAliases(String[] aliases) {
+    this.aliases = aliases;
+  }
+
+  public String[] getFeatures() { return features; }
+
+  public void setFeatures(String[] features) {
+    this.features = features;
+  }
+
   private static List<InputInfo> inputInfoList(List<InputStats> inputStatsList) {
     List<InputInfo> inputInfoList = new ArrayList<InputInfo>();
     if (inputStatsList == null) { return inputInfoList; }
@@ -138,7 +127,7 @@ public class PigJob extends Job {
     if (outputStatsList == null) { return outputInfoList; }
 
     for (OutputStats outputStats : outputStatsList) {
-        outputInfoList.add(new PigOutputInfo(outputStats));
+      outputInfoList.add(new PigOutputInfo(outputStats));
     }
 
     return outputInfoList;
@@ -147,11 +136,11 @@ public class PigJob extends Job {
   private static class PigInputInfo extends InputInfo {
     private PigInputInfo(InputStats inputStats) {
       super(inputStats.getName(),
-        inputStats.getLocation(),
-        inputStats.getBytes(),
-        inputStats.getNumberRecords(),
-        inputStats.isSuccessful(),
-        enumToString(inputStats.getInputType()));
+          inputStats.getLocation(),
+          inputStats.getBytes(),
+          inputStats.getNumberRecords(),
+          inputStats.isSuccessful(),
+          enumToString(inputStats.getInputType()));
     }
 
     private static String enumToString(Enum<?> someEnum) {
@@ -162,12 +151,12 @@ public class PigJob extends Job {
   private static class PigOutputInfo extends OutputInfo {
     private PigOutputInfo(OutputStats outputStats) {
       super(outputStats.getName(),
-            outputStats.getLocation(),
-            outputStats.getBytes(),
-            outputStats.getNumberRecords(),
-            outputStats.isSuccessful(),
-            outputStats.getFunctionName(),
-            outputStats.getAlias());
+          outputStats.getLocation(),
+          outputStats.getBytes(),
+          outputStats.getNumberRecords(),
+          outputStats.isSuccessful(),
+          outputStats.getFunctionName(),
+          outputStats.getAlias());
     }
   }
 
@@ -184,8 +173,8 @@ public class PigJob extends Job {
   }
 
   @JsonSubTypes({
-      @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
-      @JsonSubTypes.Type(value=com.twitter.ambrose.pig.PigJob.class, name="pig")
+    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
+    @JsonSubTypes.Type(value=com.twitter.ambrose.pig.PigJob.class, name="pig")
   })
   private static class AnnotationMixinClass { }
 }

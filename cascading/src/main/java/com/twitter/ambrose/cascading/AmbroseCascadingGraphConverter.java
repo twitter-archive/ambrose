@@ -61,11 +61,11 @@ public class AmbroseCascadingGraphConverter {
     for (Object flowStep : vetices) {
       BaseFlowStep baseFlowStep = (BaseFlowStep) flowStep;
       String nodeName = baseFlowStep.getName();
-      String[] aliases = {};
       String[] features = getNodeFeatures(baseFlowStep.getGraph());
       // create a new DAGNode of this flowStep
-      CascadingJob job = new CascadingJob(aliases, features);
-      DAGNode newNode = new DAGNode(nodeName,job);
+      CascadingJob job = new CascadingJob();
+      job.setFeatures(features);
+      DAGNode newNode = new DAGNode(nodeName, job);
       // Add the new node to the Map of <nodeName, DAGNodes>
       dagNamesMap.put(nodeName, newNode);
     }
