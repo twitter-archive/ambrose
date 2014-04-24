@@ -19,10 +19,6 @@ import com.twitter.ambrose.pig.PigJob;
  * Unit tests for {@link com.twitter.ambrose.model.PigJobTest}.
  */
 public class PigJobTest {
-  static {
-    PigJob.mixinJsonAnnotations();
-  }
-
   PigJob pigJob;
 
   @Before
@@ -68,7 +64,7 @@ public class PigJobTest {
                    "  \"payload\" : {\n" +
                    "    \"name\" : \"scope-29\",\n" +
                    "    \"job\" : {\n" +
-                   "      \"runtime\" : \"pig\",\n" +
+                   "      \"@class\" : \"com.twitter.ambrose.pig.PigJob\",\n" +
                    "      \"id\" : \"job_local_0001\",\n" +
                    "      \"aliases\" : [ \"A\", \"AA\", \"B\", \"C\" ],\n" +
                    "      \"features\" : [ \"GROUP_BY\", \"COMBINER\", \"MAP_PARTIALAGG\" ],\n" +

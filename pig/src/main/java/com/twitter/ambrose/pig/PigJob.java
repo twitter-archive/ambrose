@@ -26,15 +26,9 @@ import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJob;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Subclass of MapReduceJob used to hold initialization logic and Pig-specific bindings for a Job.
@@ -44,7 +38,6 @@ import com.twitter.ambrose.util.JSONUtil;
  *
  * @author billg
  */
-@JsonTypeName("pig")
 public class PigJob extends MapReduceJob {
   protected static Log LOG = LogFactory.getLog(PigJob.class);
 
@@ -52,20 +45,32 @@ public class PigJob extends MapReduceJob {
   private String[] features = {};
   private List<InputInfo> inputInfoList;
   private List<OutputInfo> outputInfoList;
+  
+  public String[] getAliases() { return aliases; }
 
-  public PigJob() {
-    super();
+  public void setAliases(String[] aliases) {
+    this.aliases = aliases;
   }
 
-  @JsonCreator
-  public PigJob(@JsonProperty("aliases") String[] aliases,
-    @JsonProperty("features") String[] features,
-    @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
-    @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
-    super();
-    this.aliases = aliases;
+  public String[] getFeatures() { return features; }
+
+  public void setFeatures(String[] features) {
     this.features = features;
+  }
+
+  public List<InputInfo> getInputInfoList() {
+    return inputInfoList;
+  }
+
+  public void setInputInfoList(List<InputInfo> inputInfoList) {
     this.inputInfoList = inputInfoList;
+  }
+
+  public List<OutputInfo> getOutputInfoList() {
+    return outputInfoList;
+  }
+
+  public void setOutputInfoList(List<OutputInfo> outputInfoList) {
     this.outputInfoList = outputInfoList;
   }
 
@@ -97,18 +102,6 @@ public class PigJob extends MapReduceJob {
     metrics.put("SMMSpillCount", stats.getSMMSpillCount());
 
     setMetrics(metrics);
-  }
-
-  public String[] getAliases() { return aliases; }
-
-  public void setAliases(String[] aliases) {
-    this.aliases = aliases;
-  }
-
-  public String[] getFeatures() { return features; }
-
-  public void setFeatures(String[] features) {
-    this.features = features;
   }
 
   private static List<InputInfo> inputInfoList(List<InputStats> inputStatsList) {
@@ -159,22 +152,4 @@ public class PigJob extends MapReduceJob {
           outputStats.getAlias());
     }
   }
-
-  /**
-   * This is a hack to get around how the json library requires subtype info to be defined on the
-   * super-class, which doesn't always have access to the subclasses at compile time. Since the
-   * mixinAnnotations method replaces the existing annotation, this means that an action like this
-   * will need to be taken once upon app startup to register all known types. If this action
-   * happens multiple times, calls will override each other.
-   */
-  public static void mixinJsonAnnotations() {
-    LOG.info("Mixing in JSON annotations for PigJob and Job into Job");
-    JSONUtil.mixinAnnotatons(Job.class, AnnotationMixinClass.class);
-  }
-
-  @JsonSubTypes({
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
-    @JsonSubTypes.Type(value=com.twitter.ambrose.pig.PigJob.class, name="pig")
-  })
-  private static class AnnotationMixinClass { }
 }

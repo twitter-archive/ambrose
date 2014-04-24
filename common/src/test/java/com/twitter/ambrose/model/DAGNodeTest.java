@@ -2,7 +2,12 @@ package com.twitter.ambrose.model;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.collect.ImmutableList;
+import com.twitter.ambrose.util.JSONUtil;
 
 import org.junit.Test;
 

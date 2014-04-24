@@ -105,9 +105,13 @@ public class JSONUtil {
     }
   }
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = new ObjectMapper();
 
   static {
+    setMapperProperties();
+  }
+  
+  private static void setMapperProperties() {
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -116,9 +120,5 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-  }
-
-  public static void mixinAnnotatons(Class<?> target, Class<?> mixinSource) {
-    mapper.addMixInAnnotations(target, mixinSource);
   }
 }

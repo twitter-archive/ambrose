@@ -60,24 +60,4 @@ public class CascadingMapReduceJobState extends MapReduceJobState {
       setJobLastUpdateTime(System.currentTimeMillis());
     }
   }
-
-  /**
-   * This is a hack to get around how the json library requires subtype info to
-   * be defined on the super-class, which doesn't always have access to the
-   * subclasses at compile time. Since the mixinAnnotations method replaces the
-   * existing annotation, this means that an action like this will need to be
-   * taken once upon app startup to register all known types. If this action
-   * happens multiple times, calls will override each other.
-   *
-   * @see com.twitter.ambrose.pig.HiveJob#mixinJsonAnnotations()
-   */
-  public static void mixinJsonAnnotations() {
-
-    JSONUtil.mixinAnnotatons(MapReduceJobState.class, AnnotationMixinClass.class);
-  }
-
-  @JsonSubTypes({
-      @JsonSubTypes.Type(value = com.twitter.ambrose.model.hadoop.MapReduceJobState.class, name = "default"),
-      @JsonSubTypes.Type(value = com.twitter.ambrose.cascading.CascadingMapReduceJobState.class, name = "cascading") })
-  private static class AnnotationMixinClass {}
 }
