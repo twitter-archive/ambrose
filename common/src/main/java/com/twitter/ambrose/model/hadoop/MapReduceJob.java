@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.model.Job;
+import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Subclass of Job used to hold state information of a mapreduce job.
@@ -32,6 +33,12 @@ import com.twitter.ambrose.model.Job;
  */
 @JsonTypeName("mapred")
 public class MapReduceJob extends Job {
+  
+  static {
+    JSONUtil.registerSubtypes(MapReduceJob.class);
+  }
+
+  
   private MapReduceJobState mapReduceJobState;
   private Map<String, CounterGroup> counterGroupMap;
 

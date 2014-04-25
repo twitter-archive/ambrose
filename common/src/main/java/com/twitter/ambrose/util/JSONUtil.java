@@ -125,10 +125,6 @@ public class JSONUtil {
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     return mapper;
   }
-
-  public static void mixinAnnotatons(Class<?> target, Class<?> mixinSource) {
-    mapper.addMixInAnnotations(target, mixinSource);
-  }
   
   public static void registerSubtypes(Class<?> c) {
     // We need to reinitialize the mapper here in order 
