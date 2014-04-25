@@ -71,9 +71,8 @@
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
     </dependency>
-  </dependencies>
 
-  <!-- hraven -->
+    <!-- hraven -->
     <dependency>
        <groupId>com.twitter.hraven</groupId>
        <artifactId>hraven-core</artifactId>
@@ -82,4 +81,6 @@
        <groupId>org.apache.hbase</groupId>
        <artifactId>hbase</artifactId>
     </dependency>
+  
+  </dependencies>
 </project>
