@@ -24,6 +24,9 @@ import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -40,6 +43,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author billg
  */
 public class JSONUtil {
+  
+  private JSONUtil() {}
   /**
    * Writes object to the writer as JSON using Jackson and adds a new-line before flushing.
    *
@@ -105,9 +110,11 @@ public class JSONUtil {
     }
   }
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = newMapper();
+  private static List<Class<?>> subtypeList = new ArrayList<Class<?>>();
 
-  static {
+  private static ObjectMapper newMapper() {
+    ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -116,9 +123,18 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    return mapper;
   }
 
   public static void mixinAnnotatons(Class<?> target, Class<?> mixinSource) {
     mapper.addMixInAnnotations(target, mixinSource);
+  }
+  
+  public static void registerSubtypes(Class<?> c) {
+    // We need to reinitialize the mapper here in order 
+    // to register this subtype to the mapper
+    subtypeList.add(c);
+    mapper = newMapper();
+    mapper.registerSubtypes(subtypeList.toArray(new Class<?>[subtypeList.size()]));
   }
 }
