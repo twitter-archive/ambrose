@@ -16,17 +16,21 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.zookeeper.ZKUtil;
+import org.apache.hadoop.mapred.JobConf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.WorkflowId;
 import com.twitter.ambrose.service.StatsWriteService;
+import com.twitter.ambrose.util.JSONUtil;
 import com.twitter.hraven.Flow;
 import com.twitter.hraven.FlowEvent;
+import com.twitter.hraven.FlowEventKey;
 import com.twitter.hraven.FlowKey;
 import com.twitter.hraven.FlowQueueKey;
+import com.twitter.hraven.Framework;
 import com.twitter.hraven.JobDescFactory;
 import com.twitter.hraven.datasource.FlowEventService;
 import com.twitter.hraven.datasource.FlowQueueService;
@@ -47,6 +51,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private FlowQueueKey flowQueueKey;
   private Map<String, DAGNode<Job>> dagNodeNameMap;
   private static final int HRAVEN_POOL_SHUTDOWN_SECS = 5;
+  private JobConf jobConf;
 
   public HRavenStatsWriteService() {
     runningJobs = new HashSet<String>();
@@ -281,6 +286,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
     // This will return appid for pig, cascading consistent with hraven (only available in 0.9.13+)
     appId = JobDescFactory.getFrameworkSpecificJobDescFactory(jobConf).getAppId(jobConf);
 
+    // TODO runID could match with hraven's runId for easy navigation between two systems
     flowKey = new FlowKey(cluster, username, appId, System.currentTimeMillis());
 
     // create a new flow queue entry
@@ -298,15 +304,129 @@ public class HRavenStatsWriteService implements StatsWriteService {
   }
 
   @Override
-  public void sendDagNodeNameMap(String workflowId, Map dagNodeNameMap)
-      throws IOException {
-    // TODO Auto-generated method stub
-    
+  public void sendDagNodeNameMap(String workflowId,
+      Map dagNodeMap) throws IOException {
+    this.dagNodeNameMap = dagNodeMap;
+    lazyInitWorkflow();
+    updateFlowQueue(flowQueueKey);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void pushEvent(String workflowId, Event event) throws IOException {
-    // TODO Auto-generated method stub
-    
+    lazyInitWorkflow();
+
+    String eventDataJson = event.toJson();
+    switch (event.getType()) {
+      case WORKFLOW_PROGRESS:
+        updateWorkflowProgress((Map<Event.WorkflowProgressField, String>) event.getPayload());
+        break;
+      case JOB_STARTED:
+        updateJobStarted((DAGNode) event.getPayload());
+        break;
+      case JOB_FAILED:
+      case JOB_FINISHED:
+        updateJobComplete((DAGNode) event.getPayload(), event.getType());
+        break;
+      default:
+        break;
+    }
+
+    Preconditions.checkNotNull(flowKey, String.format(
+        "Can not push event type %s because flowKey is not set", event.getType()));
+    FlowEventKey eventKey = new FlowEventKey(flowKey, event.getId());
+    FlowEvent flowEvent = new FlowEvent(eventKey);
+    flowEvent.setTimestamp(event.getTimestamp());
+    flowEvent.setFramework(JobDescFactory.getFramework(jobConf));
+    flowEvent.setType(event.getType().name());
+
+    if (eventDataJson != null) {
+      flowEvent.setEventDataJSON(eventDataJson);
+    }
+
+    hRavenPool.submit(new HRavenEventRunnable(flowEventService, flowEvent));
+  }
+
+  /**
+   * Repersist the FlowQueue for this object.
+   *
+   * @param key key to the queue
+   * @throws IOException if things go bad
+   */
+  private void updateFlowQueue(FlowQueueKey key) throws IOException {
+    updateFlowQueue(key, null);
+  }
+
+  private void updateFlowQueue(FlowQueueKey key, Integer progress) throws IOException {
+    Flow flow = new Flow(flowKey);
+    if (progress != null) {
+      flow.setProgress(progress);
+    }
+    flow.setQueueKey(key);
+    flow.setFlowName(appId);
+    flow.setUserName(username);
+    flow.setJobGraphJSON(JSONUtil.toJson(dagNodeNameMap));
+    hRavenPool.submit(new HRavenQueueRunnable(flowQueueService, flowQueueKey, flow));
+  }
+
+  private void updateWorkflowProgress(Map<Event.WorkflowProgressField, String> progressMap)
+      throws IOException {
+    int progress = Integer.parseInt(
+        progressMap.get(Event.WorkflowProgressField.workflowProgress));
+
+    if (progress == 100) {
+      updateWorkflowStateIfDone();
+    }
+
+    updateFlowQueue(flowQueueKey, progress);
+  }
+
+  private String updateJobStarted(DAGNode node) throws IOException {
+    runningJobs.add(node.getJob().getId());
+    return node.toJson();
+  }
+
+  private void updateJobComplete(DAGNode node, Event.Type eventType)
+      throws IOException {
+    String jobId = node.getJob().getId();
+    switch (eventType) {
+      case JOB_FINISHED:
+        runningJobs.remove(jobId);
+        completedJobs.add(jobId);
+        break;
+      case JOB_FAILED:
+        runningJobs.remove(jobId);
+        failedJobs.add(jobId);
+        break;
+      default:
+        throw new IllegalArgumentException(
+            "Unrecognized Event type in updateJobInfo: " + eventType);
+    }
+
+    updateWorkflowStateIfDone();
+  }
+
+  private void updateWorkflowStateIfDone() throws IOException {
+    // see if we're done or not. We're done if no jobs are running and the sum of completed jobs
+    // is the size of the DAG
+    if (runningJobs.size() > 0 || dagNodeNameMap.size() == 0
+        || (completedJobs.size() + failedJobs.size() != dagNodeNameMap.size())) {
+      return;
+    }
+
+    LOG.info(String.format("Ambrose total jobs: %d, succeeded: %d, failed: %d",
+        dagNodeNameMap.size(), completedJobs.size(), failedJobs.size()));
+
+    if (failedJobs.size() > 0) {
+      //change queue state to failed
+      changeFlowQueueStatus(Flow.Status.FAILED);
+    } else {
+      //change queue state to succeeded
+      changeFlowQueueStatus(Flow.Status.SUCCEEDED);
+    }
+
+    // Calling this here results in a RejectedExecutionException for the above submit calls,
+    // which is odd becase they've already been submitted
+    //shutdown();
   }
 }
