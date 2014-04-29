@@ -124,11 +124,12 @@ define(['lib/jquery', 'lib/uri', './core'], function($, URI, Ambrose) {
      * null, defaults to -1.
      * @return a jQuery Promise on which success and error callbacks may be registered.
      */
-    getEvents: function(workflowId, lastEventId) {
+    getEvents: function(workflowId, lastEventId, maxEvents) {
       if (lastEventId == null) lastEventId = -1;
       return this.sendRequest(this.eventsUri, {
         workflowId: workflowId,
-        lastEventId: lastEventId
+        lastEventId: lastEventId,
+        maxEvents: maxEvents
       });
     },
   };
