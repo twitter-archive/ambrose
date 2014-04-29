@@ -24,6 +24,7 @@ import org.apache.pig.tools.pigstats.PigStats;
  *
  * @author gzhang
  */
+@Deprecated
 public interface JobClientHandler {
   /**
    * Grab the JobClient from the current thread and sets it to be used in another thread.
