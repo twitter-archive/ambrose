@@ -95,6 +95,7 @@ public class APIHandler extends AbstractHandler {
   private static final String QUERY_PARAM_START_KEY = "startKey";
   private static final String QUERY_PARAM_WORKFLOW_ID = "workflowId";
   private static final String QUERY_PARAM_LAST_EVENT_ID = "lastEventId";
+  private static final String QUERY_PARAM_MAX_EVENTS = "maxEvents";
   private static final String MIME_TYPE_HTML = "text/html";
   private static final String MIME_TYPE_JSON = "application/json";
   private WorkflowIndexReadService workflowIndexReadService;
@@ -147,9 +148,11 @@ public class APIHandler extends AbstractHandler {
     } else if (target.endsWith("/events")) {
       String lastEventIdParam = normalize(request.getParameter(QUERY_PARAM_LAST_EVENT_ID));
       Integer lastEventId = getInt(lastEventIdParam, -1);
+      
+      Integer maxEvents = getInt(request.getParameter(QUERY_PARAM_MAX_EVENTS), -1);
 
       Collection<Event> events = statsReadService
-          .getEventsSinceId(request.getParameter(QUERY_PARAM_WORKFLOW_ID), lastEventId);
+          .getEventsSinceId(request.getParameter(QUERY_PARAM_WORKFLOW_ID), lastEventId, maxEvents);
 
       response.setContentType(MIME_TYPE_JSON);
       response.setStatus(HttpServletResponse.SC_OK);
