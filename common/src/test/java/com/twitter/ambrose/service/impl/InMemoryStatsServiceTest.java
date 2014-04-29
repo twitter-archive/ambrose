@@ -41,6 +41,8 @@ public class InMemoryStatsServiceTest {
     new Event.JobStartedEvent(new DAGNode<Job>("some name", null)),
     new Event.JobProgressEvent(new DAGNode<Job>("50", null)),
     new Event.JobFinishedEvent(new DAGNode<Job>("done", null)),
+    new Event.JobProgressEvent(new DAGNode<Job>("75", null)),
+    new Event.JobProgressEvent(new DAGNode<Job>("100", null)),
   };
 
   @Before
@@ -85,6 +87,23 @@ public class InMemoryStatsServiceTest {
       assertEqualWorkflows(sentEvent, foundEvents.next());
     }
     assertFalse("Wrong number of events returned", foundEvents.hasNext());
+  }
+
+  @Test
+  public void testGetEventsMax() throws IOException {
+    for(Event event : testEvents) {
+      service.pushEvent(workflowId, event);
+    }
+
+    int sinceId = -1;
+    Event foundEvent;
+    for(Event event : testEvents) {
+      Iterator<Event> foundEvents = service.getEventsSinceId(workflowId, sinceId, 1).iterator();
+      foundEvent = foundEvents.next();
+      assertEqualWorkflows(event, foundEvent);
+      assertFalse("Wrong number of events returned", foundEvents.hasNext());
+      sinceId = foundEvent.getId();
+    }
   }
 
   private void assertEqualWorkflows(Event expected, Event found) {
