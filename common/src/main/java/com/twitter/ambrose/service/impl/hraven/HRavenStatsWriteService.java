@@ -1,4 +1,4 @@
-package com.twitter.ambrose.service.impl;
+package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -30,11 +30,18 @@ import com.twitter.hraven.FlowEvent;
 import com.twitter.hraven.FlowEventKey;
 import com.twitter.hraven.FlowKey;
 import com.twitter.hraven.FlowQueueKey;
-import com.twitter.hraven.Framework;
 import com.twitter.hraven.JobDescFactory;
 import com.twitter.hraven.datasource.FlowEventService;
 import com.twitter.hraven.datasource.FlowQueueService;
 
+/**
+ * StatsWriteService to persist job statistics- DAG and events to hraven
+ * hraven has FlowQueueService and FlowEventService to store job related information 
+ * and real time stats respectively. Data is persisted by writing directly to hraven's HBase backend.
+ * HRavenStatsReadService can be used to read the DAG and events back from hraven 
+ * to display them on a hosted dashboard.
+ */
+@SuppressWarnings("rawtypes")
 public class HRavenStatsWriteService implements StatsWriteService {
   private static final Log LOG = LogFactory.getLog(HRavenStatsWriteService.class);
   private final String username;
@@ -44,7 +51,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private FlowQueueService flowQueueService;
   private FlowEventService flowEventService;
   private final ExecutorService hRavenPool;
-  private boolean initialized = false;
+  private volatile boolean initialized = false;
   private String cluster;
   private String appId;
   private FlowKey flowKey;
@@ -119,11 +126,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
   /** Connection information for the hRaven HBase zookeeper quorum,
    * ("quorum peer hostname1[,quorum peer host2,...]:client port:parent znode"). */
   public static final String HRAVEN_ZOOKEEPER_QUORUM = "hraven." + HConstants.ZOOKEEPER_QUORUM;
-
-  /** The url for Ambrose dashboard. */
-  private static final String AMBROSE_URL =
-      "http://ambrose.prod.analytics.service.smf1.twitter.com";
-  private static final String AMBROSE_WORKFLOW_PARAM = "/workflow.html?workflowId=";
 
   private static final class HRavenEventRunnable implements Runnable {
 
@@ -232,12 +234,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
     }
   }
 
-  /**
-   * Change the FlowQueue to a new status
-   *
-   * @param status status to change the queue key to
-   * @throws IOException if things go bad
-   */
   private void changeFlowQueueStatus(Flow.Status status) throws IOException {
     LOG.info(String.format("Changing flowQueueStatus from %s to %s",
         flowQueueKey.getStatus(), status));
@@ -249,6 +245,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   }
 
   private void lazyInitWorkflow() {
+    // avoid synchronization if intialized
     if (initialized) {
       return;
     }
@@ -259,7 +256,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
     if (initialized) {
       return;
     }
-    initialized = true;
 
     Configuration jobConf = new Configuration();
 
@@ -278,6 +274,8 @@ public class HRavenStatsWriteService implements StatsWriteService {
       throw new RuntimeException("Could not instantiate hRaven FlowEventService", e);
     }
 
+    // make sure hRavenClusters.properties file is on the classpath
+    // this file stores mapping between jobtracker host and cluster name
     cluster = JobDescFactory.getCluster(jobConf);
     if (cluster == null) {
       cluster = "default";
@@ -286,26 +284,34 @@ public class HRavenStatsWriteService implements StatsWriteService {
     // This will return appid for pig, cascading consistent with hraven (only available in 0.9.13+)
     appId = JobDescFactory.getFrameworkSpecificJobDescFactory(jobConf).getAppId(jobConf);
 
-    // TODO runID could match with hraven's runId for easy navigation between two systems
     flowKey = new FlowKey(cluster, username, appId, System.currentTimeMillis());
 
     // create a new flow queue entry
     UUID uuid = UUID.randomUUID();
     flowQueueKey = new FlowQueueKey(cluster, Flow.Status.RUNNING,
         System.currentTimeMillis(), uuid.toString());
+    initialized = true;
+  }
 
-    // Log the Ambrose workflow url.
+  /**
+   * get hraven workflow id corresponding to this instance of StatsWriteService.
+   * Useful for logging url of the workflow dashboard.
+   * @return hraven workflow id for the stats write service
+   */
+  public String getWorkflowId() {
+    if(!initialized) {
+      return null;
+    }
+    // initialized is true only if flowKey and flowQueueKey are initialized
     WorkflowId workflowId = new WorkflowId(cluster, username,
         appId, flowKey.getRunId(), flowQueueKey.getTimestamp(),
         flowQueueKey.getFlowId());
-    LOG.info("Ambrose workflow page: " +  AMBROSE_URL
-        + AMBROSE_WORKFLOW_PARAM + workflowId.toId());
-
+    return workflowId.toId();
   }
 
   @Override
   public void sendDagNodeNameMap(String workflowId,
-      Map dagNodeMap) throws IOException {
+    Map dagNodeMap) throws IOException {
     this.dagNodeNameMap = dagNodeMap;
     lazyInitWorkflow();
     updateFlowQueue(flowQueueKey);
@@ -318,18 +324,18 @@ public class HRavenStatsWriteService implements StatsWriteService {
 
     String eventDataJson = event.toJson();
     switch (event.getType()) {
-      case WORKFLOW_PROGRESS:
-        updateWorkflowProgress((Map<Event.WorkflowProgressField, String>) event.getPayload());
-        break;
-      case JOB_STARTED:
-        updateJobStarted((DAGNode) event.getPayload());
-        break;
-      case JOB_FAILED:
-      case JOB_FINISHED:
-        updateJobComplete((DAGNode) event.getPayload(), event.getType());
-        break;
-      default:
-        break;
+    case WORKFLOW_PROGRESS:
+      updateWorkflowProgress((Map<Event.WorkflowProgressField, String>) event.getPayload());
+      break;
+    case JOB_STARTED:
+      updateJobStarted((DAGNode) event.getPayload());
+      break;
+    case JOB_FAILED:
+    case JOB_FINISHED:
+      updateJobComplete((DAGNode) event.getPayload(), event.getType());
+      break;
+    default:
+      break;
     }
 
     Preconditions.checkNotNull(flowKey, String.format(
@@ -347,12 +353,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
     hRavenPool.submit(new HRavenEventRunnable(flowEventService, flowEvent));
   }
 
-  /**
-   * Repersist the FlowQueue for this object.
-   *
-   * @param key key to the queue
-   * @throws IOException if things go bad
-   */
   private void updateFlowQueue(FlowQueueKey key) throws IOException {
     updateFlowQueue(key, null);
   }
@@ -390,17 +390,17 @@ public class HRavenStatsWriteService implements StatsWriteService {
       throws IOException {
     String jobId = node.getJob().getId();
     switch (eventType) {
-      case JOB_FINISHED:
-        runningJobs.remove(jobId);
-        completedJobs.add(jobId);
-        break;
-      case JOB_FAILED:
-        runningJobs.remove(jobId);
-        failedJobs.add(jobId);
-        break;
-      default:
-        throw new IllegalArgumentException(
-            "Unrecognized Event type in updateJobInfo: " + eventType);
+    case JOB_FINISHED:
+      runningJobs.remove(jobId);
+      completedJobs.add(jobId);
+      break;
+    case JOB_FAILED:
+      runningJobs.remove(jobId);
+      failedJobs.add(jobId);
+      break;
+    default:
+      throw new IllegalArgumentException(
+          "Unrecognized Event type in updateJobInfo: " + eventType);
     }
 
     updateWorkflowStateIfDone();
@@ -424,9 +424,5 @@ public class HRavenStatsWriteService implements StatsWriteService {
       //change queue state to succeeded
       changeFlowQueueStatus(Flow.Status.SUCCEEDED);
     }
-
-    // Calling this here results in a RejectedExecutionException for the above submit calls,
-    // which is odd becase they've already been submitted
-    //shutdown();
   }
 }

@@ -1,4 +1,4 @@
-package com.twitter.ambrose.service.impl;
+package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import com.twitter.hraven.datasource.FlowQueueService;
 /**
  * Service that is able to read the dag and event from HRaven.
  */
+@SuppressWarnings("rawtypes")
 public class HRavenStatsReadService implements StatsReadService {
   private static final Log LOG = LogFactory.getLog(HRavenStatsReadService.class);
 
@@ -71,6 +72,8 @@ public class HRavenStatsReadService implements StatsReadService {
       return null;
     }
 
+    // TODO This may not work nicely with multiple type of jobs
+    // See: https://github.com/twitter/ambrose/pull/131
     Map<String, DAGNode> dagMap = JSONUtil.toObject(
         flow.getJobGraphJSON(), new TypeReference<Map<String, DAGNode>>() {
         });
@@ -79,7 +82,6 @@ public class HRavenStatsReadService implements StatsReadService {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public List<Event> getEventsSinceId(String workflowId, int eventId)
       throws IOException {
 
@@ -105,18 +107,21 @@ public class HRavenStatsReadService implements StatsReadService {
   private static FlowKey toFlowKey(WorkflowId id) {
     return new FlowKey(id.getCluster(), id.getUserId(), id.getAppId(), id.getRunId());
   }
-  
-  static class Test {
+
+  /**
+   * Utility class to test working with Hraven
+   */
+  private static class Test {
 
     /**
      * Main method for testing
      */
     public static void main(String[] args) throws IOException {
-  
+
       //cluster!userName!appId!runId!timestamp!flowId
       String workflowId = args[0];
       HRavenStatsReadService service = new HRavenStatsReadService();
-  
+
       Map<String, DAGNode> dagMap = service.getDagNodeNameMap(workflowId);
       if (dagMap == null) {
         print("No dagNodeNameMap found for " + workflowId);
@@ -129,7 +134,7 @@ public class HRavenStatsReadService implements StatsReadService {
               entry.getKey(), node.getName(), jobId, node.getSuccessorNames()));
         }
       }
-  
+
       List<Event> events = service.getEventsSinceId(workflowId, -1);
       print(String.format("Found %d events", events.size()));
       for (Event event : events) {
@@ -137,9 +142,9 @@ public class HRavenStatsReadService implements StatsReadService {
             event.getId(), event.getTimestamp(), event.getType(), event.getPayload()));
       }
     }
-    
+
     private static void print(String object) { System.out.println(object); }
-  
+
   }
-  
+
 }
