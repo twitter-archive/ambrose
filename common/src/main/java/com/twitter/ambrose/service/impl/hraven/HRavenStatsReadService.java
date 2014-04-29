@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,19 +82,34 @@ public class HRavenStatsReadService implements StatsReadService {
     return dagMap;
   }
 
+
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId)
       throws IOException {
+    return getEventsSinceId(workflowId, eventId, Integer.MAX_VALUE);
+  }
+
+  @Override
+  public List<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents)
+      throws IOException {
+    
+    Preconditions.checkArgument(maxEvents > 0);
 
     WorkflowId id = WorkflowId.parseString(workflowId);
     FlowEventKey flowEventKey = new FlowEventKey(toFlowKey(id), eventId);
     List<FlowEvent> flowEventList = flowEventService.getFlowEventsSince(flowEventKey);
 
+    // TODO push this limit into the FlowEventService
+    int numElems = 0;
     List<Event> workflowEvents = new ArrayList<Event>();
     for (FlowEvent flowEvent : flowEventList) {
+      if (numElems >= maxEvents) {
+        break;
+      }
       String eventDataJson = flowEvent.getEventDataJSON();
       try {
         Event event = Event.fromJson(eventDataJson);
+        numElems++;
         workflowEvents.add(event);
 
       } catch (JsonMappingException e) {
