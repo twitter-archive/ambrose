@@ -28,12 +28,9 @@ import cascading.stats.hadoop.HadoopStepStats;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJob;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Subclass of MapReduceJob used to hold initialization logic and Cascading-specific bindings for a Job.

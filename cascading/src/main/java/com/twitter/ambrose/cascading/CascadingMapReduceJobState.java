@@ -17,13 +17,14 @@
 
 package com.twitter.ambrose.cascading;
 
-import cascading.stats.hadoop.HadoopStepStats;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.twitter.ambrose.model.hadoop.MapReduceJobState;
-import com.twitter.ambrose.util.JSONUtil;
 import java.io.IOException;
+
 import org.apache.hadoop.mapred.TaskReport;
+
+import cascading.stats.hadoop.HadoopStepStats;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.twitter.ambrose.model.hadoop.MapReduceJobState;
 
 /**
  * A wrapper that contains related flow step job statistics

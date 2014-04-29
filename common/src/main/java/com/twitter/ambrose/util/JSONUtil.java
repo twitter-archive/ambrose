@@ -105,13 +105,9 @@ public class JSONUtil {
     }
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   static {
-    setMapperProperties();
-  }
-  
-  private static void setMapperProperties() {
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);

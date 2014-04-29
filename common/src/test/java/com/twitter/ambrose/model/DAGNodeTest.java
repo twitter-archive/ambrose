@@ -1,18 +1,13 @@
 package com.twitter.ambrose.model;
 
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.google.common.collect.ImmutableList;
-import com.twitter.ambrose.util.JSONUtil;
+import java.io.IOException;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Unit tests for {@link DAGNodeTest}.
