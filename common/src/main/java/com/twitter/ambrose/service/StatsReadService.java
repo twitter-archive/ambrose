@@ -48,4 +48,16 @@ public interface StatsReadService<T extends Job> {
    * @return a Collection of WorkflowEvents, ordered by eventId ascending
    */
   public Collection<Event> getEventsSinceId(String workflowId, int eventId) throws IOException;
+  
+  /**
+   * Get all events for a given workflow since eventId. To get the entire list of events, pass a
+   * negative eventId.
+   *
+   * @param workflowId the id of the workflow being accessed
+   * @param eventId the eventId that all returned events will be greater than
+   * @param maxEvents maximum number of events returned by api
+   * @return a Collection of WorkflowEvents, ordered by eventId ascending, upto maxEvents in number
+   * @throws IOException
+   */
+  public Collection<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents) throws IOException;
 }
