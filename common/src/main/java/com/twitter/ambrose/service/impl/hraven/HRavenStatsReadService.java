@@ -82,7 +82,6 @@ public class HRavenStatsReadService implements StatsReadService {
     return dagMap;
   }
 
-
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId)
       throws IOException {
@@ -92,7 +91,7 @@ public class HRavenStatsReadService implements StatsReadService {
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents)
       throws IOException {
-    
+
     Preconditions.checkArgument(maxEvents > 0);
 
     WorkflowId id = WorkflowId.parseString(workflowId);
@@ -160,7 +159,5 @@ public class HRavenStatsReadService implements StatsReadService {
     }
 
     private static void print(String object) { System.out.println(object); }
-
   }
-
 }
