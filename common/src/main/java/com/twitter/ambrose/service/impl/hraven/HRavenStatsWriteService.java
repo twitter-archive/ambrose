@@ -1,7 +1,6 @@
 package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -19,6 +18,7 @@ import org.apache.hadoop.hbase.zookeeper.ZKUtil;
 import org.apache.hadoop.mapred.JobConf;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
@@ -61,9 +61,9 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private JobConf jobConf;
 
   public HRavenStatsWriteService() {
-    runningJobs = new HashSet<String>();
-    completedJobs = new HashSet<String>();
-    failedJobs = new HashSet<String>();
+    runningJobs = Sets.newHashSet();
+    completedJobs = Sets.newHashSet();
+    failedJobs = Sets.newHashSet();
     username = System.getProperty("user.name");
 
     // queue hRaven requests up and fire them asynchronously
