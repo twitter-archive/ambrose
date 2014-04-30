@@ -29,11 +29,11 @@ public class MapReduceHelper {
 
   private static Log log = LogFactory.getLog(MapReduceHelper.class);
 
-  private MapReduceJobState getMapReduceJobState(String jobId, JobClient jobClient) {
+  private MapReduceJobState getMapReduceJobState(MapReduceJob job, JobClient jobClient) {
     try {
-      RunningJob runningJob = jobClient.getJob(jobId);
+      RunningJob runningJob = jobClient.getJob(JobID.forName(job.getId()));
       if (runningJob == null) {
-        log.warn("Couldn't find job status for jobId: " + jobId);
+        log.warn("Couldn't find job status for jobId: " + job.getId());
         return null;
       }
       JobID jobID = runningJob.getID();
@@ -43,7 +43,7 @@ public class MapReduceHelper {
       return new MapReduceJobState(runningJob, mapTaskReport, reduceTaskReport);
 
     } catch (Exception e) {
-      log.warn("Couldn't find job status for jobId: " + jobId);
+      log.warn("Couldn't find job status for jobId: " + job.getId());
     }
     return null;
   }
@@ -55,7 +55,7 @@ public class MapReduceHelper {
    * @param jobClient 
    */
   public void addMapReduceJobState(MapReduceJob job, JobClient jobClient) {
-    MapReduceJobState state = getMapReduceJobState(job.getId(), jobClient);
+    MapReduceJobState state = getMapReduceJobState(job, jobClient);
     // only set if we can successfully get it
     if (state != null) {
       job.setMapReduceJobState(state);
@@ -71,7 +71,7 @@ public class MapReduceHelper {
   public void setJobConfFromFile(MapReduceJob job, JobClient jobClient) {
     Properties jobConfProperties = new Properties();
     try {
-      RunningJob runningJob = jobClient.getJob(job.getId());
+      RunningJob runningJob = jobClient.getJob(JobID.forName(job.getId()));
       if (runningJob == null) {
         log.warn("Couldn't find job status for jobId: " + job.getId());
       }
