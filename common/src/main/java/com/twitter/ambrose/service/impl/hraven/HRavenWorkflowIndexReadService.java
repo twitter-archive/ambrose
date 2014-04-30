@@ -126,28 +126,4 @@ public class HRavenWorkflowIndexReadService implements WorkflowIndexReadService 
     return new WorkflowId(flow.getCluster(), flow.getUserName(), flow.getFlowKey().getAppId(),
         flow.getRunId(), flow.getQueueKey().getTimestamp(), flow.getQueueKey().getFlowId());
   }
-
-  private static class Test {
-    /**
-     * Main method
-     */
-    public static void main(String[] args) throws IOException {
-      String cluster = args.length > 0 ? args[0] : "dw@smf1";
-      Status status = args.length > 1
-          ? Status.valueOf(args[1]) : Status.SUCCEEDED;
-          String username = args.length > 2 ? args[2] : null;
-
-          HRavenWorkflowIndexReadService service = new HRavenWorkflowIndexReadService();
-          PaginatedList<WorkflowSummary> paginatedList =
-              service.getWorkflows(cluster, status, username, 10, null);
-
-          print(String.format("Found %d flows", paginatedList.getResults().size()));
-          for (WorkflowSummary summary : paginatedList.getResults()) {
-            print(String.format("%s %s %s %d", summary.getName(), summary.getId(),
-                summary.getStatus(), summary.getProgress()));
-          }
-    }
-
-    private static void print(String object) { System.out.println(object); }
-  }
 }

@@ -44,12 +44,14 @@ import com.twitter.hraven.datasource.FlowQueueService;
 /**
  * Service that is able to read the dag and event from HRaven.
  */
-@SuppressWarnings("rawtypes")
 public class HRavenStatsReadService implements StatsReadService {
   private static final Log LOG = LogFactory.getLog(HRavenStatsReadService.class);
 
-  private FlowQueueService flowQueueService;
-  private FlowEventService flowEventService;
+  private final FlowQueueService flowQueueService;
+  private final FlowEventService flowEventService;
+  
+  // By default, we return as many events as possible in getEventsSinceId api
+  private static final int DEFAULT_MAX_EVENTS = Integer.MAX_VALUE;
 
   /**
    * Creates an HRavenStatsReadService
@@ -77,7 +79,7 @@ public class HRavenStatsReadService implements StatsReadService {
    * @return a map of nodeIds to DAGNodes
    * @throws IOException
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   @Override
   public Map<String, DAGNode> getDagNodeNameMap(String workflowId) throws IOException {
     WorkflowId id = WorkflowId.parseString(workflowId);
@@ -97,25 +99,25 @@ public class HRavenStatsReadService implements StatsReadService {
     return dagMap;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId)
       throws IOException {
-    return getEventsSinceId(workflowId, eventId, Integer.MAX_VALUE);
+    return getEventsSinceId(workflowId, eventId, DEFAULT_MAX_EVENTS);
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents)
       throws IOException {
-
     Preconditions.checkArgument(maxEvents > 0);
-
     WorkflowId id = WorkflowId.parseString(workflowId);
     FlowEventKey flowEventKey = new FlowEventKey(toFlowKey(id), eventId);
     List<FlowEvent> flowEventList = flowEventService.getFlowEventsSince(flowEventKey);
 
     // TODO push this limit into the FlowEventService
     int numElems = 0;
-    List<Event> workflowEvents = Lists.newArrayList();
+    List<Event> workflowEvents = Lists.newArrayListWithCapacity(maxEvents);
     for (FlowEvent flowEvent : flowEventList) {
       if (numElems >= maxEvents) {
         break;
@@ -125,7 +127,6 @@ public class HRavenStatsReadService implements StatsReadService {
         Event event = Event.fromJson(eventDataJson);
         numElems++;
         workflowEvents.add(event);
-
       } catch (JsonMappingException e) {
         LOG.error("Could not deserialize json: " + eventDataJson, e);
       }
@@ -136,43 +137,5 @@ public class HRavenStatsReadService implements StatsReadService {
 
   private static FlowKey toFlowKey(WorkflowId id) {
     return new FlowKey(id.getCluster(), id.getUserId(), id.getAppId(), id.getRunId());
-  }
-
-  /**
-   * Utility class to test working with Hraven
-   */
-  private static class Test {
-
-    /**
-     * Main method for testing
-     */
-    public static void main(String[] args) throws IOException {
-
-      //cluster!userName!appId!runId!timestamp!flowId
-      String workflowId = args[0];
-      HRavenStatsReadService service = new HRavenStatsReadService();
-
-      Map<String, DAGNode> dagMap = service.getDagNodeNameMap(workflowId);
-      if (dagMap == null) {
-        print("No dagNodeNameMap found for " + workflowId);
-      } else {
-        print(String.format("Found %d dapMap entries", dagMap.size()));
-        for (Map.Entry<String, DAGNode> entry : dagMap.entrySet()) {
-          DAGNode node = entry.getValue();
-          String jobId = node.getJob() != null ? node.getJob().getId() : null;
-          print(String.format("%s: nodeName=%s jobId=%s successors=%s",
-              entry.getKey(), node.getName(), jobId, node.getSuccessorNames()));
-        }
-      }
-
-      List<Event> events = service.getEventsSinceId(workflowId, -1);
-      print(String.format("Found %d events", events.size()));
-      for (Event event : events) {
-        print(String.format("%d %d %s %s",
-            event.getId(), event.getTimestamp(), event.getType(), event.getPayload()));
-      }
-    }
-
-    private static void print(String object) { System.out.println(object); }
   }
 }
