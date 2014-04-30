@@ -25,7 +25,8 @@ define([
   './view/graph',
   './view/graph-node-popover',
   './view/graph-edge-popover',
-  './view/script'
+  './view/script',
+  './view/title'
 ], function(View) {
   return View;
 });
