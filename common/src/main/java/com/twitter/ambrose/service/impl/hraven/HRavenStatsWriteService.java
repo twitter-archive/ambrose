@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
@@ -55,6 +55,21 @@ import com.twitter.hraven.datasource.FlowQueueService;
  * and real time stats respectively. Data is persisted by writing directly to hraven's HBase backend.
  * HRavenStatsReadService can be used to read the DAG and events back from hraven 
  * to display them on a hosted dashboard.
+ * 
+ * An instance of HRavenStatsWriteService corresponds to one hraven flow (it's not stateless).
+ * Flow id is derived from jobConf passed to the constructor.
+ * Hence, workflowId parameter in sendDagNodeNameMap and pushEvent api is ignored.
+ * TODO separate out this into another interface to make service stateless
+ * 
+ * HRavenStatsWriteService persists data directly to HRaven's HBase backend.
+ * Configuration keys for hRaven HBase storage
+ * We construct an HBase configuration to use for the hRaven client using the following logic:
+ * 1) if the HRAVEN_HBASE_CONF_DIR environment variable is set, we construct a Configuration
+ *    object and add the file $HRAVEN_HBASE_CONF_DIR/hbase-site.xml
+ * 2) otherwise, we look in the job configuration for a property named
+ *    "hraven.hbase.zookeeper.quorum", (in the format
+ *    "quorum peer hostname1[,quorum peer host2,...]:client port:parent znode").  If found, this
+ *    value is split and applied to the HBase configuration.
  */
 @SuppressWarnings("rawtypes")
 public class HRavenStatsWriteService implements StatsWriteService {
@@ -75,14 +90,15 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private static final int HRAVEN_POOL_SHUTDOWN_SECS = 5;
   private JobConf jobConf;
 
-  public HRavenStatsWriteService() {
-    runningJobs = Sets.newHashSet();
-    completedJobs = Sets.newHashSet();
-    failedJobs = Sets.newHashSet();
-    username = System.getProperty("user.name");
+  public HRavenStatsWriteService(JobConf jobConf) {
+    this.runningJobs = Sets.newHashSet();
+    this.completedJobs = Sets.newHashSet();
+    this.failedJobs = Sets.newHashSet();
+    this.username = System.getProperty("user.name");
+    this.jobConf = jobConf;
 
     // queue hRaven requests up and fire them asynchronously
-    hRavenPool = Executors.newFixedThreadPool(1);
+    this.hRavenPool = Executors.newFixedThreadPool(1);
 
     // we try to shut down gracefully, but this exists if we can't
     Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -123,16 +139,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
     return hbaseConf;
   }
 
-  /* Configuration keys for hRaven HBase storage
-   *
-   * We construct an HBase configuration to use for the hRaven client using the following logic:
-   * 1) if the HRAVEN_HBASE_CONF_DIR environment variable is set, we construct a Configuration
-   *    object and add the file $HRAVEN_HBASE_CONF_DIR/hbase-site.xml
-   * 2) otherwise, we look in the job configuration for a property named
-   *    "hraven.hbase.zookeeper.quorum", (in the format
-   *    "quorum peer hostname1[,quorum peer host2,...]:client port:parent znode").  If found, this
-   *    value is split and applied to the HBase configuration.
-   */
   /** Environment variable pointing to the configuration directory to use with hRaven */
   public static final String HRAVEN_HBASE_CONF_DIR_ENV = "HRAVEN_HBASE_CONF_DIR";
   /** Filename to load the HBase configuration from */
@@ -167,8 +173,8 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private final class HRavenQueueRunnable implements Runnable {
     private final FlowQueueService flowQueueService;
     private final FlowQueueKey flowQueueKey;
-    private FlowQueueKey newQueueKey;
-    private Flow flow;
+    private final FlowQueueKey newQueueKey;
+    private final Flow flow;
 
     private HRavenQueueRunnable(FlowQueueService flowQueueService,
       FlowQueueKey flowQueueKey,
@@ -176,6 +182,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
       this.flowQueueService = flowQueueService;
       this.flowQueueKey = flowQueueKey;
       this.flow = flow;
+      this.newQueueKey = null;
     }
 
     private HRavenQueueRunnable(FlowQueueService flowQueueService,
@@ -184,6 +191,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
       this.flowQueueService = flowQueueService;
       this.flowQueueKey = flowQueueKey;
       this.newQueueKey = newQueueKey;
+      this.flow = null;
     }
 
     @Override
@@ -195,7 +203,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
           flowQueueService.updateFlow(flowQueueKey, flow);
 
           LOG.debug("Submitted update to flowQueue to hRaven: " + flowQueueKey.getFlowId());
-
         } else if (newQueueKey != null) {
           LOG.info(String.format(
               "Submitting request to hRaven to move flowQueueKey from %s to %s",
@@ -206,7 +213,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
           LOG.info(String.format(
               "Submitted request to hRaven to move flowQueueKey from %s to %s",
               flowQueueKey != null ? flowQueueKey : "", newQueueKey));
-
         } else {
           LOG.warn("Can not make request to flowQueueService since it is not clear if this is an "
               + "update or a move, since both flow and newQueueKey are null");
@@ -272,8 +278,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
       return;
     }
 
-    Configuration jobConf = new Configuration();
-
     // setup hraven hbase connection information
     Configuration hbaseConf = initHBaseConfiguration(jobConf);
 
@@ -327,6 +331,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   @Override
   public void sendDagNodeNameMap(String workflowId,
     Map dagNodeMap) throws IOException {
+    Preconditions.checkNotNull(dagNodeMap);
     this.dagNodeNameMap = dagNodeMap;
     lazyInitWorkflow();
     updateFlowQueue(flowQueueKey);
