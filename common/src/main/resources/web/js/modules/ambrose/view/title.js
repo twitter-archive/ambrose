@@ -30,12 +30,9 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
      * @param container the DOM element in which to render the view.
      */
     init: function(workflow, container) {
-      var cluster = Ambrose.getCluster(workflow.id)
-      var user = Ambrose.getUser(workflow.id)
-      var appName = Ambrose.getAppName(workflow.id)
       container = $(container)
-      var title = $('<h2>').appendTo(container).text(appName).css('margin-bottom', '0px');
-      var info = $('<span>').appendTo(container).html("user <em>" + user + "</em> on cluster <em>" + cluster + "</em>");
+      var workflowId = workflow.id || "unknown workflow"
+      var title = $('<h4>').appendTo(container).text(workflowId).css('margin-bottom', '0px');
     },
   };
 
