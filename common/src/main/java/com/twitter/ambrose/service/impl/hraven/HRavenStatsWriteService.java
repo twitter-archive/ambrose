@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -54,6 +55,7 @@ import com.twitter.hraven.JobDescFactory;
 import com.twitter.hraven.JobDescFactoryBase;
 import com.twitter.hraven.datasource.FlowEventService;
 import com.twitter.hraven.datasource.FlowQueueService;
+import com.twitter.hraven.util.StringUtil;
 
 /**
  * StatsWriteService to persist job statistics- DAG and events to hraven
@@ -104,7 +106,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   /** Connection information for the hRaven HBase zookeeper quorum,
    * ("quorum peer hostname1[,quorum peer host2,...]:client port:parent znode"). */
   public static final String HRAVEN_ZOOKEEPER_QUORUM = "hraven." + HConstants.ZOOKEEPER_QUORUM;
-  
+
   public HRavenStatsWriteService() {
     this.runningJobs = Sets.newHashSet();
     this.completedJobs = Sets.newHashSet();
@@ -274,10 +276,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
     if (initialized) {
       return;
     }
-    
-    System.out.println(properties);
-    LOG.info("Properties:  " + properties);
-    
+
     jobConf = new JobConf(MapReduceHelper.toConfiguration(properties));
 
     // setup hraven hbase connection information
@@ -303,27 +302,17 @@ public class HRavenStatsWriteService implements StatsWriteService {
     }
 
     // This will return appid for pig, cascading consistent with hraven (only available in 0.9.13+)
-    JobDescFactoryBase base = JobDescFactory.getFrameworkSpecificJobDescFactory(jobConf);
-    LOG.info("base: " + base);
-    appId = base.getAppId(jobConf);
-    LOG.info("appId: " + appId);
-    
-    String aappId = jobConf.get(Constants.APP_NAME_CONF_KEY);
+    appId = JobDescFactory.getFrameworkSpecificJobDescFactory(jobConf).getAppId(jobConf);
 
-    // TODO: we need to refactor this out of here and into hRaven to assure we have consistent
-    // appIds. See https://jira.twitter.biz/browse/HRAV-90
-    // if batch.desc isn't set, try to parse it from mapred.job.name or jobName
-    if (aappId == null) {
-      aappId = jobConf.get(Constants.APP_NAME_CONF_KEY,
-                jobConf.get("mapred.job.name",
-                    jobConf.get("jobName")));
+    // TODO Remove this: Temporary fix for adhoc pig jobs
+    if (StringUtils.isBlank(appId)) {
+      appId = jobConf.get("jobName");
       Matcher matcher = Pattern.compile(
-                        Constants.PIG_SCHEDULED_JOBNAME_PATTERN_REGEX).matcher(aappId);
+          Constants.PIG_SCHEDULED_JOBNAME_PATTERN_REGEX).matcher(appId);
       if (matcher.matches()) {
-        aappId = matcher.group(1);
+        appId = matcher.group(1);
       }
     }
-    LOG.info("aappId: " + aappId);
 
     flowKey = new FlowKey(cluster, username, appId, System.currentTimeMillis());
 
