@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.InMemoryFileSystem;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
@@ -129,7 +128,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     Preconditions.checkNotNull(pigConfig.getPigProperties());
 
     try {
-      statsWriteService.initWriteStore(pigConfig.getPigProperties());
+      statsWriteService.initWriteService(pigConfig.getPigProperties());
     } catch (IOException ioe) {
       throw new RuntimeException("Exception while initializing statsWriteService", ioe);
     }

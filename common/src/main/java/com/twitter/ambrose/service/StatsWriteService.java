@@ -36,7 +36,7 @@ public interface StatsWriteService<T extends Job> {
    * Initialize the StatsWriteService from configuration properties
    * @param properties configuration properties
    */
-  public void initWriteStore(Properties properties) throws IOException;
+  public void initWriteService(Properties properties) throws IOException;
 
   /**
    * Send a map of all DAGNodes in the workflow. The structure of the DAG is assumed to be immutable.

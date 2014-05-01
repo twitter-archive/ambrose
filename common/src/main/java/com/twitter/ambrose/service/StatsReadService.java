@@ -37,7 +37,7 @@ public interface StatsReadService<T extends Job> {
    * Initialize the StatsReadService from configuration properties
    * @param properties configuration properties
    */
-  public void initReadStore(Properties properties) throws IOException;
+  public void initReadService(Properties properties) throws IOException;
 
   /**
    * Get a map of all DAGNodes in the workflow.

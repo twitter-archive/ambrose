@@ -273,7 +273,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   }
 
   @Override
-  public void initWriteStore(Properties properties) throws IOException {
+  public void initWriteService(Properties properties) throws IOException {
     if (initialized) {
       return;
     }

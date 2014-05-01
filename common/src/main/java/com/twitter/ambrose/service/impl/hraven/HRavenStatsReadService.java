@@ -74,7 +74,7 @@ public class HRavenStatsReadService implements StatsReadService {
   }
   
   @Override
-  public void initReadStore(Properties properties) throws IOException {
+  public void initReadService(Properties properties) throws IOException {
     // Do nothing
   }
 
