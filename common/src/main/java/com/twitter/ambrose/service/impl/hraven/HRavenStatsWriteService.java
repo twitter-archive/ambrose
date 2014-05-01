@@ -272,7 +272,8 @@ public class HRavenStatsWriteService implements StatsWriteService {
     flowQueueKey = newQueueKey;
   }
 
-  public void initialize(Properties properties) {
+  @Override
+  public void initWriteStore(Properties properties) throws IOException {
     if (initialized) {
       return;
     }

@@ -22,6 +22,7 @@ import com.twitter.ambrose.model.Job;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Service that serves the DAGNode map and push events. Implementations of this service might read
@@ -31,6 +32,12 @@ import java.util.Map;
  * @author billg
  */
 public interface StatsReadService<T extends Job> {
+  
+  /**
+   * Initialize the StatsReadService from configuration properties
+   * @param properties configuration properties
+   */
+  public void initReadStore(Properties properties) throws IOException;
 
   /**
    * Get a map of all DAGNodes in the workflow.

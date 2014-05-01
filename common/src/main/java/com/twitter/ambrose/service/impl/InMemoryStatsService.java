@@ -191,6 +191,12 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public void initialize(Properties properties) {
+  public void initWriteStore(Properties properties) throws IOException {
+    // Do nothing
+  }
+
+  @Override
+  public void initReadStore(Properties properties) throws IOException {
+    // Do nothing
   }
 }

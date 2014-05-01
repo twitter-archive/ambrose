@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.InMemoryFileSystem;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
@@ -46,6 +47,7 @@ import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceHelper;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.util.AmbroseUtils;
+import com.twitter.ambrose.service.impl.InMemoryStatsService;
 
 /**
  * PigProgressNotificationListener that collects plan and job information from within a Pig runtime,
@@ -54,6 +56,9 @@ import com.twitter.ambrose.util.AmbroseUtils;
  *
  * @see EmbeddedAmbrosePigProgressNotificationListener for a sublclass that can be used to run an
  * embedded Abrose web server from Pig client process.
+ * 
+ * This PPNL should be used as a base class for concrete implementations that provide a way of
+ * reading, writing 
  *
  */
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
@@ -123,7 +128,11 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     Preconditions.checkNotNull(pigConfig.getJobGraph());
     Preconditions.checkNotNull(pigConfig.getPigProperties());
 
-    statsWriteService.initialize(pigConfig.getPigProperties());
+    try {
+      statsWriteService.initWriteStore(pigConfig.getPigProperties());
+    } catch (IOException ioe) {
+      throw new RuntimeException("Exception while initializing statsWriteService", ioe);
+    }
     this.workflowVersion = pigConfig.getPigProperties().getProperty("pig.logical.plan.signature");
 
     Map<OperatorKey, MapReduceOper> planKeys = plan.getKeys();

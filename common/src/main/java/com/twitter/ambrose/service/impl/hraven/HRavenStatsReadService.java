@@ -18,6 +18,7 @@ package com.twitter.ambrose.service.impl.hraven;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -70,6 +71,11 @@ public class HRavenStatsReadService implements StatsReadService {
     } catch (IOException e) {
       throw new RuntimeException("Could not instantiate hRaven FlowEventService", e);
     }
+  }
+  
+  @Override
+  public void initReadStore(Properties properties) throws IOException {
+    // Do nothing
   }
 
   /**
