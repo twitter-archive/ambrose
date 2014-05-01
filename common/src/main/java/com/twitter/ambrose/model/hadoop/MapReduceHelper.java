@@ -12,11 +12,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package com.twitter.ambrose.model.hadoop;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -62,7 +63,7 @@ public class MapReduceHelper {
     }
     return null;
   }
-  
+
   /**
    * set the mapreduce statistics by querying the jobtracker
    * This method only sets the mapreduce statistics if they are queried successfully
@@ -76,7 +77,7 @@ public class MapReduceHelper {
       job.setMapReduceJobState(state);
     }
   }
-  
+
   /**
    * Get the configurations at the beginning of the job flow, it will contain information
    * about the map/reduce plan and decoded pig script.
@@ -90,10 +91,10 @@ public class MapReduceHelper {
       if (runningJob == null) {
         log.warn("Couldn't find job status for jobId: " + job.getId());
       }
-      
+
       log.info("RunningJob Configuration File location: " + runningJob.getJobFile());
       Path path = new Path(runningJob.getJobFile());
-      
+
       Configuration conf = new Configuration(false);
       FileSystem fileSystem = FileSystem.get(new Configuration());
       InputStream inputStream = fileSystem.open(path);
@@ -101,8 +102,8 @@ public class MapReduceHelper {
 
       Iterator<Map.Entry<String, String>> iter = conf.iterator();
       while (iter.hasNext()) {
-          Map.Entry<String, String> entry = iter.next();
-          jobConfProperties.put(entry.getKey(), entry.getValue());
+        Map.Entry<String, String> entry = iter.next();
+        jobConfProperties.put(entry.getKey(), entry.getValue());
       }
     } catch (FileNotFoundException e) {
       log.warn("Configuration file not found for old jobsflows.");
@@ -110,5 +111,17 @@ public class MapReduceHelper {
       log.warn("Error occurred when retrieving configuration info." + e.getMessage());
     }
     job.setConfiguration(jobConfProperties);
+  }
+
+  public static Configuration toConfiguration(Properties properties) {
+    assert properties != null;
+    final Configuration config = new Configuration(false);
+    final Enumeration<Object> iter = properties.keys();
+    while (iter.hasMoreElements()) {
+      final String key = (String) iter.nextElement();
+      final String val = properties.getProperty(key);
+      config.set(key, val);
+    }
+    return config;
   }
 }

@@ -65,12 +65,12 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = Maps.newTreeMap();
   private Set<String> completedJobIds = Sets.newHashSet();
   // subclasses can access this to set pig's configuration in multithreaded PPNL
-  protected PigConfig pigConfig = new PigConfig();
+  PigConfig pigConfig = new PigConfig();
 
   // We encapsulate jobClient, jobGraph, pigProperties under static class
   // to avoid accidental usage of these parameters in the outer class.
   // These should be only accessed through the getter apis.
-  private static class PigConfig {
+  public static class PigConfig {
     private JobClient jobClient;
     private PigStats.JobGraph jobGraph;
     private Properties pigProperties;
@@ -123,8 +123,8 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     Preconditions.checkNotNull(pigConfig.getJobGraph());
     Preconditions.checkNotNull(pigConfig.getPigProperties());
 
+    statsWriteService.initialize(pigConfig.getPigProperties());
     this.workflowVersion = pigConfig.getPigProperties().getProperty("pig.logical.plan.signature");
-
 
     Map<OperatorKey, MapReduceOper> planKeys = plan.getKeys();
 

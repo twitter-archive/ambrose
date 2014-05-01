@@ -17,11 +17,14 @@ package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,14 +41,17 @@ import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.WorkflowId;
+import com.twitter.ambrose.model.hadoop.MapReduceHelper;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.util.JSONUtil;
+import com.twitter.hraven.Constants;
 import com.twitter.hraven.Flow;
 import com.twitter.hraven.FlowEvent;
 import com.twitter.hraven.FlowEventKey;
 import com.twitter.hraven.FlowKey;
 import com.twitter.hraven.FlowQueueKey;
 import com.twitter.hraven.JobDescFactory;
+import com.twitter.hraven.JobDescFactoryBase;
 import com.twitter.hraven.datasource.FlowEventService;
 import com.twitter.hraven.datasource.FlowQueueService;
 
@@ -78,24 +84,32 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private final Set<String> runningJobs;
   private final Set<String> completedJobs;
   private final Set<String> failedJobs;
+  private final ExecutorService hRavenPool;
+
+  private volatile boolean initialized = false;
   private FlowQueueService flowQueueService;
   private FlowEventService flowEventService;
-  private final ExecutorService hRavenPool;
-  private volatile boolean initialized = false;
   private String cluster;
   private String appId;
   private FlowKey flowKey;
   private FlowQueueKey flowQueueKey;
   private Map<String, DAGNode<Job>> dagNodeNameMap;
-  private static final int HRAVEN_POOL_SHUTDOWN_SECS = 5;
   private JobConf jobConf;
 
-  public HRavenStatsWriteService(JobConf jobConf) {
+  private static final int HRAVEN_POOL_SHUTDOWN_SECS = 5;
+  /** Environment variable pointing to the configuration directory to use with hRaven */
+  public static final String HRAVEN_HBASE_CONF_DIR_ENV = "HRAVEN_HBASE_CONF_DIR";
+  /** Filename to load the HBase configuration from */
+  public static final String HRAVEN_HBASE_CONF_FILE = "hbase-site.xml";
+  /** Connection information for the hRaven HBase zookeeper quorum,
+   * ("quorum peer hostname1[,quorum peer host2,...]:client port:parent znode"). */
+  public static final String HRAVEN_ZOOKEEPER_QUORUM = "hraven." + HConstants.ZOOKEEPER_QUORUM;
+  
+  public HRavenStatsWriteService() {
     this.runningJobs = Sets.newHashSet();
     this.completedJobs = Sets.newHashSet();
     this.failedJobs = Sets.newHashSet();
     this.username = System.getProperty("user.name");
-    this.jobConf = jobConf;
 
     // queue hRaven requests up and fire them asynchronously
     this.hRavenPool = Executors.newFixedThreadPool(1);
@@ -138,15 +152,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
 
     return hbaseConf;
   }
-
-  /** Environment variable pointing to the configuration directory to use with hRaven */
-  public static final String HRAVEN_HBASE_CONF_DIR_ENV = "HRAVEN_HBASE_CONF_DIR";
-  /** Filename to load the HBase configuration from */
-  public static final String HRAVEN_HBASE_CONF_FILE = "hbase-site.xml";
-
-  /** Connection information for the hRaven HBase zookeeper quorum,
-   * ("quorum peer hostname1[,quorum peer host2,...]:client port:parent znode"). */
-  public static final String HRAVEN_ZOOKEEPER_QUORUM = "hraven." + HConstants.ZOOKEEPER_QUORUM;
 
   private static final class HRavenEventRunnable implements Runnable {
 
@@ -265,18 +270,15 @@ public class HRavenStatsWriteService implements StatsWriteService {
     flowQueueKey = newQueueKey;
   }
 
-  private void lazyInitWorkflow() {
-    // avoid synchronization if intialized
+  public void initialize(Properties properties) {
     if (initialized) {
       return;
     }
-    initializeWorkflow();
-  }
-
-  private synchronized void initializeWorkflow() {
-    if (initialized) {
-      return;
-    }
+    
+    System.out.println(properties);
+    LOG.info("Properties:  " + properties);
+    
+    jobConf = new JobConf(MapReduceHelper.toConfiguration(properties));
 
     // setup hraven hbase connection information
     Configuration hbaseConf = initHBaseConfiguration(jobConf);
@@ -301,7 +303,27 @@ public class HRavenStatsWriteService implements StatsWriteService {
     }
 
     // This will return appid for pig, cascading consistent with hraven (only available in 0.9.13+)
-    appId = JobDescFactory.getFrameworkSpecificJobDescFactory(jobConf).getAppId(jobConf);
+    JobDescFactoryBase base = JobDescFactory.getFrameworkSpecificJobDescFactory(jobConf);
+    LOG.info("base: " + base);
+    appId = base.getAppId(jobConf);
+    LOG.info("appId: " + appId);
+    
+    String aappId = jobConf.get(Constants.APP_NAME_CONF_KEY);
+
+    // TODO: we need to refactor this out of here and into hRaven to assure we have consistent
+    // appIds. See https://jira.twitter.biz/browse/HRAV-90
+    // if batch.desc isn't set, try to parse it from mapred.job.name or jobName
+    if (aappId == null) {
+      aappId = jobConf.get(Constants.APP_NAME_CONF_KEY,
+                jobConf.get("mapred.job.name",
+                    jobConf.get("jobName")));
+      Matcher matcher = Pattern.compile(
+                        Constants.PIG_SCHEDULED_JOBNAME_PATTERN_REGEX).matcher(aappId);
+      if (matcher.matches()) {
+        aappId = matcher.group(1);
+      }
+    }
+    LOG.info("aappId: " + aappId);
 
     flowKey = new FlowKey(cluster, username, appId, System.currentTimeMillis());
 
@@ -333,15 +355,12 @@ public class HRavenStatsWriteService implements StatsWriteService {
     Map dagNodeMap) throws IOException {
     Preconditions.checkNotNull(dagNodeMap);
     this.dagNodeNameMap = dagNodeMap;
-    lazyInitWorkflow();
     updateFlowQueue(flowQueueKey);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void pushEvent(String workflowId, Event event) throws IOException {
-    lazyInitWorkflow();
-
     String eventDataJson = event.toJson();
     switch (event.getType()) {
     case WORKFLOW_PROGRESS:
