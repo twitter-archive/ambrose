@@ -93,6 +93,18 @@ define(['lib/jquery'], function($) {
 
   // core Ambrose object, util methods
   return {
+    getCluster: function(workflowId) {
+      return workflowId.split("!")[0];
+    },
+
+    getUser: function(workflowId) {
+      return workflowId.split("!")[1];
+    },
+
+    getAppName: function(workflowId) {
+      return workflowId.split("!")[2];
+    },
+
     calculateElapsedTime : function(start, end) {
       var ms = Number(end) - Number(start);
 
