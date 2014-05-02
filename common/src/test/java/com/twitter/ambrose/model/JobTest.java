@@ -59,9 +59,6 @@ public class JobTest {
 
 @JsonTypeName("extendedjob1")
 class ExtendedJob1 extends Job {
-  static {
-    JSONUtil.registerSubtypes(ExtendedJob1.class);
-  }
   String [] aliases;
 
   public ExtendedJob1() {
@@ -84,9 +81,6 @@ class ExtendedJob1 extends Job {
 
 @JsonTypeName("extendedjob2")
 class ExtendedJob2 extends Job {
-  static {
-    JSONUtil.registerSubtypes(ExtendedJob2.class);
-  }
   String [] features;
 
   public ExtendedJob2() {

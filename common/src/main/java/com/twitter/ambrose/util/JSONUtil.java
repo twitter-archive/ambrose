@@ -27,6 +27,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
+import org.reflections.Reflections;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -36,6 +39,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.reflect.Reflection;
+import com.twitter.ambrose.model.Job;
 
 /**
  * Helper method for dealing with JSON in a common way.
@@ -110,8 +115,7 @@ public class JSONUtil {
     }
   }
 
-  private static ObjectMapper mapper = newMapper();
-  private static List<Class<?>> subtypeList = new ArrayList<Class<?>>();
+  private static final ObjectMapper mapper = newMapper();
 
   private static ObjectMapper newMapper() {
     ObjectMapper mapper = new ObjectMapper();
@@ -123,14 +127,15 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    // dynamically find all the subtypes of Job in classpath
+    registerSubtypes(mapper);
     return mapper;
   }
   
-  public static void registerSubtypes(Class<?> c) {
-    // We need to reinitialize the mapper here in order 
-    // to register this subtype to the mapper
-    subtypeList.add(c);
-    mapper = newMapper();
-    mapper.registerSubtypes(subtypeList.toArray(new Class<?>[subtypeList.size()]));
+  private static void registerSubtypes(ObjectMapper mapper) {
+    Reflections reflections = new Reflections("com.twitter.ambrose");
+    Set<Class<? extends Job>> subTypes = reflections.getSubTypesOf(Job.class);
+    System.out.println(subTypes);
+    mapper.registerSubtypes(subTypes.toArray(new Class<?>[subTypes.size()]));
   }
 }
