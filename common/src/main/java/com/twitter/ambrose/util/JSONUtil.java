@@ -127,15 +127,19 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    // dynamically find all the subtypes of Job in classpath
-    registerSubtypes(mapper);
+
+    Set<Class<? extends Job>> jobSubTypes = getSubtypes();
+    mapper.registerSubtypes(jobSubTypes.toArray(new Class<?>[jobSubTypes.size()]));
     return mapper;
   }
   
-  private static void registerSubtypes(ObjectMapper mapper) {
+  
+  /**
+   * dynamically find all the subtypes of Job in classpath
+   * @param mapper
+   */
+  private static Set<Class<? extends Job>> getSubtypes() {
     Reflections reflections = new Reflections("com.twitter.ambrose");
-    Set<Class<? extends Job>> subTypes = reflections.getSubTypesOf(Job.class);
-    System.out.println(subTypes);
-    mapper.registerSubtypes(subTypes.toArray(new Class<?>[subTypes.size()]));
+    return reflections.getSubTypesOf(Job.class);
   }
 }
