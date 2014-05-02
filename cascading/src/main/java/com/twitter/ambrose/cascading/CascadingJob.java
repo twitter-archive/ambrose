@@ -42,10 +42,6 @@ import com.twitter.ambrose.util.JSONUtil;
 public class CascadingJob extends MapReduceJob {
 
   protected static Log LOG = LogFactory.getLog(CascadingJob.class);
-  
-  static {
-    JSONUtil.registerSubtypes(CascadingJob.class);
-  }
 
   private String[] features = {};
 

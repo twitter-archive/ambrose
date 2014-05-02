@@ -33,12 +33,6 @@ import com.twitter.ambrose.util.JSONUtil;
  */
 @JsonTypeName("mapred")
 public class MapReduceJob extends Job {
-  
-  static {
-    JSONUtil.registerSubtypes(MapReduceJob.class);
-  }
-
-  
   private MapReduceJobState mapReduceJobState;
   private Map<String, CounterGroup> counterGroupMap;
 

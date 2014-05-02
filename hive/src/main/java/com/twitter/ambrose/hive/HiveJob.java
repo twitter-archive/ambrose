@@ -43,10 +43,6 @@ import com.twitter.ambrose.util.JSONUtil;
 public class HiveJob extends Job {
 
   private static final Log LOG = LogFactory.getLog(HiveJob.class);
-  
-  static {
-    JSONUtil.registerSubtypes(HiveJob.class);
-  }
 
   private final String[] aliases;
   private final String[] features;

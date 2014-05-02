@@ -45,10 +45,6 @@ import com.twitter.ambrose.util.JSONUtil;
 @JsonTypeName("pig")
 public class PigJob extends MapReduceJob {
   protected static Log LOG = LogFactory.getLog(PigJob.class);
-  
-  static {
-    JSONUtil.registerSubtypes(PigJob.class);
-  }
 
   private String[] aliases = {};
   private String[] features = {};
