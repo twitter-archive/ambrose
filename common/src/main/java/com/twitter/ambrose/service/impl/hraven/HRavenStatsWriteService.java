@@ -308,10 +308,14 @@ public class HRavenStatsWriteService implements StatsWriteService {
     // TODO Remove this: Temporary fix for adhoc pig jobs
     if (StringUtils.isBlank(appId)) {
       appId = jobConf.get("jobName");
-      Matcher matcher = Pattern.compile(
-          Constants.PIG_SCHEDULED_JOBNAME_PATTERN_REGEX).matcher(appId);
-      if (matcher.matches()) {
-        appId = matcher.group(1);
+      if (appId != null) {
+        Matcher matcher = Pattern.compile(
+            Constants.PIG_SCHEDULED_JOBNAME_PATTERN_REGEX).matcher(appId);
+        if (matcher.matches()) {
+          appId = matcher.group(1);
+        }
+      } else {
+        appId = "Unknown_"+UUID.randomUUID(); 
       }
     }
 
