@@ -117,8 +117,4 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
   }
-
-  public static void mixinAnnotatons(Class<?> target, Class<?> mixinSource) {
-    mapper.addMixInAnnotations(target, mixinSource);
-  }
 }

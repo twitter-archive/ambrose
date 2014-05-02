@@ -1,13 +1,13 @@
 package com.twitter.ambrose.model;
 
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Unit tests for {@link DAGNodeTest}.

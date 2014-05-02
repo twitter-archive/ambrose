@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Objects;
@@ -34,10 +33,7 @@ import com.twitter.ambrose.util.JSONUtil;
  *
  * @author billg
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "runtime")
-@JsonSubTypes({
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default")
-})
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public class Job {
   private String id;
   private Properties configuration;
@@ -47,8 +43,8 @@ public class Job {
 
   @JsonCreator
   public Job(@JsonProperty("id") String id,
-      @JsonProperty("configuration") Properties configuration,
-      @JsonProperty("metrics") Map<String, Number> metrics) {
+    @JsonProperty("configuration") Properties configuration,
+    @JsonProperty("metrics") Map<String, Number> metrics) {
     this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;

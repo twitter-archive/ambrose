@@ -34,10 +34,6 @@ import com.twitter.ambrose.hive.HiveJob;
  * Unit tests for {@link com.twitter.ambrose.model.HiveJobTest}.
  */
 public class HiveJobTest {
-  static {
-    HiveJob.mixinJsonAnnotations();
-  }
-
   private HiveJob hiveJob;
 
   @Before
@@ -80,7 +76,7 @@ public class HiveJobTest {
       "  \"payload\" : {" +
       "    \"name\" : \"Stage-1_user_20130723105858_3f0d530c-34a6-4bb9-8964-22c4ea289895\"," +
       "    \"job\" : {" +
-      "      \"runtime\" : \"hive\"," +
+      "      \"@class\" : \"com.twitter.ambrose.hive.HiveJob\"," +
       "      \"id\" : \"job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)\"," +
       "      \"aliases\" : [ \"src\" ]," +
       "      \"features\" : [ \"SELECT\", \"FILTER\" ]," +
