@@ -46,6 +46,7 @@ import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceHelper;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.util.AmbroseUtils;
+import com.twitter.ambrose.service.impl.InMemoryStatsService;
 
 /**
  * PigProgressNotificationListener that collects plan and job information from within a Pig runtime,
@@ -54,6 +55,9 @@ import com.twitter.ambrose.util.AmbroseUtils;
  *
  * @see EmbeddedAmbrosePigProgressNotificationListener for a sublclass that can be used to run an
  * embedded Abrose web server from Pig client process.
+ * 
+ * This PPNL should be used as a base class for concrete implementations that provide a way of
+ * reading, writing 
  *
  */
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
@@ -65,12 +69,12 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   private Map<String, DAGNode<PigJob>> dagNodeJobIdMap = Maps.newTreeMap();
   private Set<String> completedJobIds = Sets.newHashSet();
   // subclasses can access this to set pig's configuration in multithreaded PPNL
-  protected PigConfig pigConfig = new PigConfig();
+  PigConfig pigConfig = new PigConfig();
 
   // We encapsulate jobClient, jobGraph, pigProperties under static class
   // to avoid accidental usage of these parameters in the outer class.
   // These should be only accessed through the getter apis.
-  private static class PigConfig {
+  public static class PigConfig {
     private JobClient jobClient;
     private PigStats.JobGraph jobGraph;
     private Properties pigProperties;
@@ -123,8 +127,12 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     Preconditions.checkNotNull(pigConfig.getJobGraph());
     Preconditions.checkNotNull(pigConfig.getPigProperties());
 
+    try {
+      statsWriteService.initWriteService(pigConfig.getPigProperties());
+    } catch (IOException ioe) {
+      throw new RuntimeException("Exception while initializing statsWriteService", ioe);
+    }
     this.workflowVersion = pigConfig.getPigProperties().getProperty("pig.logical.plan.signature");
-
 
     Map<OperatorKey, MapReduceOper> planKeys = plan.getKeys();
 

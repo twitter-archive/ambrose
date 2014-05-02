@@ -67,9 +67,11 @@
     <apache.pig.version>0.12.1</apache.pig.version>
     <apache.hive.version>0.12.0</apache.hive.version>
     <apache.hadoop.version>1.0.4</apache.hadoop.version>
+    <apache.hbase.version>0.94.0</apache.hbase.version>
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
     <cascading.version>2.5.2</cascading.version>
+    <twitter.hraven.version>0.9.13</twitter.hraven.version>
     <scalding.version>0.9.1</scalding.version>
     <scala.version>2.9.2</scala.version>
   </properties>
@@ -125,6 +127,20 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>14.0.1</version>
+      </dependency>
+
+      <!-- hraven -->
+      <dependency>
+        <groupId>com.twitter.hraven</groupId>
+        <artifactId>hraven-core</artifactId>
+        <version>${twitter.hraven.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase</artifactId>
+        <version>${apache.hbase.version}</version>
+        <scope>provided</scope>
       </dependency>
 
       <!-- serialization -->

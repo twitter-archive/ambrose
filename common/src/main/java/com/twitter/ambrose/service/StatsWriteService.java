@@ -21,6 +21,7 @@ import com.twitter.ambrose.model.Job;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Service that accepts the DAGNode map and push events. Implementations of this service might write
@@ -30,6 +31,12 @@ import java.util.Map;
  * @author billg
  */
 public interface StatsWriteService<T extends Job> {
+  
+  /**
+   * Initialize the StatsWriteService from configuration properties
+   * @param properties configuration properties
+   */
+  public void initWriteService(Properties properties) throws IOException;
 
   /**
    * Send a map of all DAGNodes in the workflow. The structure of the DAG is assumed to be immutable.

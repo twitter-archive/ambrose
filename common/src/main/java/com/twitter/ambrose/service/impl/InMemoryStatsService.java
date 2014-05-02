@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -187,5 +188,15 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
     int maxEvents) throws IOException {
     int minId = sinceId >= 0 ? sinceId + 1 : sinceId;
     return Lists.newArrayList(Iterables.limit(eventMap.tailMap(minId).values(), maxEvents));
+  }
+
+  @Override
+  public void initWriteService(Properties properties) throws IOException {
+    // Do nothing
+  }
+
+  @Override
+  public void initReadService(Properties properties) throws IOException {
+    // Do nothing
   }
 }
