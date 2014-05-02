@@ -128,18 +128,9 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-    Set<Class<? extends Job>> jobSubTypes = getSubtypes();
+    Reflections reflections = new Reflections("com.twitter.ambrose");
+    Set<Class<? extends Job>> jobSubTypes = reflections.getSubTypesOf(Job.class);
     mapper.registerSubtypes(jobSubTypes.toArray(new Class<?>[jobSubTypes.size()]));
     return mapper;
-  }
-  
-  
-  /**
-   * dynamically find all the subtypes of Job in classpath
-   * @param mapper
-   */
-  private static Set<Class<? extends Job>> getSubtypes() {
-    Reflections reflections = new Reflections("com.twitter.ambrose");
-    return reflections.getSubTypesOf(Job.class);
   }
 }
