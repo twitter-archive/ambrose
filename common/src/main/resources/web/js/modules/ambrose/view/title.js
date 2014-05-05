@@ -30,9 +30,16 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
      * @param container the DOM element in which to render the view.
      */
     init: function(workflow, container) {
-      container = $(container)
-      var workflowId = workflow.id || "unknown workflow"
-      var title = $('<h4>').appendTo(container).text(workflowId).css('margin-bottom', '0px');
+      container = $(container);
+      var info = Ambrose.parseHRavenWorkflow(workflow);
+      console.log(info);
+      if (!$.isEmptyObject(info)) {
+        $('<h3>').appendTo(container).text(info.id).css('margin-bottom', '0px');
+        $('<span>').appendTo(container)
+          .html("user <u>" + info.user + "</u> on cluster <u>" + info.cluster + "</u>");
+      } else {
+        container.remove();
+      }
     },
   };
 
