@@ -58,15 +58,13 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
 
   protected Log log = LogFactory.getLog(getClass());
   private StatsWriteService statsWriteService;
-  private String workflowVersion;
   private List<Job> jobs = new ArrayList<Job>();
   private Map<String, DAGNode<CascadingJob>> dagNodeNameMap = Maps.newTreeMap();
   private Map<String, DAGNode<CascadingJob>> dagNodeJobIdMap = Maps.newTreeMap();
   private HashSet<String> completedJobIds = new HashSet<String>();
-  private SimpleDirectedGraph jobGraph;
   private int totalNumberOfJobs;
-  private int runnigJobs;
-  private String currentFlowId;   //id of the flow being excuted
+  private int runningJobs = 0;
+  private String currentFlowId;
 
   private MapReduceHelper mapReduceHelper = new MapReduceHelper();
   
@@ -98,7 +96,6 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     //init flow
     List<BaseFlowStep> steps = flow.getFlowSteps();
     totalNumberOfJobs = steps.size();
-    runnigJobs = 0;
     currentFlowId = flow.getID();
     
     Properties props = new Properties();
@@ -113,7 +110,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     AmbroseCascadingGraphConverter convertor =
         new AmbroseCascadingGraphConverter((SimpleDirectedGraph) Flows.getStepGraphFrom(flow), dagNodeNameMap);
     convertor.convert();
-    AmbroseUtils.sendDagNodeNameMap(statsWriteService, null, this.dagNodeNameMap);
+    AmbroseUtils.sendDagNodeNameMap(statsWriteService, currentFlowId, this.dagNodeNameMap);
   }
 
   /**
@@ -132,7 +129,6 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    *
    * @param flow
    */
-
   @Override
   public void onCompleted(Flow flow) {}
 
@@ -147,7 +143,6 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param throwable
    * @return true if this listener has handled the given throwable
    */
-
   @Override
   public boolean onThrowable(Flow flow, Throwable throwable) {
       return false;
@@ -167,7 +162,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     String jobName = flowStep.getName();
     JobClient jc = stats.getJobClient();
 
-    runnigJobs++; //update overall progress
+    runningJobs++; //update overall progress
 
     DAGNode<CascadingJob> node = this.dagNodeNameMap.get(jobName);
     if (node == null) {
@@ -239,7 +234,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     JobClient jc = stats.getJobClient();
 
     // first we report the scripts progress
-    int progress = (int) (((runnigJobs * 1.0) / totalNumberOfJobs) * 100);
+    int progress = (int) (((runningJobs * 1.0) / totalNumberOfJobs) * 100);
     AmbroseUtils.pushWorkflowProgressEvent(statsWriteService, currentFlowId, progress);
 
     //get job node
