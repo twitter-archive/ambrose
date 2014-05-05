@@ -29,9 +29,7 @@ import org.apache.pig.tools.pigstats.OutputStats;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJob;
 import com.twitter.ambrose.util.JSONUtil;
@@ -159,22 +157,4 @@ public class PigJob extends MapReduceJob {
           outputStats.getAlias());
     }
   }
-
-  /**
-   * This is a hack to get around how the json library requires subtype info to be defined on the
-   * super-class, which doesn't always have access to the subclasses at compile time. Since the
-   * mixinAnnotations method replaces the existing annotation, this means that an action like this
-   * will need to be taken once upon app startup to register all known types. If this action
-   * happens multiple times, calls will override each other.
-   */
-  public static void mixinJsonAnnotations() {
-    LOG.info("Mixing in JSON annotations for PigJob and Job into Job");
-    JSONUtil.mixinAnnotatons(Job.class, AnnotationMixinClass.class);
-  }
-
-  @JsonSubTypes({
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default"),
-    @JsonSubTypes.Type(value=com.twitter.ambrose.pig.PigJob.class, name="pig")
-  })
-  private static class AnnotationMixinClass { }
 }

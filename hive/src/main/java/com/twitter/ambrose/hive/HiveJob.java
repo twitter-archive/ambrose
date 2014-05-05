@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 package com.twitter.ambrose.hive;
 
 import java.util.Map;
@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.collect.Maps;
 import com.twitter.ambrose.model.Job;
@@ -60,10 +59,10 @@ public class HiveJob extends Job {
 
   @JsonCreator
   public HiveJob(@JsonProperty("id") String id,
-                 @JsonProperty("aliases") String[] aliases,
-                 @JsonProperty("features") String[] features,
-                 @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-                 @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
+    @JsonProperty("aliases") String[] aliases,
+    @JsonProperty("features") String[] features,
+    @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
+    @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
     this(aliases, features);
     setId(id);
     this.mapReduceJobState = mapReduceJobState;
@@ -96,7 +95,7 @@ public class HiveJob extends Job {
 
   @JsonIgnore
   public void setJobStats(Map<String, Double> counterNameToValue, int totalMappers,
-      int totalReducers) {
+    int totalReducers) {
     counterGroupMap = AmbroseHiveUtil.counterGroupInfoMap(counterNameToValue);
 
     // job metrics
@@ -106,7 +105,7 @@ public class HiveJob extends Job {
     metrics.put("avgMapTime",
         getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_MAPS, totalMappers));
     metrics.put("avgReduceTime",
-       getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_REDUCES, totalReducers));
+        getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_REDUCES, totalReducers));
     metrics.put("bytesWritten",
         getCounterValue(counterNameToValue, MetricsCounter.FILE_BYTES_WRITTEN));
     metrics.put("hdfsBytesWritten",
@@ -124,32 +123,12 @@ public class HiveJob extends Job {
     setMetrics(metrics);
   }
 
-  /**
-   * This is a hack to get around how the json library requires subtype info to
-   * be defined on the super-class, which doesn't always have access to the
-   * subclasses at compile time. Since the mixinAnnotations method replaces the
-   * existing annotation, this means that an action like this will need to be
-   * taken once upon app startup to register all known types. If this action
-   * happens multiple times, calls will override each other.
-   * 
-   * @see com.twitter.ambrose.pig.HiveJob#mixinJsonAnnotations()
-   */
-  public static void mixinJsonAnnotations() {
-    LOG.info("Mixing in JSON annotations for HiveJob and Job into Job");
-    JSONUtil.mixinAnnotatons(Job.class, AnnotationMixinClass.class);
-  }
-
-  @JsonSubTypes({
-      @JsonSubTypes.Type(value = com.twitter.ambrose.model.Job.class, name = "default"),
-      @JsonSubTypes.Type(value = com.twitter.ambrose.hive.HiveJob.class, name = "hive") })
-  private static class AnnotationMixinClass {}
-
   private Double getCounterValue(Map<String, Double> counterNameToValue, MetricsCounter hjc) {
     String[] keys = MetricsCounter.get(hjc);
     return (counterNameToValue.get(keys[0]) == null) ? counterNameToValue.get(keys[1])
         : counterNameToValue.get(keys[0]);
   }
-  
+
   private Double getAvgCounterValue(Map<String, Double> counterNameToValue, MetricsCounter hjc, int divisor) {
     if (divisor == 0) {
       return Double.valueOf(0.0d);

@@ -24,6 +24,12 @@ import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
+import org.reflections.Reflections;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -33,6 +39,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.reflect.Reflection;
+import com.twitter.ambrose.model.Job;
 
 /**
  * Helper method for dealing with JSON in a common way.
@@ -40,6 +48,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * @author billg
  */
 public class JSONUtil {
+  
+  private JSONUtil() {}
   /**
    * Writes object to the writer as JSON using Jackson and adds a new-line before flushing.
    *
@@ -105,9 +115,10 @@ public class JSONUtil {
     }
   }
 
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper mapper = newMapper();
 
-  static {
+  private static ObjectMapper newMapper() {
+    ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     mapper.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
@@ -116,9 +127,10 @@ public class JSONUtil {
     mapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-  }
 
-  public static void mixinAnnotatons(Class<?> target, Class<?> mixinSource) {
-    mapper.addMixInAnnotations(target, mixinSource);
+    Reflections reflections = new Reflections("com.twitter.ambrose");
+    Set<Class<? extends Job>> jobSubTypes = reflections.getSubTypesOf(Job.class);
+    mapper.registerSubtypes(jobSubTypes.toArray(new Class<?>[jobSubTypes.size()]));
+    return mapper;
   }
 }
