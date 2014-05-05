@@ -93,6 +93,17 @@ define(['lib/jquery'], function($) {
 
   // core Ambrose object, util methods
   return {
+    parseHRavenWorkflow : function(workflow) {
+      var splits = workflow.id.split("!");
+      var info = {};
+      if (splits.length == 6) {
+        info.cluster = splits[0];
+        info.user = splits[1];
+        info.id = splits[2];
+      }
+      return info;
+    },
+
     calculateElapsedTime : function(start, end) {
       var ms = Number(end) - Number(start);
 

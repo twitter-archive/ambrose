@@ -15,6 +15,7 @@ require([
     // Rescale the edges based on the option chosen, default option.
     workflow.rescaleOption = "hdfsBytesWritten";
 
+    var title = Ambrose.View.Title(workflow, $('#ambrose-view-title'));
     var progressBar = Ambrose.View.ProgressBar(workflow, $('#ambrose-view-progress-bar'));
     var graph = Ambrose.View.Graph(workflow, $graphContainer);
     var table = Ambrose.View.Table(workflow, $('#ambrose-view-table'));
