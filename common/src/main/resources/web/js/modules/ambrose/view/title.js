@@ -36,7 +36,7 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
       if (!$.isEmptyObject(info)) {
         $('<h3>').appendTo(container).text(info.id).css('margin-bottom', '0px');
         $('<span>').appendTo(container)
-          .html("user <u>" + info.user + "</u> on cluster <u>" + info.cluster + "</u>");
+          .html("user <b>" + info.user + "</b> on cluster <b>" + info.cluster + "</b>");
       } else {
         container.remove();
       }
