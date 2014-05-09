@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 
@@ -139,7 +140,10 @@ public class APIHandler extends AbstractHandler {
       LOG.info("Submitted request for workflowId={}", workflowId);
       Map<String, DAGNode<Job>> dagNodeNameMap =
           statsReadService.getDagNodeNameMap(workflowId);
-      Collection<DAGNode<Job>> nodes = dagNodeNameMap.values();
+      Collection<DAGNode<Job>> nodes = Lists.newArrayList();
+      if (dagNodeNameMap != null) {
+        nodes = dagNodeNameMap.values();
+      }
 
       response.setContentType(MIME_TYPE_JSON);
       response.setStatus(HttpServletResponse.SC_OK);
