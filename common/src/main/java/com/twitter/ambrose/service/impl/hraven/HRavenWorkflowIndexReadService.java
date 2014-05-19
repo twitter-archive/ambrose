@@ -65,6 +65,7 @@ public class HRavenWorkflowIndexReadService implements WorkflowIndexReadService 
     //TODO make this an api in hraven
     Properties props = new Properties();
     String filename = Constants.HRAVEN_CLUSTER_PROPERTIES_FILENAME;
+    clusterMap.put("default", "default");
     try {
       //TODO : property file to be moved out from resources into config dir
       InputStream inp = Cluster.class.getResourceAsStream("/" + filename);
