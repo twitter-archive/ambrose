@@ -66,10 +66,6 @@
       <groupId>cascading</groupId>
       <artifactId>cascading-xml</artifactId>
     </dependency>
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-platform</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
