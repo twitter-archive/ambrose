@@ -28,12 +28,16 @@ import org.apache.hadoop.mapreduce.JobContext
  */
 trait AmbroseAdapter extends Job {
 
-  val ambroseListener: AmbroseCascadingNotifier
+  @transient val ambroseListener: Option[AmbroseCascadingNotifier] = None
 
   override def buildFlow: Flow[_] = {
     val flow = super.buildFlow
-    flow.addListener(ambroseListener)
-    flow.addStepListener(ambroseListener)
+    ambroseListener match {
+      case Some(listener) =>
+        flow.addListener(listener)
+        flow.addStepListener(listener)
+      case _ => // do nothing
+    }
     flow
   }
 }
