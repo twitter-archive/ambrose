@@ -25,7 +25,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobClient;
+import org.apache.pig.backend.hadoop.datastorage.ConfigurationUtil;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
 import org.apache.pig.impl.plan.OperatorKey;
@@ -135,16 +137,27 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
     this.workflowVersion = pigConfig.getPigProperties().getProperty("pig.logical.plan.signature");
 
     Map<OperatorKey, MapReduceOper> planKeys = plan.getKeys();
+    
+    Configuration flowConfig = new Configuration(false);
+    boolean initialized = false;
 
     // first pass builds all nodes
     for (Map.Entry<OperatorKey, MapReduceOper> entry : planKeys.entrySet()) {
       String nodeName = entry.getKey().toString();
-      String[] aliases = toArray(ScriptState.get().getAlias(entry.getValue()).trim());
-      String[] features = toArray(ScriptState.get().getPigFeature(entry.getValue()).trim());
+      MapReduceOper mrOper = entry.getValue();
+      String[] aliases = toArray(ScriptState.get().getAlias(mrOper).trim());
+      String[] features = toArray(ScriptState.get().getPigFeature(mrOper).trim());
+      
+      if (!initialized) {
+    	  ScriptState.get().addSettingsToConf(mrOper, flowConfig);
+    	  pigConfig.getPigProperties().putAll(ConfigurationUtil.toProperties(flowConfig));
+    	  initialized = true;
+      }
 
       PigJob job = new PigJob();
       job.setAliases(aliases);
       job.setFeatures(features);
+      job.setConfiguration(pigConfig.getPigProperties());
 
       DAGNode<PigJob> node = new DAGNode<PigJob>(nodeName, job);
 
