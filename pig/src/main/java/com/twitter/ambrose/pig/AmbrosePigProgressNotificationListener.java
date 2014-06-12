@@ -227,7 +227,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       return;
     }
 
-    mapReduceHelper.addMapReduceJobState(job, pigConfig.getJobClient());
+    mapReduceHelper.addMapReduceJobState(node.getJob(), pigConfig.getJobClient());
     addCompletedJobStats(node.getJob(), stats);
     AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobFailedEvent(node));
   }
@@ -246,7 +246,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
       return;
     }
 
-    mapReduceHelper.addMapReduceJobState(job, pigConfig.getJobClient());
+    mapReduceHelper.addMapReduceJobState(node.getJob(), pigConfig.getJobClient());
     addCompletedJobStats(node.getJob(), stats);
     AmbroseUtils.pushEvent(statsWriteService, scriptId, new Event.JobFinishedEvent(node));
   }
