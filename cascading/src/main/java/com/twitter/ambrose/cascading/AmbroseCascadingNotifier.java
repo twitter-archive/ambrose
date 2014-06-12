@@ -195,6 +195,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
         log.warn("Unrecognized jobId reported for succeeded job: " + stats.getJobID());
         return;
       }
+      mapReduceHelper.addMapReduceJobState(node.getJob(), stats.getJobClient());
       addCompletedJobStats(node.getJob(), stats);
       AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobFinishedEvent(node));
   }
@@ -217,6 +218,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
       log.warn("Unrecognized jobId reported for succeeded job: " + stats.getJobID());
       return false;
     }
+    mapReduceHelper.addMapReduceJobState(node.getJob(), stats.getJobClient());
     addCompletedJobStats(node.getJob(), stats);
     AmbroseUtils.pushEvent(statsWriteService, currentFlowId, new Event.JobFailedEvent(node));
     return false;
