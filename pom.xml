@@ -71,7 +71,7 @@
     <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
     <cascading.version>2.5.4</cascading.version>
-    <twitter.hraven.version>0.9.13</twitter.hraven.version>
+    <twitter.hraven.version>0.9.14</twitter.hraven.version>
     <scalding.version>0.9.1</scalding.version>
     <scala.version>2.9.2</scala.version>
   </properties>
