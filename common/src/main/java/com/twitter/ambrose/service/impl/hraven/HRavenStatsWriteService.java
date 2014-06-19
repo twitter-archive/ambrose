@@ -130,7 +130,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
-        shutdown();
+        shutdownWriteService();
       }
     });
   }
@@ -250,7 +250,8 @@ public class HRavenStatsWriteService implements StatsWriteService {
         && dagNodeNameMap != null;
   }
 
-  public void shutdown() {
+  @Override
+  public void shutdownWriteService() {
     if (shutdown) {
       return;
     }
@@ -399,11 +400,6 @@ public class HRavenStatsWriteService implements StatsWriteService {
     }
 
     hRavenPool.submit(new HRavenEventRunnable(flowEventService, flowEvent));
-  }
-
-  @Override
-  public void shutdownWriteService() throws IOException {
-    shutdown();
   }
 
   private void updateFlowQueue(FlowQueueKey key) throws IOException {
