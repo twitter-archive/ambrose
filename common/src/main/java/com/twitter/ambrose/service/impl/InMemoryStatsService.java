@@ -25,14 +25,15 @@ import java.util.Properties;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
@@ -131,6 +132,9 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
     }
     writeJsonEventToDisk(event);
   }
+
+  @Override
+  public void shutdownWriteService() throws IOException {} // no-op for in-memory
 
   @Override
   public synchronized Map<String, DAGNode<Job>> getDagNodeNameMap(String workflowId) {

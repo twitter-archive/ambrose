@@ -15,13 +15,13 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
-import com.twitter.ambrose.model.DAGNode;
-import com.twitter.ambrose.model.Event;
-import com.twitter.ambrose.model.Job;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
 
 /**
  * Service that accepts the DAGNode map and push events. Implementations of this service might write
@@ -55,4 +55,10 @@ public interface StatsWriteService<T extends Job> {
    * @param event the event bound to the workflow
    */
   public void pushEvent(String workflowId, Event event) throws IOException;
+
+  /**
+   * Perform any shutdown/cleanup required when this StatWriteService is no longer required.
+   * @throws IOException
+   */
+  public void shutdownWriteService() throws IOException;
 }

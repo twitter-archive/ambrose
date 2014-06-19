@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,6 +90,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
   private final ExecutorService hRavenPool;
 
   private volatile boolean initialized = false;
+  private volatile boolean shutdown = false;
   private FlowQueueService flowQueueService;
   private FlowEventService flowEventService;
   private String cluster;
@@ -114,7 +116,15 @@ public class HRavenStatsWriteService implements StatsWriteService {
     this.username = System.getProperty("user.name");
 
     // queue hRaven requests up and fire them asynchronously
-    this.hRavenPool = Executors.newFixedThreadPool(1);
+    this.hRavenPool = Executors.newFixedThreadPool(1,
+        new ThreadFactory() {
+          public Thread newThread(Runnable r) {
+              Thread t = new Thread(r);
+              t.setName("HRavenStatsWriteService thread");
+              return t;
+          }
+        }
+    );
 
     // we try to shut down gracefully, but this exists if we can't
     Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -241,6 +251,10 @@ public class HRavenStatsWriteService implements StatsWriteService {
   }
 
   public void shutdown() {
+    if (shutdown) {
+      return;
+    }
+
     if (ifInitialized() && (runningJobs.size() > 0
         || completedJobs.size() + failedJobs.size() < dagNodeNameMap.size())) {
       try {
@@ -257,6 +271,7 @@ public class HRavenStatsWriteService implements StatsWriteService {
           HRAVEN_POOL_SHUTDOWN_SECS));
 
       hRavenPool.awaitTermination(HRAVEN_POOL_SHUTDOWN_SECS, TimeUnit.SECONDS);
+      shutdown = true;
     } catch (InterruptedException e) {
       LOG.error("Was not able to await termination for hRavenPool", e);
     }
@@ -384,6 +399,11 @@ public class HRavenStatsWriteService implements StatsWriteService {
     }
 
     hRavenPool.submit(new HRavenEventRunnable(flowEventService, flowEvent));
+  }
+
+  @Override
+  public void shutdownWriteService() throws IOException {
+    shutdown();
   }
 
   private void updateFlowQueue(FlowQueueKey key) throws IOException {
