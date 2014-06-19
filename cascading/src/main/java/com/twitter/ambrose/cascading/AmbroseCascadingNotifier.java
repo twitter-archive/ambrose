@@ -22,10 +22,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.collect.Maps;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.JobClient;
 import org.jgrapht.graph.SimpleDirectedGraph;
+
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
+import com.twitter.ambrose.model.hadoop.MapReduceHelper;
+import com.twitter.ambrose.service.StatsWriteService;
+import com.twitter.ambrose.util.AmbroseUtils;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowListener;
@@ -35,14 +44,6 @@ import cascading.flow.Flows;
 import cascading.flow.hadoop.HadoopFlowStep;
 import cascading.flow.planner.BaseFlowStep;
 import cascading.stats.hadoop.HadoopStepStats;
-
-import com.google.common.collect.Maps;
-import com.twitter.ambrose.model.DAGNode;
-import com.twitter.ambrose.model.Event;
-import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.hadoop.MapReduceHelper;
-import com.twitter.ambrose.service.StatsWriteService;
-import com.twitter.ambrose.util.AmbroseUtils;
 
 /**
  * CascadingNotifier that collects plan and job information from within a cascading
@@ -130,7 +131,13 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flow
    */
   @Override
-  public void onCompleted(Flow flow) {}
+  public void onCompleted(Flow flow) {
+    try {
+      statsWriteService.shutdownWriteService();
+    } catch (IOException e) {
+      log.warn("Failure trying to shutdown the StatsWriteService" + e);
+    }
+  }
 
   /**
    * The onThrowable event is fired if any child
