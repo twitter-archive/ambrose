@@ -94,12 +94,15 @@ define(['lib/jquery'], function($) {
   // core Ambrose object, util methods
   return {
     parseHRavenWorkflow : function(workflow) {
-      var splits = workflow.id.split("!");
+      var splits = [];
       var info = {};
-      if (splits.length == 6) {
-        info.cluster = splits[0];
-        info.user = splits[1];
-        info.id = splits[2];
+      if ('undefined' !== typeof workflow.id) {
+        splits = workflow.id.split("!");
+        if (splits.length == 6) {
+          info.cluster = splits[0];
+          info.user = splits[1];
+          info.id = splits[2];
+        }
       }
       return info;
     },
