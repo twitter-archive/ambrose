@@ -62,18 +62,18 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <slf4j.version>1.7.5</slf4j.version>
-    <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
-    <apache.pig.version>0.12.1</apache.pig.version>
-    <apache.hive.version>0.12.0</apache.hive.version>
     <apache.hadoop.version>1.0.4</apache.hadoop.version>
     <apache.hbase.version>0.94.0</apache.hbase.version>
-    <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
-    <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
+    <apache.hive.version>0.12.0</apache.hive.version>
+    <apache.pig.version>0.12.1</apache.pig.version>
     <cascading.version>2.5.4</cascading.version>
+    <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
+    <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
+    <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
+    <scala.version>2.10.4</scala.version>
+    <scalding.version>0.12.0rc4</scalding.version>
+    <slf4j.version>1.7.5</slf4j.version>
     <twitter.hraven.version>0.9.14</twitter.hraven.version>
-    <scalding.version>0.9.1</scalding.version>
-    <scala.version>2.9.2</scala.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -270,7 +270,7 @@
       </dependency>
      <dependency>
        <groupId>com.twitter</groupId>
-       <artifactId>scalding-core_2.9.3</artifactId>
+       <artifactId>scalding-core_2.10</artifactId>
        <version>${scalding.version}</version>
        <scope>provided</scope>
      </dependency>

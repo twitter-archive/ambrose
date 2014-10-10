@@ -48,7 +48,7 @@
     <!-- scalding -->
     <dependency>
       <groupId>com.twitter</groupId>
-      <artifactId>scalding-core_2.9.3</artifactId>
+      <artifactId>scalding-core_2.10</artifactId>
     </dependency>
 
     <!-- hadoop -->
