@@ -131,8 +131,11 @@ public class ScriptStatusServer implements Runnable {
     server.setConnectors(new Connector[]{connector});
 
     // this needs to be loaded via the jar'ed resources, not the relative dir
+    String resourcePath = "com/twitter/ambrose/server/web";
     URL resourceUrl = checkNotNull(
-        APIHandler.class.getClassLoader().getResource("web"), "Failed to find resource 'web'");
+        APIHandler.class.getClassLoader().getResource(resourcePath),
+        "Failed to find resource '%s'", resourcePath
+    );
     ResourceHandler resourceHandler = new ResourceHandler();
     resourceHandler.setWelcomeFiles(new String[]{ "workflow.html" });
     resourceHandler.setResourceBase(resourceUrl.toExternalForm());
