@@ -75,7 +75,6 @@ define(['lib/jquery'], function($) {
     return String(this).commafy();
   };
 
-
   Number.prototype.formatTimestamp = function() {
     var date = new Date(this);
     var timezoneOffsetHours = date.getTimezoneOffset() / 60;
@@ -94,8 +93,9 @@ define(['lib/jquery'], function($) {
   // core Ambrose object, util methods
   return {
     parseHRavenWorkflow : function(workflow) {
-      var splits = workflow.id.split("!");
       var info = {};
+      if (workflow == null || typeof workflow.id !== 'string') return info;
+      var splits = workflow.id.split("!");
       if (splits.length == 6) {
         info.cluster = splits[0];
         info.user = splits[1];
