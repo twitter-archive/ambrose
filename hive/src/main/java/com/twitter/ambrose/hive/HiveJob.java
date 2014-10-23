@@ -28,7 +28,6 @@ import com.google.common.collect.Maps;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJobState;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Subclass of Job used to hold initialization logic and Hive-specific bindings
@@ -42,7 +41,8 @@ import com.twitter.ambrose.util.JSONUtil;
 @JsonTypeName("hive")
 public class HiveJob extends Job {
 
-  private static final Log LOG = LogFactory.getLog(HiveJob.class);
+  @SuppressWarnings("unused")
+private static final Log LOG = LogFactory.getLog(HiveJob.class);
 
   private final String[] aliases;
   private final String[] features;

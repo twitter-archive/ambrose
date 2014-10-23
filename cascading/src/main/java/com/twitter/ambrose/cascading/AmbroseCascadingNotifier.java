@@ -57,7 +57,7 @@ import com.twitter.ambrose.util.AmbroseUtils;
 public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener {
 
   protected Log log = LogFactory.getLog(getClass());
-  private StatsWriteService statsWriteService;
+  private StatsWriteService<?> statsWriteService;
   private List<Job> jobs = new ArrayList<Job>();
   private Map<String, DAGNode<CascadingJob>> dagNodeNameMap = Maps.newTreeMap();
   private Map<String, DAGNode<CascadingJob>> dagNodeJobIdMap = Maps.newTreeMap();
@@ -74,11 +74,11 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    *
    * @param statsWriteService
    */
-  public AmbroseCascadingNotifier(StatsWriteService statsWriteService) {
+  public AmbroseCascadingNotifier(StatsWriteService<?> statsWriteService) {
       this.statsWriteService = statsWriteService;
   }
 
-  protected StatsWriteService getStatsWriteService() {
+  protected StatsWriteService<?> getStatsWriteService() {
       return statsWriteService;
   }
 
@@ -91,7 +91,8 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    *
    * @param flow
    */
-  @Override
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+@Override
   public void onStarting(Flow flow) {
     //init flow
     List<BaseFlowStep> steps = flow.getFlowSteps();
@@ -119,7 +120,8 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    *
    * @param flow
    */
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void onStopping(Flow flow) {}
 
   /**
@@ -129,7 +131,8 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    *
    * @param flow
    */
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void onCompleted(Flow flow) {}
 
   /**
@@ -144,7 +147,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @return true if this listener has handled the given throwable
    */
   @Override
-  public boolean onThrowable(Flow flow, Throwable throwable) {
+  public boolean onThrowable(@SuppressWarnings("rawtypes") Flow flow, Throwable throwable) {
       return false;
   }
 
@@ -155,7 +158,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flowStep the step in the flow that represents the MapReduce job
    */
   @Override
-  public void onStepStarting(FlowStep flowStep) {
+  public void onStepStarting(@SuppressWarnings("rawtypes") FlowStep flowStep) {
     //getting Hadoop job client
     HadoopStepStats stats = (HadoopStepStats)((HadoopFlowStep)flowStep).getFlowStepStats();
     String assignedJobId = stats.getJobID();
@@ -185,7 +188,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flowStep the step in the flow that represents the MapReduce job
    */
   @Override
-  public void onStepCompleted(FlowStep flowStep) {
+  public void onStepCompleted(@SuppressWarnings("rawtypes") FlowStep flowStep) {
        HadoopStepStats stats = (HadoopStepStats)flowStep.getFlowStepStats();
        String jobId = stats.getJobID();
 
@@ -208,7 +211,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param throwable  the exception that caused the job to fail
    */
   @Override
-  public boolean onStepThrowable(FlowStep flowStep , Throwable throwable) {
+  public boolean onStepThrowable(@SuppressWarnings("rawtypes") FlowStep flowStep , Throwable throwable) {
     HadoopStepStats stats = (HadoopStepStats)flowStep.getFlowStepStats();
     String jobName = flowStep.getName();
 
@@ -230,7 +233,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flowStep the step in the flow that represents the MapReduce job
    */
   @Override
-  public void onStepRunning(FlowStep flowStep) {
+  public void onStepRunning(@SuppressWarnings("rawtypes") FlowStep flowStep) {
     //getting Hadoop running job and job client
     HadoopStepStats stats = (HadoopStepStats)flowStep.getFlowStepStats();
     JobClient jc = stats.getJobClient();
@@ -264,7 +267,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
   }
 
   @Override
-  public void onStepStopping(FlowStep flowStep) {
+  public void onStepStopping(@SuppressWarnings("rawtypes") FlowStep flowStep) {
   }
 
   private void addCompletedJobStats(CascadingJob job, HadoopStepStats stats) {

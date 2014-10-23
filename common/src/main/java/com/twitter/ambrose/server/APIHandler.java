@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 
 import org.mortbay.jetty.HttpConnection;
@@ -18,14 +17,9 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.twitter.ambrose.model.DAGNode;
-import com.twitter.ambrose.model.Event;
-import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.model.PaginatedList;
-import com.twitter.ambrose.model.WorkflowSummary;
+import com.twitter.ambrose.model.*;
 import com.twitter.ambrose.model.WorkflowSummary.Status;
-import com.twitter.ambrose.service.StatsReadService;
-import com.twitter.ambrose.service.WorkflowIndexReadService;
+import com.twitter.ambrose.service.*;
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
@@ -108,7 +102,8 @@ public class APIHandler extends AbstractHandler {
     this.statsReadService = statsReadService;
   }
 
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void handle(String target,
       HttpServletRequest request,
       HttpServletResponse response,

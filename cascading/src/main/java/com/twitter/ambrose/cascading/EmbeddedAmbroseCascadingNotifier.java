@@ -20,7 +20,6 @@ import cascading.flow.Flow;
 import com.twitter.ambrose.server.ScriptStatusServer;
 import com.twitter.ambrose.service.impl.InMemoryStatsService;
 
-
 import java.io.IOException;
 
 /**
@@ -43,14 +42,16 @@ public class EmbeddedAmbroseCascadingNotifier
   private InMemoryStatsService service;
   private ScriptStatusServer server;
 
-  public EmbeddedAmbroseCascadingNotifier() {
+  @SuppressWarnings("unchecked")
+public EmbeddedAmbroseCascadingNotifier() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);
     this.server.start();
   }
 
-  @Override
+  @SuppressWarnings("rawtypes")
+@Override
   public void onCompleted(Flow flow) {
     super.onCompleted(flow);
 

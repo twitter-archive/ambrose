@@ -13,10 +13,10 @@ import static org.junit.Assert.assertNotNull;
  * Unit tests for {@link DAGNodeTest}.
  */
 public class DAGNodeTest {
-  private void testRoundTrip(DAGNode expected) throws IOException {
+  private void testRoundTrip(DAGNode<Job> expected) throws IOException {
     String asJson = expected.toJson();
     System.out.println(asJson);
-    DAGNode asDAGNodeAgain = DAGNode.fromJson(asJson);
+    DAGNode<?> asDAGNodeAgain = DAGNode.fromJson(asJson);
     assertEquals(expected.getName(), asDAGNodeAgain.getName());
     assertNotNull(asDAGNodeAgain.getJob());
     assertEquals(expected.getJob(), asDAGNodeAgain.getJob());

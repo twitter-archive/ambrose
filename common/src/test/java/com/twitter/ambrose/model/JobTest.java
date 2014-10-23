@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.collect.Maps;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Unit tests for {@link com.twitter.ambrose.model.JobTest}.

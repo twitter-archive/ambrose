@@ -111,7 +111,8 @@ public class HRavenWorkflowIndexReadService implements WorkflowIndexReadService 
     return Flow.Status.valueOf(status.name());
   }
 
-  private static Status convertStatus(Flow.Status status) {
+  @SuppressWarnings("unused")
+private static Status convertStatus(Flow.Status status) {
     return Status.valueOf(status.name());
   }
 

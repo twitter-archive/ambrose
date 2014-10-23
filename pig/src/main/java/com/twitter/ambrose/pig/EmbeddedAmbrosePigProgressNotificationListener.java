@@ -51,7 +51,8 @@ public class EmbeddedAmbrosePigProgressNotificationListener
   private InMemoryStatsService service;
   private ScriptStatusServer server;
 
-  public EmbeddedAmbrosePigProgressNotificationListener() {
+  @SuppressWarnings("unchecked")
+public EmbeddedAmbrosePigProgressNotificationListener() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);

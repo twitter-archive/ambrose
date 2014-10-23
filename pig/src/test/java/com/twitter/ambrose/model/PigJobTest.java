@@ -77,8 +77,9 @@ public class PigJobTest {
                    "  \"id\" : 1,\n" +
                    "  \"timestamp\" : 1373560988033\n" +
                    "}";
-    Event event = Event.fromJson(json);
-    PigJob job = ((DAGNode<PigJob>)event.getPayload()).getJob();
+    Event<?> event = Event.fromJson(json);
+    @SuppressWarnings("unchecked")
+	PigJob job = ((DAGNode<PigJob>)event.getPayload()).getJob();
     assertEquals("job_local_0001", job.getId());
     assertArrayEquals(new String[] {"A", "AA", "B", "C"}, job.getAliases());
     assertArrayEquals(new String[] {"GROUP_BY", "COMBINER", "MAP_PARTIALAGG"}, job.getFeatures());
@@ -88,7 +89,7 @@ public class PigJobTest {
 
   private void doTestRoundTrip(DAGNode<PigJob> expected) throws IOException {
     String asJson = expected.toJson();
-    DAGNode asDAGNodeAgain = DAGNode.fromJson(asJson);
+    DAGNode<?> asDAGNodeAgain = DAGNode.fromJson(asJson);
     assertEquals(expected.getName(), asDAGNodeAgain.getName());
     assertNotNull(asDAGNodeAgain.getJob());
 

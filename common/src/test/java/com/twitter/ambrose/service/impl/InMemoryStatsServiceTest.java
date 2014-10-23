@@ -18,6 +18,7 @@ package com.twitter.ambrose.service.impl;
 import com.twitter.ambrose.model.DAGNode;
 import com.twitter.ambrose.model.Event;
 import com.twitter.ambrose.model.Job;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +38,8 @@ public class InMemoryStatsServiceTest {
   private InMemoryStatsService service;
 
   private final String workflowId = "id1";
-  private final Event[] testEvents = new Event[] {
+  @SuppressWarnings("rawtypes")
+private final Event[] testEvents = new Event[] {
     new Event.JobStartedEvent(new DAGNode<Job>("some name", null)),
     new Event.JobProgressEvent(new DAGNode<Job>("50", null)),
     new Event.JobFinishedEvent(new DAGNode<Job>("done", null)),
@@ -50,9 +52,10 @@ public class InMemoryStatsServiceTest {
     service = new InMemoryStatsService();
   }
 
-  @Test
+  @SuppressWarnings("rawtypes")
+@Test
   public void testGetAllEvents() throws IOException {
-    for(Event event : testEvents) {
+    for(Event<?> event : testEvents) {
       service.pushEvent(workflowId, event);
     }
 
@@ -66,9 +69,10 @@ public class InMemoryStatsServiceTest {
     assertFalse("Wrong number of events returned", foundEvents.hasNext());
   }
 
-  @Test
+  @SuppressWarnings("rawtypes")
+@Test
   public void testGetEventsSince() throws IOException {
-    for(Event event : testEvents) {
+    for(Event<?> event : testEvents) {
       service.pushEvent(workflowId, event);
     }
 
@@ -89,14 +93,15 @@ public class InMemoryStatsServiceTest {
     assertFalse("Wrong number of events returned", foundEvents.hasNext());
   }
 
-  @Test
+  @SuppressWarnings("rawtypes")
+@Test
   public void testGetEventsMax() throws IOException {
-    for(Event event : testEvents) {
+    for(Event<?> event : testEvents) {
       service.pushEvent(workflowId, event);
     }
 
     int sinceId = -1;
-    Event foundEvent;
+    Event<?> foundEvent;
     for(Event event : testEvents) {
       Iterator<Event> foundEvents = service.getEventsSinceId(workflowId, sinceId, 1).iterator();
       foundEvent = foundEvents.next();
@@ -106,7 +111,7 @@ public class InMemoryStatsServiceTest {
     }
   }
 
-  private void assertEqualWorkflows(Event expected, Event found) {
+  private void assertEqualWorkflows(Event<?> expected, Event<?> found) {
     assertEquals("Wrong eventId found", expected.getId(), found.getId());
     assertEquals("Wrong eventData found", expected.getPayload(), found.getPayload());
   }

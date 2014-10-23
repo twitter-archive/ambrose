@@ -66,9 +66,11 @@ public abstract class AmbroseHiveProgressReporter {
   /** holds all dagNodes within a script (for all workflows) */
   protected SortedMap<String, DAGNode<Job>> allDagNodes = new ConcurrentSkipListMap<String, DAGNode<Job>>();
  
-  private StatsWriteService statsWriteService;
+  @SuppressWarnings("rawtypes")
+private StatsWriteService statsWriteService;
 
-  AmbroseHiveProgressReporter(StatsWriteService statsWriteService) {
+  @SuppressWarnings("rawtypes")
+AmbroseHiveProgressReporter(StatsWriteService statsWriteService) {
     this.statsWriteService = statsWriteService;
     init();
   }
@@ -98,7 +100,8 @@ public abstract class AmbroseHiveProgressReporter {
    */
   public abstract void restoreEventStack();
   
-  protected StatsWriteService<? extends Job> getStatsWriteService() {
+  @SuppressWarnings("unchecked")
+protected StatsWriteService<? extends Job> getStatsWriteService() {
     return statsWriteService;
   }
   
@@ -177,7 +180,8 @@ public abstract class AmbroseHiveProgressReporter {
     }
   }
 
-  public void sendDagNodeNameMap(String queryId, Map<String, DAGNode<Job>> nodeIdToDAGNode) {
+  @SuppressWarnings("unchecked")
+public void sendDagNodeNameMap(String queryId, Map<String, DAGNode<Job>> nodeIdToDAGNode) {
     try {
       statsWriteService.sendDagNodeNameMap(queryId, nodeIdToDAGNode);
     }

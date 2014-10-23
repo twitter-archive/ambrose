@@ -49,7 +49,8 @@ public class EmbeddedAmbroseHiveProgressReporter extends AmbroseHiveProgressRepo
    */
   private SortedMap<Integer, Event<?>> _eventMap;
 
-  EmbeddedAmbroseHiveProgressReporter() {
+  @SuppressWarnings("unchecked")
+EmbeddedAmbroseHiveProgressReporter() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);

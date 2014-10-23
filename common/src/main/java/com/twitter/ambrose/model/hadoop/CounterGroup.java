@@ -29,7 +29,6 @@ import org.apache.hadoop.mapred.Counters.Counter;
  *
  * @author billg
  */
-@SuppressWarnings("deprecation")
 public class CounterGroup {
 
   private String groupName;

@@ -32,7 +32,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJob;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Subclass of MapReduceJob used to hold initialization logic and Pig-specific bindings for a Job.
@@ -48,9 +47,6 @@ public class PigJob extends MapReduceJob {
 
   private String[] aliases = {};
   private String[] features = {};
-  private List<InputInfo> inputInfoList;
-  private List<OutputInfo> outputInfoList;
-
   public PigJob() {
     super();
   }
@@ -63,15 +59,13 @@ public class PigJob extends MapReduceJob {
     super();
     this.aliases = aliases;
     this.features = features;
-    this.inputInfoList = inputInfoList;
-    this.outputInfoList = outputInfoList;
   }
 
   @JsonIgnore
   public void setJobStats(JobStats stats) {
     setCounterGroupMap(CounterGroup.counterGroupInfoMap(stats.getHadoopCounters()));
-    this.inputInfoList = inputInfoList(stats.getInputs());
-    this.outputInfoList = outputInfoList(stats.getOutputs());
+    inputInfoList(stats.getInputs());
+    outputInfoList(stats.getOutputs());
 
     // job metrics
     Map<String, Number> metrics = new HashMap<String, Number>();

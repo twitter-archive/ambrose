@@ -8,18 +8,16 @@ import com.google.common.collect.Maps;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link EventTest}.
  */
 public class EventTest {
-  private void testRoundTrip(Event expected) throws IOException {
+  private void testRoundTrip(Event<?> expected) throws IOException {
     String asJson = expected.toJson();
     System.out.println(asJson);
-    Event asEventAgain = Event.fromJson(asJson);
+    Event<?> asEventAgain = Event.fromJson(asJson);
     assertEquals(expected.getId(), asEventAgain.getId());
     assertEquals(expected.getType(), asEventAgain.getType());
     assertEquals(expected.getTimestamp(), asEventAgain.getTimestamp());
@@ -58,8 +56,9 @@ public class EventTest {
                    "  \"id\" : 1,\n" +
                    "  \"timestamp\" : 1373560988033\n" +
                    "}";
-    Event event = Event.fromJson(json);
-    Job job = ((DAGNode<Job>)event.getPayload()).getJob();
+    Event<?> event = Event.fromJson(json);
+    @SuppressWarnings("unchecked")
+	Job job = ((DAGNode<Job>)event.getPayload()).getJob();
     assertEquals("job_local_0001", job.getId());
     assertEquals(111, job.getMetrics().get("somemetrics"));
   }

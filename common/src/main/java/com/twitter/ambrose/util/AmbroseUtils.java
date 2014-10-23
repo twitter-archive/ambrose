@@ -37,7 +37,8 @@ public final class AmbroseUtils {
    * @param scriptId unique id of the script
    * @param dagNodeNameMap map of name to dag node
    */
-  public static void sendDagNodeNameMap(StatsWriteService statsWriteService, String scriptId, Map dagNodeNameMap) {
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+public static void sendDagNodeNameMap(StatsWriteService<?> statsWriteService, String scriptId, Map dagNodeNameMap) {
     try {
       statsWriteService.sendDagNodeNameMap(scriptId, dagNodeNameMap);
     } catch (IOException e) {
@@ -51,7 +52,7 @@ public final class AmbroseUtils {
    * @param scriptId unique id of the script
    * @param event ambrose event
    */
-  public static void pushEvent(StatsWriteService statsWriteService, String scriptId, Event event) {
+  public static void pushEvent(StatsWriteService<?> statsWriteService, String scriptId, Event<?> event) {
     try {
       statsWriteService.pushEvent(scriptId, event);
     } catch (IOException e) {
@@ -65,7 +66,7 @@ public final class AmbroseUtils {
    * @param scriptId
    * @param progress
    */
-  public static void pushWorkflowProgressEvent(StatsWriteService statsWriteService, String scriptId, int progress) {
+  public static void pushWorkflowProgressEvent(StatsWriteService<?> statsWriteService, String scriptId, int progress) {
     Map<Event.WorkflowProgressField, String> eventData = Maps.newHashMap();
     eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
     pushEvent(statsWriteService, scriptId, new Event.WorkflowProgressEvent(eventData));

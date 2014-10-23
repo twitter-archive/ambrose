@@ -48,7 +48,6 @@ import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.model.hadoop.MapReduceHelper;
 import com.twitter.ambrose.service.StatsWriteService;
 import com.twitter.ambrose.util.AmbroseUtils;
-import com.twitter.ambrose.service.impl.InMemoryStatsService;
 
 /**
  * PigProgressNotificationListener that collects plan and job information from within a Pig runtime,
@@ -64,7 +63,7 @@ import com.twitter.ambrose.service.impl.InMemoryStatsService;
  */
 public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
   protected Log log = LogFactory.getLog(getClass());
-  private StatsWriteService statsWriteService;
+  private StatsWriteService<?> statsWriteService;
   private String workflowVersion;
   private List<Job> jobs = new ArrayList<Job>();
   private Map<String, DAGNode<PigJob>> dagNodeNameMap = Maps.newTreeMap();
@@ -109,11 +108,11 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
    *
    * @param statsWriteService
    */
-  public AmbrosePigProgressNotificationListener(StatsWriteService statsWriteService) {
+  public AmbrosePigProgressNotificationListener(StatsWriteService<?> statsWriteService) {
     this.statsWriteService = statsWriteService;
   }
 
-  protected StatsWriteService getStatsWriteService() { return statsWriteService; }
+  protected StatsWriteService<?> getStatsWriteService() { return statsWriteService; }
 
   /**
    * Called after the job DAG has been created, but before any jobs are fired.
@@ -171,7 +170,7 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
 
     // second pass connects the edges
     for (Map.Entry<OperatorKey, MapReduceOper> entry : planKeys.entrySet()) {
-      DAGNode node = this.dagNodeNameMap.get(entry.getKey().toString());
+      DAGNode<?> node = this.dagNodeNameMap.get(entry.getKey().toString());
       List<DAGNode<? extends Job>> successorNodeList = Lists.newArrayList();
       List<MapReduceOper> successors = plan.getSuccessors(entry.getValue());
 

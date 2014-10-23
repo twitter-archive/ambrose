@@ -24,5 +24,6 @@ import java.util.Collection;
  * @author billg
  */
 public interface DAGTransformer {
-  public Collection<DAGNode> transform(Collection<DAGNode> nodes);
+  @SuppressWarnings("rawtypes")
+public Collection<DAGNode> transform(Collection<DAGNode> nodes);
 }

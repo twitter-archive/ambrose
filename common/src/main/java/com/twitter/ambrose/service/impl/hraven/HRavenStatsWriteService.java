@@ -16,10 +16,7 @@ limitations under the License.
 package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -52,10 +49,8 @@ import com.twitter.hraven.FlowEventKey;
 import com.twitter.hraven.FlowKey;
 import com.twitter.hraven.FlowQueueKey;
 import com.twitter.hraven.JobDescFactory;
-import com.twitter.hraven.JobDescFactoryBase;
 import com.twitter.hraven.datasource.FlowEventService;
 import com.twitter.hraven.datasource.FlowQueueService;
-import com.twitter.hraven.util.StringUtil;
 
 /**
  * StatsWriteService to persist job statistics- DAG and events to hraven
@@ -344,7 +339,8 @@ public class HRavenStatsWriteService implements StatsWriteService {
     return workflowId.toId();
   }
 
-  @Override
+  @SuppressWarnings("unchecked")
+@Override
   public void sendDagNodeNameMap(String workflowId,
     Map dagNodeMap) throws IOException {
     Preconditions.checkNotNull(dagNodeMap);

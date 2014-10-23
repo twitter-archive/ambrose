@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
@@ -93,7 +92,7 @@ public class Event<T> {
    * @return
    */
   @SuppressWarnings("unchecked")
-  public static Event create(Type type, Object data) {
+  public static Event<?> create(Type type, Object data) {
     switch (type) {
       case JOB_STARTED:
         return new JobStartedEvent((DAGNode<Job>) data);
@@ -146,10 +145,11 @@ public class Event<T> {
     }
   }
 
-  public static void main(String[] args) throws IOException {
+  @SuppressWarnings("rawtypes")
+public static void main(String[] args) throws IOException {
     String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
     List<Event> events = JSONUtil.toObject(json, new TypeReference<List<Event>>() { });
-    for (Event event : events) {
+    for (@SuppressWarnings("unused") Event event : events) {
       // useful if we need to read a file, add a field, output and re-generate
     }
     JSONUtil.writeJson("pig/src/main/resources/web/data/small-events.json2", events);

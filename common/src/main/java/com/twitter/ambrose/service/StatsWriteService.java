@@ -54,5 +54,5 @@ public interface StatsWriteService<T extends Job> {
    * @param workflowId the id of the workflow being updated
    * @param event the event bound to the workflow
    */
-  public void pushEvent(String workflowId, Event event) throws IOException;
+  public void pushEvent(String workflowId, Event<?> event) throws IOException;
 }

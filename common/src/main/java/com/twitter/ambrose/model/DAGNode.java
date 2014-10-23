@@ -23,11 +23,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Objects;
-
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
@@ -62,7 +59,7 @@ public class DAGNode<T extends Job> {
   public synchronized void setSuccessors(Collection<DAGNode<? extends Job>> successors) {
     Collection<String> successorNames = new HashSet<String>();
     if (successors != null) {
-      for(DAGNode node : successors) {
+      for(DAGNode<?> node : successors) {
         successorNames.add(node.getName());
       }
     }
@@ -102,11 +99,11 @@ public class DAGNode<T extends Job> {
     return JSONUtil.toObject(json, new TypeReference<DAGNode<? extends Job>>() { });
   }
 
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws IOException {
     String sourceFile = "pig/src/main/resources/web/data/large-dag.json";
     String json = JSONUtil.readFile(sourceFile);
-    List<DAGNode> nodes = JSONUtil.toObject(json, new TypeReference<List<DAGNode>>() { });
+    @SuppressWarnings("rawtypes")
+	List<DAGNode> nodes = JSONUtil.toObject(json, new TypeReference<List<DAGNode>>() { });
     JSONUtil.writeJson(sourceFile + "2", nodes);
   }
 }

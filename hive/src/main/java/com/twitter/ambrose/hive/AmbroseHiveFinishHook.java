@@ -35,6 +35,7 @@ import org.apache.hadoop.hive.ql.session.SessionState;
 
 import com.twitter.ambrose.model.Workflow;
 import com.twitter.ambrose.hive.reporter.EmbeddedAmbroseHiveProgressReporter;
+
 import static com.twitter.ambrose.hive.reporter.AmbroseHiveReporterFactory.getEmbeddedProgressReporter;
 
 /**
@@ -147,7 +148,8 @@ public class AmbroseHiveFinishHook implements HiveDriverRunHook {
     return false;
   }
 
-  private String getLastCmd() {
+  @SuppressWarnings("resource")
+private String getLastCmd() {
     CliSessionState cliss = (CliSessionState) SessionState.get();
     Scanner scanner = null;
     try {

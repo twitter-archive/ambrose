@@ -45,6 +45,7 @@ import com.twitter.hraven.datasource.FlowQueueService;
 /**
  * Service that is able to read the dag and event from HRaven.
  */
+@SuppressWarnings("rawtypes")
 public class HRavenStatsReadService implements StatsReadService {
   private static final Log LOG = LogFactory.getLog(HRavenStatsReadService.class);
 
@@ -85,7 +86,6 @@ public class HRavenStatsReadService implements StatsReadService {
    * @return a map of nodeIds to DAGNodes
    * @throws IOException
    */
-  @SuppressWarnings("rawtypes")
   @Override
   public Map<String, DAGNode> getDagNodeNameMap(String workflowId) throws IOException {
     WorkflowId id = WorkflowId.parseString(workflowId);
@@ -105,14 +105,12 @@ public class HRavenStatsReadService implements StatsReadService {
     return dagMap;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId)
       throws IOException {
     return getEventsSinceId(workflowId, eventId, DEFAULT_MAX_EVENTS);
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public List<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents)
       throws IOException {
