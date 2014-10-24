@@ -29,7 +29,7 @@ import org.apache.hadoop.mapred.Counters.Counter;
  *
  * @author billg
  */
-public class CounterGroup {
+  public class CounterGroup {
 
   private String groupName;
   private String groupDisplayName;

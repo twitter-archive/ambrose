@@ -30,7 +30,7 @@ import com.twitter.ambrose.util.JSONUtil;
  *
  * @author billg
  */
-public class Workflow {
+  public class Workflow {
 
   private String workflowId;
   private String workflowFingerprint;

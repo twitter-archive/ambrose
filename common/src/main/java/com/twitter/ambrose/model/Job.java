@@ -38,7 +38,7 @@ import com.twitter.ambrose.util.JSONUtil;
 @JsonSubTypes({
     @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default")
 })
-public class Job {
+  public class Job {
   private String id;
   private Properties configuration;
   private Map<String, Number> metrics;

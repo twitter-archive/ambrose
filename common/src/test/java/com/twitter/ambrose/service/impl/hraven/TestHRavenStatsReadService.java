@@ -25,8 +25,8 @@ import com.twitter.ambrose.model.Event;
 /**
  * Utility class to test working with Hraven
  */
-@SuppressWarnings("rawtypes")
-public class TestHRavenStatsReadService {
+  @SuppressWarnings("rawtypes")
+  public class TestHRavenStatsReadService {
   /**
    * Main method for testing reading from hraven
    */
@@ -59,4 +59,3 @@ public class TestHRavenStatsReadService {
 
   private static void print(String object) { System.out.println(object); }
 }
-

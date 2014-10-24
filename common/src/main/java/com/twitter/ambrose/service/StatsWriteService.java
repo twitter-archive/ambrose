@@ -30,7 +30,7 @@ import java.util.Properties;
  *
  * @author billg
  */
-public interface StatsWriteService<T extends Job> {
+  public interface StatsWriteService<T extends Job> {
   
   /**
    * Initialize the StatsWriteService from configuration properties

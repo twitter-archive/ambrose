@@ -35,7 +35,7 @@ import com.twitter.ambrose.service.impl.InMemoryStatsService;
  * @author Lorand Bendig <lbendig@gmail.com>
  *
  */
-public class EmbeddedAmbroseHiveProgressReporter extends AmbroseHiveProgressReporter {
+  public class EmbeddedAmbroseHiveProgressReporter extends AmbroseHiveProgressReporter {
 
   private static final Log LOG = LogFactory.getLog(EmbeddedAmbroseHiveProgressReporter.class);
 
@@ -50,7 +50,7 @@ public class EmbeddedAmbroseHiveProgressReporter extends AmbroseHiveProgressRepo
   private SortedMap<Integer, Event<?>> _eventMap;
 
   @SuppressWarnings("unchecked")
-EmbeddedAmbroseHiveProgressReporter() {
+  EmbeddedAmbroseHiveProgressReporter() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);

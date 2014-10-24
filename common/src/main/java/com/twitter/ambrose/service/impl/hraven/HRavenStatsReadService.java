@@ -45,8 +45,8 @@ import com.twitter.hraven.datasource.FlowQueueService;
 /**
  * Service that is able to read the dag and event from HRaven.
  */
-@SuppressWarnings("rawtypes")
-public class HRavenStatsReadService implements StatsReadService {
+  @SuppressWarnings("rawtypes")
+  public class HRavenStatsReadService implements StatsReadService {
   private static final Log LOG = LogFactory.getLog(HRavenStatsReadService.class);
 
   private final FlowQueueService flowQueueService;

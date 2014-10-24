@@ -9,7 +9,7 @@ import com.twitter.ambrose.model.WorkflowSummary;
 /**
  * Interface to fetch paginated lists of WorkflowSummaries.
  */
-public interface WorkflowIndexReadService {
+  public interface WorkflowIndexReadService {
   /**
    * Returns map of cluster id to name.
    *

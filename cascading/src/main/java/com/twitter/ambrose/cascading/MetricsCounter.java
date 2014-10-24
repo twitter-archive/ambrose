@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
  * @author Lorand Bendig <lbendig@gmail.com>
  *
  */
-public enum MetricsCounter {
+  public enum MetricsCounter {
 
   // Task counters
   SLOTS_MILLIS_MAPS(1),

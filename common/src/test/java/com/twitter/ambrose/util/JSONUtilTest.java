@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Unit tests for JSONUtil.
  */
-public class JSONUtilTest {
+  public class JSONUtilTest {
   public void test(Object obj, String expected) throws IOException {
     DataOutputBuffer out = new DataOutputBuffer();
     PrintWriter writer = new PrintWriter(out);

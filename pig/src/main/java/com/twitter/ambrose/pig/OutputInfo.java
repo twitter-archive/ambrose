@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Class that represents information about a data output of a job.
  */
-public class OutputInfo {
+  public class OutputInfo {
   private String name;
   private String location;
   private long numberBytes;

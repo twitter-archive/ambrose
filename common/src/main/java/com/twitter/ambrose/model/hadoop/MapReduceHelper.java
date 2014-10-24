@@ -41,7 +41,7 @@ import org.apache.hadoop.mapred.TaskReport;
  * @author amokashi
  *
  */
-public class MapReduceHelper {
+  public class MapReduceHelper {
 
   private static Log log = LogFactory.getLog(MapReduceHelper.class);
 

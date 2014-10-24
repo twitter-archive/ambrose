@@ -1,5 +1,8 @@
 package com.twitter.ambrose.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
@@ -8,12 +11,12 @@ import com.google.common.collect.Maps;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 
-/**
- * Unit tests for {@link EventTest}.
- */
-public class EventTest {
+
+  /**
+   * Unit tests for {@link EventTest}.
+   */
+  public class EventTest {
   private void testRoundTrip(Event<?> expected) throws IOException {
     String asJson = expected.toJson();
     System.out.println(asJson);

@@ -33,7 +33,7 @@ import com.twitter.ambrose.hive.HiveJob;
 /**
  * Unit tests for {@link com.twitter.ambrose.model.HiveJobTest}.
  */
-public class HiveJobTest {
+  public class HiveJobTest {
 
   private HiveJob hiveJob;
 

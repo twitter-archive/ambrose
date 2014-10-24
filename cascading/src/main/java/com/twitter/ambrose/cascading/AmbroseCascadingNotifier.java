@@ -54,7 +54,7 @@ import com.twitter.ambrose.util.AmbroseUtils;
  * an embedded Ambrose web server from Main method.
  * @author Ahmed Mohsen
  */
-public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener {
+  public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener {
 
   protected Log log = LogFactory.getLog(getClass());
   private StatsWriteService<?> statsWriteService;
@@ -92,7 +92,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flow
    */
   @SuppressWarnings({ "rawtypes", "unchecked" })
-@Override
+  @Override
   public void onStarting(Flow flow) {
     //init flow
     List<BaseFlowStep> steps = flow.getFlowSteps();
@@ -121,7 +121,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flow
    */
   @SuppressWarnings("rawtypes")
-@Override
+  @Override
   public void onStopping(Flow flow) {}
 
   /**
@@ -132,7 +132,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
    * @param flow
    */
   @SuppressWarnings("rawtypes")
-@Override
+  @Override
   public void onCompleted(Flow flow) {}
 
   /**
@@ -254,7 +254,7 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     if(completedJobIds.contains(node.getJob().getId())) {
       return;
     }
-    
+
     mapReduceHelper.addMapReduceJobState(node.getJob(), jc);
 
     if (node.getJob().getMapReduceJobState() != null) {
@@ -275,4 +275,3 @@ public class AmbroseCascadingNotifier implements FlowListener, FlowStepListener 
     jobs.add(job);
   }
 }
-

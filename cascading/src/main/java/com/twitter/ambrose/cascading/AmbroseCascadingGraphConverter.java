@@ -29,14 +29,18 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 /**
- * This class is responsible for converting the SimpleDirectedGraph object used 
+ * This class is responsible for converting the SimpleDirectedGraph object used
  * to represent a flow into a map of DagNodes
  *
  * @author Ahmed Eshra
  */
-public class AmbroseCascadingGraphConverter {
+  public class AmbroseCascadingGraphConverter {
 
-  /* Input list of cascading flow steps to be generated to Ambrose DAGNode */
+  /* Input list of cascading flow steps to be generated to Ambrose DAGNode
+   */
+	/**
+	 * 
+	 */
   protected SimpleDirectedGraph<Object, ?> jobsGraph;
   /* Output Map of the generated DAGNode and their names */
   protected Map<String, DAGNode<CascadingJob>> dagNamesMap;
@@ -58,7 +62,7 @@ public class AmbroseCascadingGraphConverter {
    *
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-public void convert() {
+  public void convert() {
     //  Returns a set of the nodes contained in this graph.
     Set<Object> vetices = jobsGraph.vertexSet();
 
@@ -107,7 +111,7 @@ public void convert() {
    * @return collection of successor DAGNodes for each node.
    */
   @SuppressWarnings("rawtypes")
-protected Collection<DAGNode> getNodeSuccessors(Object flowStep) {
+  protected Collection<DAGNode> getNodeSuccessors(Object flowStep) {
     Collection<DAGNode> nodeSuccessors = new HashSet<DAGNode>();
     // Graphs, used to get the successor nodes using
     // successorListOf(DirectedGraph, vertex) method

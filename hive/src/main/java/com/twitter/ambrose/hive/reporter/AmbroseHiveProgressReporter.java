@@ -46,7 +46,7 @@ import com.twitter.ambrose.service.StatsWriteService;
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public abstract class AmbroseHiveProgressReporter {
+  public abstract class AmbroseHiveProgressReporter {
 
   private static final Log LOG = LogFactory.getLog(AmbroseHiveProgressReporter.class);
 
@@ -67,10 +67,10 @@ public abstract class AmbroseHiveProgressReporter {
   protected SortedMap<String, DAGNode<Job>> allDagNodes = new ConcurrentSkipListMap<String, DAGNode<Job>>();
  
   @SuppressWarnings("rawtypes")
-private StatsWriteService statsWriteService;
+  private StatsWriteService statsWriteService;
 
   @SuppressWarnings("rawtypes")
-AmbroseHiveProgressReporter(StatsWriteService statsWriteService) {
+  AmbroseHiveProgressReporter(StatsWriteService statsWriteService) {
     this.statsWriteService = statsWriteService;
     init();
   }
@@ -101,7 +101,7 @@ AmbroseHiveProgressReporter(StatsWriteService statsWriteService) {
   public abstract void restoreEventStack();
   
   @SuppressWarnings("unchecked")
-protected StatsWriteService<? extends Job> getStatsWriteService() {
+  protected StatsWriteService<? extends Job> getStatsWriteService() {
     return statsWriteService;
   }
   
@@ -171,6 +171,7 @@ protected StatsWriteService<? extends Job> getStatsWriteService() {
    * @param queryId
    * @param event
    */
+  @SuppressWarnings("unchecked")
   public void pushEvent(String queryId, Event<?> event) {
     try {
       statsWriteService.pushEvent(queryId, event);
@@ -181,7 +182,7 @@ protected StatsWriteService<? extends Job> getStatsWriteService() {
   }
 
   @SuppressWarnings("unchecked")
-public void sendDagNodeNameMap(String queryId, Map<String, DAGNode<Job>> nodeIdToDAGNode) {
+  public void sendDagNodeNameMap(String queryId, Map<String, DAGNode<Job>> nodeIdToDAGNode) {
     try {
       statsWriteService.sendDagNodeNameMap(queryId, nodeIdToDAGNode);
     }

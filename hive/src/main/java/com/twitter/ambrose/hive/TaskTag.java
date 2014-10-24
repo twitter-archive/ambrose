@@ -25,7 +25,7 @@ import com.google.common.collect.Maps;
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public enum TaskTag {
+  public enum TaskTag {
 
   COMMON_JOIN(1),
   CONVERTED_MAPJOIN(2),

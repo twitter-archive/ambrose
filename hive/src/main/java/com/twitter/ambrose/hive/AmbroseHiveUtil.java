@@ -35,7 +35,7 @@ import com.twitter.ambrose.model.hadoop.CounterGroup;
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public class AmbroseHiveUtil {
+  public class AmbroseHiveUtil {
 
   private static final Pattern STAGEID_PATTERN = Pattern.compile("^.*\\((Stage\\-\\d+)\\)$",
       Pattern.DOTALL);

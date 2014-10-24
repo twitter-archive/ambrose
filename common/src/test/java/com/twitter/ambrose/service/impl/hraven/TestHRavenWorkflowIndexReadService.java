@@ -21,7 +21,7 @@ import com.twitter.ambrose.model.PaginatedList;
 import com.twitter.ambrose.model.WorkflowSummary;
 import com.twitter.ambrose.model.WorkflowSummary.Status;
 
-public class TestHRavenWorkflowIndexReadService {
+  public class TestHRavenWorkflowIndexReadService {
   /**
    * Main method
    */

@@ -60,7 +60,7 @@ import com.twitter.ambrose.model.Job;
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public class HiveDAGTransformer {
+  public class HiveDAGTransformer {
 
   private static final Log LOG = LogFactory.getLog(HiveDAGTransformer.class);
   private static final Pattern SUBQUERY_ALIAS = Pattern.compile("-subquery\\d+\\:([^\\-]+)");

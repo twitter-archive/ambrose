@@ -42,7 +42,7 @@ import com.twitter.hraven.rest.PaginatedResult;
 /**
  * Implementaton of WorkflowIndexReadService that knows how to read workflow info from HRaven.
  */
-public class HRavenWorkflowIndexReadService implements WorkflowIndexReadService {
+  public class HRavenWorkflowIndexReadService implements WorkflowIndexReadService {
 
   private FlowQueueService flowQueueService;
 
@@ -112,7 +112,7 @@ public class HRavenWorkflowIndexReadService implements WorkflowIndexReadService 
   }
 
   @SuppressWarnings("unused")
-private static Status convertStatus(Flow.Status status) {
+  private static Status convertStatus(Flow.Status status) {
     return Status.valueOf(status.name());
   }
 

@@ -23,7 +23,8 @@ import java.util.Collection;
  * Interface to transform a list of DAGNodes
  * @author billg
  */
-public interface DAGTransformer {
+  public interface DAGTransformer {
   @SuppressWarnings("rawtypes")
-public Collection<DAGNode> transform(Collection<DAGNode> nodes);
-}
+  public Collection<DAGNode> transform(Collection<DAGNode> nodes);
+  
+  }

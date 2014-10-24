@@ -38,7 +38,7 @@ public final class AmbroseUtils {
    * @param dagNodeNameMap map of name to dag node
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
-public static void sendDagNodeNameMap(StatsWriteService<?> statsWriteService, String scriptId, Map dagNodeNameMap) {
+  public static void sendDagNodeNameMap(StatsWriteService<?> statsWriteService, String scriptId, Map dagNodeNameMap) {
     try {
       statsWriteService.sendDagNodeNameMap(scriptId, dagNodeNameMap);
     } catch (IOException e) {

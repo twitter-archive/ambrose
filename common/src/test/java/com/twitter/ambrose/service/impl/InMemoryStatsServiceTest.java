@@ -39,7 +39,7 @@ public class InMemoryStatsServiceTest {
 
   private final String workflowId = "id1";
   @SuppressWarnings("rawtypes")
-private final Event[] testEvents = new Event[] {
+  private final Event[] testEvents = new Event[] {
     new Event.JobStartedEvent(new DAGNode<Job>("some name", null)),
     new Event.JobProgressEvent(new DAGNode<Job>("50", null)),
     new Event.JobFinishedEvent(new DAGNode<Job>("done", null)),
@@ -53,7 +53,7 @@ private final Event[] testEvents = new Event[] {
   }
 
   @SuppressWarnings("rawtypes")
-@Test
+  @Test
   public void testGetAllEvents() throws IOException {
     for(Event<?> event : testEvents) {
       service.pushEvent(workflowId, event);
@@ -70,7 +70,7 @@ private final Event[] testEvents = new Event[] {
   }
 
   @SuppressWarnings("rawtypes")
-@Test
+  @Test
   public void testGetEventsSince() throws IOException {
     for(Event<?> event : testEvents) {
       service.pushEvent(workflowId, event);
@@ -94,7 +94,7 @@ private final Event[] testEvents = new Event[] {
   }
 
   @SuppressWarnings("rawtypes")
-@Test
+  @Test
   public void testGetEventsMax() throws IOException {
     for(Event<?> event : testEvents) {
       service.pushEvent(workflowId, event);

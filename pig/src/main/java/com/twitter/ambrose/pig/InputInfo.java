@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Class that represents information about a data input to a job.
  */
-public class InputInfo {
+  public class InputInfo {
   private String name;
   private String location;
   private long numberBytes;

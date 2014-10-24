@@ -43,7 +43,7 @@ import com.twitter.ambrose.util.JSONUtil;
     @JsonSubTypes.Type(value=Event.JobFinishedEvent.class, name="JOB_FINISHED"),
     @JsonSubTypes.Type(value=Event.JobFailedEvent.class, name="JOB_FAILED")
 })
-public class Event<T> {
+  public class Event<T> {
   private static AtomicInteger NEXT_ID = new AtomicInteger();
 
   public static enum Type { JOB_STARTED, JOB_FINISHED, JOB_FAILED, JOB_PROGRESS, WORKFLOW_PROGRESS }
@@ -146,7 +146,7 @@ public class Event<T> {
   }
 
   @SuppressWarnings("rawtypes")
-public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     String json = JSONUtil.readFile("pig/src/main/resources/web/data/small-events.json");
     List<Event> events = JSONUtil.toObject(json, new TypeReference<List<Event>>() { });
     for (@SuppressWarnings("unused") Event event : events) {

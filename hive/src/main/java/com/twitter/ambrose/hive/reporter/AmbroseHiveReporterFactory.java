@@ -25,7 +25,7 @@ package com.twitter.ambrose.hive.reporter;
  * @author Lorand Bendig <lbendig@gmail.com>
  *
  */
-public class AmbroseHiveReporterFactory {
+  public class AmbroseHiveReporterFactory {
 
   private AmbroseHiveReporterFactory() {}
 

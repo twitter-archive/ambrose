@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Container that holds state of a MapReduce job
  */
-public class MapReduceJobState {
+  public class MapReduceJobState {
   private String jobId;
   private String jobName;
   private String trackingURL;

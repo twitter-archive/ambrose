@@ -31,7 +31,7 @@ import java.util.Properties;
  *
  * @author billg
  */
-public interface StatsReadService<T extends Job> {
+  public interface StatsReadService<T extends Job> {
   
   /**
    * Initialize the StatsReadService from configuration properties
@@ -55,7 +55,7 @@ public interface StatsReadService<T extends Job> {
    * @return a Collection of WorkflowEvents, ordered by eventId ascending
    */
   @SuppressWarnings("rawtypes")
-public Collection<Event> getEventsSinceId(String workflowId, int eventId) throws IOException;
+  public Collection<Event> getEventsSinceId(String workflowId, int eventId) throws IOException;
   
   /**
    * Get all events for a given workflow since eventId. To get the entire list of events, pass a
@@ -68,5 +68,5 @@ public Collection<Event> getEventsSinceId(String workflowId, int eventId) throws
    * @throws IOException
    */
   @SuppressWarnings("rawtypes")
-public Collection<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents) throws IOException;
+  public Collection<Event> getEventsSinceId(String workflowId, int eventId, int maxEvents) throws IOException;
 }

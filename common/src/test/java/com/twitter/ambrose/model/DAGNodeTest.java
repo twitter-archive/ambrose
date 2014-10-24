@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Unit tests for {@link DAGNodeTest}.
  */
-public class DAGNodeTest {
+  public class DAGNodeTest {
   private void testRoundTrip(DAGNode<Job> expected) throws IOException {
     String asJson = expected.toJson();
     System.out.println(asJson);

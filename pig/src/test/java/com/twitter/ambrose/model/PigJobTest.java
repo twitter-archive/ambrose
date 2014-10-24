@@ -18,7 +18,7 @@ import com.twitter.ambrose.pig.PigJob;
 /**
  * Unit tests for {@link com.twitter.ambrose.model.PigJobTest}.
  */
-public class PigJobTest {
+  public class PigJobTest {
   PigJob pigJob;
 
   @Before

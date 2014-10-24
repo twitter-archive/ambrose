@@ -31,8 +31,8 @@ import com.twitter.ambrose.model.Job;
  * @author amokashi
  *
  */
-@JsonTypeName("mapred")
-public class MapReduceJob extends Job {
+  @JsonTypeName("mapred")
+  public class MapReduceJob extends Job {
   private MapReduceJobState mapReduceJobState;
   private Map<String, CounterGroup> counterGroupMap;
 

@@ -41,8 +41,8 @@ import com.twitter.ambrose.model.hadoop.MapReduceJob;
  *
  * @author billg
  */
-@JsonTypeName("pig")
-public class PigJob extends MapReduceJob {
+  @JsonTypeName("pig")
+  public class PigJob extends MapReduceJob {
   protected static Log LOG = LogFactory.getLog(PigJob.class);
 
   private String[] aliases = {};

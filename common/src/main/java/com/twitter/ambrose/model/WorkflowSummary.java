@@ -3,7 +3,7 @@ package com.twitter.ambrose.model;
 /**
  * Holds WorkflowSummary info.
  */
-public class WorkflowSummary {
+  public class WorkflowSummary {
   /**
    * Represents whether a workflow is running or completed.
    */

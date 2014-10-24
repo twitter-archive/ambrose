@@ -45,14 +45,14 @@ import com.twitter.ambrose.service.impl.InMemoryStatsService;
  *   </ul>
  * </pre>
  */
-public class EmbeddedAmbrosePigProgressNotificationListener
+  public class EmbeddedAmbrosePigProgressNotificationListener
     extends AmbrosePigProgressNotificationListener {
   private static final String POST_SCRIPT_SLEEP_SECS_PARAM = "ambrose.post.script.sleep.seconds";
   private InMemoryStatsService service;
   private ScriptStatusServer server;
 
   @SuppressWarnings("unchecked")
-public EmbeddedAmbrosePigProgressNotificationListener() {
+  public EmbeddedAmbrosePigProgressNotificationListener() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);

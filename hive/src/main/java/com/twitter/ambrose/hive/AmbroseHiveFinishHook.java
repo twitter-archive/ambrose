@@ -48,7 +48,7 @@ import static com.twitter.ambrose.hive.reporter.AmbroseHiveReporterFactory.getEm
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public class AmbroseHiveFinishHook implements HiveDriverRunHook {
+  public class AmbroseHiveFinishHook implements HiveDriverRunHook {
 
   private static final Log LOG = LogFactory.getLog(AmbroseHiveFinishHook.class);
   private static final String POST_SCRIPT_SLEEP_SECS_PARAM = "ambrose.post.script.sleep.seconds";
@@ -149,7 +149,7 @@ public class AmbroseHiveFinishHook implements HiveDriverRunHook {
   }
 
   @SuppressWarnings("resource")
-private String getLastCmd() {
+  private String getLastCmd() {
     CliSessionState cliss = (CliSessionState) SessionState.get();
     Scanner scanner = null;
     try {

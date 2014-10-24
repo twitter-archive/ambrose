@@ -24,7 +24,7 @@ import java.io.Writer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Set;
 
 import org.reflections.Reflections;
 
@@ -43,7 +43,7 @@ import com.twitter.ambrose.model.Job;
  *
  * @author billg
  */
-public class JSONUtil {
+  public class JSONUtil {
   
   private JSONUtil() {}
   /**

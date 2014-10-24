@@ -16,7 +16,11 @@ limitations under the License.
 package com.twitter.ambrose.service.impl.hraven;
 
 import java.io.IOException;
-import java.util.*;
+
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -74,8 +78,8 @@ import com.twitter.hraven.datasource.FlowQueueService;
  *    "quorum peer hostname1[,quorum peer host2,...]:client port:parent znode").  If found, this
  *    value is split and applied to the HBase configuration.
  */
-@SuppressWarnings("rawtypes")
-public class HRavenStatsWriteService implements StatsWriteService {
+  @SuppressWarnings("rawtypes")
+  public class HRavenStatsWriteService implements StatsWriteService {
   private static final Log LOG = LogFactory.getLog(HRavenStatsWriteService.class);
   private final String username;
   private final Set<String> runningJobs;

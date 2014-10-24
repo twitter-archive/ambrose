@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Holds a list of results, as well as pagination info.
  */
-public class PaginatedList<T> {
+  public class PaginatedList<T> {
   private List<T> results;
   private String nextPageStart;
 

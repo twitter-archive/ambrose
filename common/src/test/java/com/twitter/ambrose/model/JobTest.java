@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 /**
  * Unit tests for {@link com.twitter.ambrose.model.JobTest}.
  */
-public class JobTest {
+  public class JobTest {
 
   private void testRoundTrip(Job expected) throws IOException {
     String asJson = expected.toJson();

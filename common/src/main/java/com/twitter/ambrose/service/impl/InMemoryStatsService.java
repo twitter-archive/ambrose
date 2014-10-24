@@ -61,8 +61,8 @@ import com.twitter.ambrose.util.JSONUtil;
  *   </ul>
  * </pre>
  */
-@SuppressWarnings("rawtypes")
-public class InMemoryStatsService implements StatsReadService, StatsWriteService<Job>,
+  @SuppressWarnings("rawtypes")
+  public class InMemoryStatsService implements StatsReadService, StatsWriteService<Job>,
     WorkflowIndexReadService {
   private static final Logger LOG = LoggerFactory.getLogger(InMemoryStatsService.class);
   private static final String DUMP_WORKFLOW_FILE_PARAM = "ambrose.write.dag.file";

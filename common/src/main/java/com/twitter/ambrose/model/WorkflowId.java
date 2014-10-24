@@ -4,7 +4,7 @@ package com.twitter.ambrose.model;
  * WorkflowId sent to the client is a composite of a bunch of information required to later fetch
  * the DAG and events.
  */
-public final class WorkflowId {
+  public final class WorkflowId {
   public static WorkflowId parseString(String workflowId) {
     String[] parts = workflowId.split(DELIM, 6);
     return new WorkflowId(parts[0], parts[1], parts[2],

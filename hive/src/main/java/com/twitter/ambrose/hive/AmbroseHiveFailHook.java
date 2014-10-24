@@ -44,7 +44,7 @@ import static com.twitter.ambrose.hive.reporter.AmbroseHiveReporterFactory.getEm
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public class AmbroseHiveFailHook implements ExecuteWithHookContext {
+  public class AmbroseHiveFailHook implements ExecuteWithHookContext {
   private static final Log LOG = LogFactory.getLog(AmbroseHiveFailHook.class);
   private static final String POST_SCRIPT_SLEEP_SECS_PARAM = "ambrose.post.script.sleep.seconds";
 

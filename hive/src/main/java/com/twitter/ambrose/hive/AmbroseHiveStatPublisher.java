@@ -49,7 +49,7 @@ import static com.twitter.ambrose.hive.reporter.AmbroseHiveReporterFactory.getEm
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
+  public class AmbroseHiveStatPublisher implements ClientStatsPublisher {
 
   private static final Log LOG = LogFactory.getLog(AmbroseHiveStatPublisher.class);
 

@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *   </ul>
  * </pre>
  */
-public class ScriptStatusServer implements Runnable {
+  public class ScriptStatusServer implements Runnable {
   private static int getConfiguredPort() {
     String port = System.getProperty(PORT_PARAM, PORT_DEFAULT);
     if (PORT_RANDOM.equalsIgnoreCase(port)) {

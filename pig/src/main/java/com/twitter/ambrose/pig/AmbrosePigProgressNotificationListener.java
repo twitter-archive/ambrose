@@ -61,7 +61,7 @@ import com.twitter.ambrose.util.AmbroseUtils;
  * reading, writing 
  *
  */
-public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
+  public class AmbrosePigProgressNotificationListener implements PigProgressNotificationListener {
   protected Log log = LogFactory.getLog(getClass());
   private StatsWriteService<?> statsWriteService;
   private String workflowVersion;

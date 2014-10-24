@@ -42,7 +42,7 @@ import com.twitter.ambrose.model.Job;
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-public class AmbroseHivePreHook implements ExecuteWithHookContext {
+  public class AmbroseHivePreHook implements ExecuteWithHookContext {
 
     private static final Log LOG = LogFactory.getLog(AmbroseHivePreHook.class);
 

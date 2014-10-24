@@ -31,7 +31,8 @@ import org.junit.Test;
 import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.cascading.CascadingJob;
 
-public class CascadingJobTest {
+
+  public class CascadingJobTest {
   CascadingJob cascadingJob;
 
   @Before

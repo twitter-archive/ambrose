@@ -30,7 +30,7 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
  * A wrapper that contains related flow step job statistics
  * @author Ahmed Mohsen
  */
-public class CascadingMapReduceJobState extends MapReduceJobState {
+  public class CascadingMapReduceJobState extends MapReduceJobState {
 
   @JsonCreator
   public CascadingMapReduceJobState() { }

@@ -35,7 +35,7 @@ import java.io.IOException;
  * </pre>
  * </P>
  */
-public class EmbeddedAmbroseCascadingNotifier
+  public class EmbeddedAmbroseCascadingNotifier
              extends AmbroseCascadingNotifier {
 
   private static final String POST_SCRIPT_SLEEP_SECS_PARAM = "ambrose.post.script.sleep.seconds";
@@ -43,7 +43,7 @@ public class EmbeddedAmbroseCascadingNotifier
   private ScriptStatusServer server;
 
   @SuppressWarnings("unchecked")
-public EmbeddedAmbroseCascadingNotifier() {
+  public EmbeddedAmbroseCascadingNotifier() {
     super(new InMemoryStatsService());
     this.service = (InMemoryStatsService) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);
@@ -51,7 +51,7 @@ public EmbeddedAmbroseCascadingNotifier() {
   }
 
   @SuppressWarnings("rawtypes")
-@Override
+  @Override
   public void onCompleted(Flow flow) {
     super.onCompleted(flow);
 

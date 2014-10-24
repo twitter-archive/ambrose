@@ -38,11 +38,11 @@ import com.twitter.ambrose.model.hadoop.MapReduceJobState;
  * @author Lorand Bendig <lbendig@gmail.com>
  * 
  */
-@JsonTypeName("hive")
-public class HiveJob extends Job {
+  @JsonTypeName("hive")
+  public class HiveJob extends Job {
 
   @SuppressWarnings("unused")
-private static final Log LOG = LogFactory.getLog(HiveJob.class);
+  private static final Log LOG = LogFactory.getLog(HiveJob.class);
 
   private final String[] aliases;
   private final String[] features;
