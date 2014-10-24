@@ -16,7 +16,7 @@
 function log { echo "$@" >&2; }
 function die { log "$@"; exit 1; }
 
-WEBROOT="$(dirname $0)/../common/src/main/resources/web"
+WEBROOT="$(dirname $0)/../common/src/main/resources/com/twitter/ambrose/server/web"
 PORT="${1:-8080}"
 
 cd "$WEBROOT" || die "Failed to cd to WEBROOT '$WEBROOT'"
