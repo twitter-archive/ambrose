@@ -104,5 +104,9 @@ import com.twitter.ambrose.pig.PigJob;
     assertArrayEquals(expected.getFeatures(), found.getFeatures());
     assertEquals(expected.getMetrics(), found.getMetrics());
     assertEquals(expected.getConfiguration(), found.getConfiguration());
+    assertEquals(expected.getMapReduceJobState(), found.getMapReduceJobState());
+    assertEquals(expected.getClass(), found.getClass());
+    assertEquals(expected.getCounterGroupMap(), found.getCounterGroupMap());
+    assertEquals(expected.getCounterGroupInfo("alias1"), found.getCounterGroupInfo("alias1"));
   }
 }
