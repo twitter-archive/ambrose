@@ -63,9 +63,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <apache.hadoop.version>1.0.4</apache.hadoop.version>
-    <apache.hbase.version>0.94.0</apache.hbase.version>
+    <apache.hbase.version>0.96.0</apache.hbase.version>
     <apache.hive.version>0.12.0</apache.hive.version>
-    <apache.pig.version>0.12.1</apache.pig.version>
+    <apache.pig.version>0.13.0</apache.pig.version>
     <cascading.version>2.5.4</cascading.version>
     <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
