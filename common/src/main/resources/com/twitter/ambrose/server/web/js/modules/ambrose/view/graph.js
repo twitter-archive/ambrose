@@ -471,9 +471,8 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       // create smaller circle and bind event handlers
       real.append('svg:circle')
         .attr('class', 'anchor')
-        // TODO(Andy Schlaikjer): we shouldn't be using ids here...
-        .attr('id', function(node, i) {
-          return 'anchor-' + node.id;
+        .attr('data-node-id', function(node, i) {
+          return node.id;
         })
         .attr('cx', cx)
         .attr('cy', cy)
