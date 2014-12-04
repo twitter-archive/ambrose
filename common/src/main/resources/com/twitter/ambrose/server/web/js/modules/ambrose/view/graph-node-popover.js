@@ -49,10 +49,10 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
       // Handle mouse actions.
       workflow.on('jobSelected', function(event, job, prev) {
         if (prev != null) {
-          graphContainer.find('#anchor-' + prev.node.id).popover('hide');
+          graphContainer.find('[data-node-id="' + prev.node.id + '"]').popover('hide');
         }
         if (job != null) {
-          graphContainer.find('#anchor-' + job.node.id).popover('show');
+          graphContainer.find('[data-node-id="' + job.node.id + '"]').popover('show');
         }
       });
     },
