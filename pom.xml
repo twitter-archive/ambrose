@@ -9,7 +9,7 @@
 
   <groupId>com.twitter.ambrose</groupId>
   <artifactId>ambrose</artifactId>
-  <version>0.1.1-T2-SNAPSHOT</version>
+  <version>0.3.1-T1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Ambrose</name>
@@ -62,13 +62,19 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <slf4j.version>1.6.4</slf4j.version>
-    <apache.pig.version>0.11.0-SNAPSHOT</apache.pig.version>
-    <apache.hadoop.version>0.22.0</apache.hadoop.version>
-    <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
+    <apache.hadoop.version>1.0.4</apache.hadoop.version>
+    <apache.hbase.version>0.94.0</apache.hbase.version>
+    <apache.hive.version>0.12.0</apache.hive.version>
+    <apache.pig.version>0.12.1</apache.pig.version>
+    <cascading.version>2.5.4</cascading.version>
+    <fasterxml.jackson.version>2.1.1</fasterxml.jackson.version>
     <mortbay.jetty.servlet.version>2.5-20081211</mortbay.jetty.servlet.version>
+    <mortbay.jetty.version>6.1.25</mortbay.jetty.version>
+    <scala.version>2.10.4</scala.version>
+    <scalding.version>0.12.0rc4</scalding.version>
+    <slf4j.version>1.7.5</slf4j.version>
+    <twitter.hraven.version>0.9.14</twitter.hraven.version>
   </properties>
-
   <dependencyManagement>
     <dependencies>
 
@@ -81,6 +87,16 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>ambrose-pig</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-hive</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>ambrose-cascading</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -110,24 +126,48 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>12.0.1</version>
+        <version>14.0.1</version>
+      </dependency>
+
+      <!-- hraven -->
+      <dependency>
+        <groupId>com.twitter.hraven</groupId>
+        <artifactId>hraven-core</artifactId>
+        <version>${twitter.hraven.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase</artifactId>
+        <version>${apache.hbase.version}</version>
+        <scope>provided</scope>
       </dependency>
 
       <!-- serialization -->
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>1.8.2</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${fasterxml.jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.8.2</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${fasterxml.jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${fasterxml.jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.thoughtworks.xstream</groupId>
         <artifactId>xstream</artifactId>
         <version>1.3.1</version>
+      </dependency>
+      <dependency>
+         <groupId>org.reflections</groupId>
+         <artifactId>reflections</artifactId>
+         <version>0.9.9-RC1</version>
       </dependency>
 
       <!-- web -->
@@ -150,7 +190,7 @@
       <!-- hadoop -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-common</artifactId>
+        <artifactId>hadoop-core</artifactId>
         <version>${apache.hadoop.version}</version>
         <exclusions>
           <exclusion>
@@ -162,11 +202,7 @@
             <artifactId>jetty</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-mapred</artifactId>
-        <version>${apache.hadoop.version}</version>
+        <scope>provided</scope>
       </dependency>
 
       <!-- pig -->
@@ -175,6 +211,69 @@
         <artifactId>pig</artifactId>
         <version>${apache.pig.version}</version>
       </dependency>
+
+      <!-- hive -->
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-common</artifactId>
+        <version>${apache.hive.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-exec</artifactId>
+        <version>${apache.hive.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-cli</artifactId>
+        <version>${apache.hive.version}</version>
+      </dependency>
+
+      <!-- cascading -->
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-core</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-local</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-hadoop</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>cascading</groupId>
+        <artifactId>cascading-xml</artifactId>
+        <version>${cascading.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+      <!-- scalding -->
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-compiler</artifactId>
+        <version>${scala.version}</version>
+        <scope>compile</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala.version}</version>
+        <scope>provided</scope>
+      </dependency>
+     <dependency>
+       <groupId>com.twitter</groupId>
+       <artifactId>scalding-core_2.10</artifactId>
+       <version>${scalding.version}</version>
+       <scope>provided</scope>
+     </dependency>
 
     </dependencies>
   </dependencyManagement>
@@ -195,6 +294,7 @@
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
+            <showDeprecation>true</showDeprecation>
             <optimize>true</optimize>
           </configuration>
         </plugin>
@@ -217,6 +317,44 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.12</version>
+        </plugin>
+
+        <!-- scala compilation; by default scala compiled before java -->
+        <plugin>
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>3.0.1</version>
+          <configuration>
+            <displayCmd>true</displayCmd>
+            <args>
+              <param>-unchecked</param>
+              <param>-deprecation</param>
+              <param>-encoding</param>
+              <param>utf8</param>
+            </args>
+          </configuration>
+          <executions>
+            <execution>
+              <id>scala-add-sources</id>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>scala-main-compile</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>scala-test-compile</id>
+              <phase>process-test-resources</phase>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <!-- package types -->
@@ -247,6 +385,20 @@
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.3</version>
+          <executions>
+            <execution>
+              <id>make-assembly</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <descriptors>
+                  <descriptor>src/main/assembly/bin.xml</descriptor>
+                </descriptors>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
@@ -254,7 +406,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.4</version>
+          <version>2.4.1</version>
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <!-- do not auto push release commits / tag -->
@@ -318,5 +470,8 @@
   <modules>
     <module>common</module>
     <module>pig</module>
+    <module>hive</module>
+    <module>cascading</module>
+    <module>scalding</module>
   </modules>
 </project>

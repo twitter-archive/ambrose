@@ -16,15 +16,14 @@
 function log { echo "$@" >&2; }
 function die { log "$@"; exit 1; }
 
-WEBROOT="$(dirname $0)/../common/src/main/resources/web"
+WEBROOT="$(dirname $0)/../common/src/main/resources/com/twitter/ambrose/server/web"
 PORT="${1:-8080}"
 
 cd "$WEBROOT" || die "Failed to cd to WEBROOT '$WEBROOT'"
 
 log "Starting web server on port '$PORT'"
-log "Browse to either of the following URLs to see Ambrose in action:"
-log "  http://localhost:$PORT/workflow.html?localdata=small"
-log "  http://localhost:$PORT/workflow.html?localdata=large"
+log "Browse to the following URLs to see Ambrose demo:"
+log "  http://localhost:$PORT/workflow.html?localdata=true&replay=true"
 log "Hit ctrl-c to stop the web server"
 
 exec python -m SimpleHTTPServer "$PORT"

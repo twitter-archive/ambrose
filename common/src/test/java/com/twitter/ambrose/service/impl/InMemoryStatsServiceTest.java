@@ -15,10 +15,13 @@ limitations under the License.
 */
 package com.twitter.ambrose.service.impl;
 
-import com.twitter.ambrose.service.WorkflowEvent;
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -34,10 +37,12 @@ public class InMemoryStatsServiceTest {
   private InMemoryStatsService service;
 
   private final String workflowId = "id1";
-  private final WorkflowEvent[] testEvents = new WorkflowEvent[] {
-    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_STARTED, "jobIdFoo", "someRuntime"),
-    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_PROGRESS, "50", "someRuntime"),
-    new WorkflowEvent(WorkflowEvent.EVENT_TYPE.JOB_FINISHED, "done", "someRuntime")
+  private final Event[] testEvents = new Event[] {
+    new Event.JobStartedEvent(new DAGNode<Job>("some name", null)),
+    new Event.JobProgressEvent(new DAGNode<Job>("50", null)),
+    new Event.JobFinishedEvent(new DAGNode<Job>("done", null)),
+    new Event.JobProgressEvent(new DAGNode<Job>("75", null)),
+    new Event.JobProgressEvent(new DAGNode<Job>("100", null)),
   };
 
   @Before
@@ -46,47 +51,63 @@ public class InMemoryStatsServiceTest {
   }
 
   @Test
-  public void testGetAllEvents() {
-    for(WorkflowEvent event : testEvents) {
+  public void testGetAllEvents() throws IOException {
+    for(Event event : testEvents) {
       service.pushEvent(workflowId, event);
     }
 
-    Collection<WorkflowEvent> events = service.getEventsSinceId(workflowId, -1);
-    Iterator<WorkflowEvent> foundEvents = events.iterator();
+    Collection<Event> events = service.getEventsSinceId(workflowId, -1);
+    Iterator<Event> foundEvents = events.iterator();
 
     assertTrue("No events returned", foundEvents.hasNext());
-    for(WorkflowEvent sentEvent : testEvents) {
+    for(Event sentEvent : testEvents) {
       assertEqualWorkflows(sentEvent, foundEvents.next());
     }
     assertFalse("Wrong number of events returned", foundEvents.hasNext());
   }
 
   @Test
-  public void testGetEventsSince() {
-    for(WorkflowEvent event : testEvents) {
+  public void testGetEventsSince() throws IOException {
+    for(Event event : testEvents) {
       service.pushEvent(workflowId, event);
     }
 
     // first, peek at the first eventId
-    Collection<WorkflowEvent> allEvents = service.getEventsSinceId(workflowId, -1);
-    int sinceId = allEvents.iterator().next().getEventId();
+    Collection<Event> allEvents = service.getEventsSinceId(workflowId, -1);
+    int sinceId = allEvents.iterator().next().getId();
 
     // get all events since the first
-    Collection<WorkflowEvent> events = service.getEventsSinceId(workflowId, sinceId);
-    Iterator<WorkflowEvent> foundEvents = events.iterator();
+    Collection<Event> events = service.getEventsSinceId(workflowId, sinceId);
+    Iterator<Event> foundEvents = events.iterator();
 
     assertEquals("Wrong number of events returned", testEvents.length - 1, events.size());
-    for(WorkflowEvent sentEvent : testEvents) {
-      if (sentEvent.getEventId() <= sinceId) { continue; }
+    for(Event sentEvent : testEvents) {
+      if (sentEvent.getId() <= sinceId) { continue; }
 
       assertEqualWorkflows(sentEvent, foundEvents.next());
     }
     assertFalse("Wrong number of events returned", foundEvents.hasNext());
   }
 
-  private void assertEqualWorkflows(WorkflowEvent expected, WorkflowEvent found) {
-    assertEquals("Wrong eventId found", expected.getEventId(), found.getEventId());
-    assertEquals("Wrong eventType found", expected.getEventType(), found.getEventType());
-    assertEquals("Wrong eventData found", expected.getEventData(), found.getEventData());
+  @Test
+  public void testGetEventsMax() throws IOException {
+    for(Event event : testEvents) {
+      service.pushEvent(workflowId, event);
+    }
+
+    int sinceId = -1;
+    Event foundEvent;
+    for(Event event : testEvents) {
+      Iterator<Event> foundEvents = service.getEventsSinceId(workflowId, sinceId, 1).iterator();
+      foundEvent = foundEvents.next();
+      assertEqualWorkflows(event, foundEvent);
+      assertFalse("Wrong number of events returned", foundEvents.hasNext());
+      sinceId = foundEvent.getId();
+    }
+  }
+
+  private void assertEqualWorkflows(Event expected, Event found) {
+    assertEquals("Wrong eventId found", expected.getId(), found.getId());
+    assertEquals("Wrong eventData found", expected.getPayload(), found.getPayload());
   }
 }

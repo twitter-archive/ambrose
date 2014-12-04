@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.twitter.ambrose</groupId>
     <artifactId>ambrose</artifactId>
-    <version>0.1.1-T2-SNAPSHOT</version>
+    <version>0.3.1-T1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -36,16 +36,24 @@
 
     <!-- serialization -->
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-core-asl</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.jackson</groupId>
-      <artifactId>jackson-mapper-asl</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
+    </dependency>
+    <dependency>
+       <groupId>org.reflections</groupId>
+       <artifactId>reflections</artifactId>
     </dependency>
 
     <!-- web -->
@@ -65,8 +73,17 @@
     <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapred</artifactId>
+      <artifactId>hadoop-core</artifactId>
+    </dependency>
+
+    <!-- hraven -->
+    <dependency>
+       <groupId>com.twitter.hraven</groupId>
+       <artifactId>hraven-core</artifactId>
+    </dependency>
+    <dependency>
+       <groupId>org.apache.hbase</groupId>
+       <artifactId>hbase</artifactId>
     </dependency>
   </dependencies>
-
 </project>

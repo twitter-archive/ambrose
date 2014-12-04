@@ -4,22 +4,12 @@
   <parent>
     <groupId>com.twitter.ambrose</groupId>
     <artifactId>ambrose</artifactId>
-    <version>0.1.1-T2-SNAPSHOT</version>
+    <version>0.3.1-T1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
   <artifactId>ambrose-pig</artifactId>
   <name>Ambrose Pig</name>
-
-  <repositories>
-    <repository>
-      <id>apache</id>
-      <name>Apache Repos</name>
-      <url>https://repository.apache.org/content/groups/public/</url>
-      <releases><enabled>true</enabled></releases>
-      <snapshots><enabled>true</enabled></snapshots>
-    </repository>
-  </repositories>
 
   <dependencies>
     <!-- ambrose -->
@@ -47,13 +37,32 @@
     <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapred</artifactId>
+      <artifactId>hadoop-core</artifactId>
+    </dependency>
+
+    <!-- serialization -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.thoughtworks.xstream</groupId>
+      <artifactId>xstream</artifactId>
     </dependency>
 
     <!-- pig -->
     <dependency>
       <groupId>org.apache.pig</groupId>
       <artifactId>pig</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -61,20 +70,6 @@
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/bin.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

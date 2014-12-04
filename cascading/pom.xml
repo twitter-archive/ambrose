@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.twitter.ambrose</groupId>
+    <artifactId>ambrose</artifactId>
+    <version>0.3.1-T1-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <artifactId>ambrose-cascading</artifactId>
+  <name>Ambrose Cascading</name>
+
+  <repositories>
+    <repository>
+      <id>conjars.org</id>
+      <url>http://conjars.org/repo</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- ambrose -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ambrose-common</artifactId>
+    </dependency>
+
+    <!-- testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+
+    <!-- logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
+
+    <!-- hadoop -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+    </dependency>
+
+    <!-- cascading -->
+    <dependency>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-local</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-hadoop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cascading</groupId>
+      <artifactId>cascading-xml</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,102 @@
+/* Page dimensions */
+body { position: relative; padding-top: 40px; }
+@media (max-width: 979px) { body { padding-top: 0px; } }
+#diagrams > div { height: 350px; margin: 0; }
+#ambrose-view-progress-bar {}
+#ambrose-view-chord {}
+#ambrose-view-graph {}
+
+/* Typography */
+h2 { margin: 1em 0px; }
+
+/* Workflows table */
+.ambrose-dashboard .progress,
+.ambrose-dashboard .bar { margin: 0px; }
+
+/* Progress Bar view */
+.ambrose-view-progress-bar { position: relative; margin: 20px 0px; }
+.ambrose-view-progress-bar .number { position: absolute; top: 0px; right: 10px; font-size: 50px; opacity: 0.1; }
+.ambrose-view-progress-bar .progress {}
+
+/* Table view */
+.ambrose-view-table td.job-mappers,
+.ambrose-view-table td.job-reducers { white-space: nowrap; }
+.ambrose-view-table td.job-time { white-space: nowrap; }
+.ambrose-view-table a,
+.ambrose-view-table a:link,
+.ambrose-view-table a:visited,
+.ambrose-view-table a:hover,
+.ambrose-view-table a:active { color: #000; text-decoration: none; }
+
+/* Chord view */
+.ambrose-view-chord {}
+
+/* Graph view */
+.ambrose-view-graph path.edge, .ambrose-view-graph path.pseudoEdge { fill: none; }
+.ambrose-view-graph path.pseudoEdge { cursor: pointer; }
+.ambrose-view-graph path.progress {}
+.ambrose-view-graph path.map { fill: #0e90d2; }
+.ambrose-view-graph path.reduce { fill: #FF7800; }
+.ambrose-view-graph-edge-popover-default { padding: 5px 10px; }
+
+.ambrose-view-graph circle.magnitude { fill: rgba(28, 231, 231, 0.25); pointer-events: none; }
+.ambrose-view-graph circle.tic { fill: none; stroke: rgba(28, 231, 231, 0.25); stroke-width: 1px; pointer-events: none; }
+.ambrose-view-script {
+  height: 300px;
+  width: 500px;
+  position:fixed !important;
+  padding-left: 10px;
+  padding-top: 5px;
+  left:400px;
+  top:100px;
+  font-family: monospace;
+}
+
+/* Graph view popovers */
+.ambrose-view-graph-popover-title { font-weight: bold; font-size: 100%; }
+.ambrose-view-graph-popover-title button.close { margin-top: -3px; }
+.popoverBody li { list-style: none; margin-left: -10px; margin-top: 5px; }
+.popoverBody .counterList { list-style: none; margin-left: -15px; margin-bottom: 5px; }
+.popoverBody .counterList li.counterListTitle { margin-left: 0px; font-weight:bold; margin-top: 0px; }
+.popoverBody .counterList li { list-style: none; margin-left: 10px; margin-top: 0px; }
+
+/* Dashboard */
+.dashboard-status { margin: 1em 0; }
+
+.popoverSectionKey { font-weight:bold; }
+.popoverKey { font-weight:bold; }
+
+.dropdown-header { padding-top:5px; padding-bottom:5px; padding-left : 20px; font-size:11pt; font-weight:bold; }
+.popover .popover-content { padding: 0px; padding-top : 5px; padding-right : 12px; margin: 0px; border: 0px; overflow-y: auto;}
+
+/* Script view */
+.ambrose-view-script .scriptContent { height:100%; width:100%; }
+.ambrose-view-script .scriptDivTitle { font-weight:bold; padding-right: 70px; cursor: move; }
+.ambrose-view-script .scriptDivTitle .scriptName {
+  width: 100%;
+  overflow:hidden;
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ambrose-view-script .scriptDivTitle .scriptTitleCloseBtn { margin-right: -60px; margin-top: -22px; }
+.ambrose-view-script .scriptDivTitle .scriptTitleRefreshBtn { margin-right: -40px; margin-top: -22px; }
+.ambrose-view-script .scriptDivBody { width:100%;  height:calc(100% - 40px); overflow: auto; }
+.ambrose-view-script .lineNumber {
+  display: inline-block;
+  font-weight: bold;
+  text-align: left;
+  background-color: #F5F5F5;
+  width: 30px;
+}
+
+.ambrose-view-script .scriptDivBody .scriptLine.hovered { background-color: #FFFF80; }
+.ambrose-view-script .scriptDivBody .scriptLine.hovered.selected { background-color: #FFFF80; }
+.ambrose-view-script .scriptDivBody .scriptLine.selected { background-color: #FFD880; }
+.ambrose-view-script .scriptDivBody .lineNumber.selected { background-color: #AAAAAA; }
+.ambrose-view-script .scriptDivBody .aliasM, .aliasC, .aliasR { vertical-align: super; top: -0.5em; font-size: 80%; font-weight:bold; }
+.ambrose-view-script .scriptDivBody .aliasR { padding-right:5px; }
+
+.edgeScaleOption .icon-ok { padding-right: 5px; }
+.hidden { opacity : 0; }
+.greyText { color: #cccccc !important; }

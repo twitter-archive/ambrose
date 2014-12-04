@@ -15,8 +15,13 @@ limitations under the License.
 */
 package com.twitter.ambrose.service;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
+
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Service that accepts the DAGNode map and push events. Implementations of this service might write
@@ -25,7 +30,13 @@ import java.util.Map;
  *
  * @author billg
  */
-public interface StatsWriteService {
+public interface StatsWriteService<T extends Job> {
+  
+  /**
+   * Initialize the StatsWriteService from configuration properties
+   * @param properties configuration properties
+   */
+  public void initWriteService(Properties properties) throws IOException;
 
   /**
    * Send a map of all DAGNodes in the workflow. The structure of the DAG is assumed to be immutable.
@@ -35,7 +46,7 @@ public interface StatsWriteService {
    * @param workflowId the id of the workflow being updated
    * @param dagNodeNameMap a Map of DAGNodes where the key is the DAGNode name
    */
-  public void sendDagNodeNameMap(String workflowId, Map<String, DAGNode> dagNodeNameMap) throws IOException;
+  public void sendDagNodeNameMap(String workflowId, Map<String, DAGNode<T>> dagNodeNameMap) throws IOException;
 
   /**
    * Push an events for a given workflow.
@@ -43,5 +54,5 @@ public interface StatsWriteService {
    * @param workflowId the id of the workflow being updated
    * @param event the event bound to the workflow
    */
-  public void pushEvent(String workflowId, WorkflowEvent event) throws IOException;
+  public void pushEvent(String workflowId, Event event) throws IOException;
 }
