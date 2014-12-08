@@ -26,6 +26,7 @@ h2 { margin: 1em 0px; }
 .ambrose-view-table td.job-mappers,
 .ambrose-view-table td.job-reducers { white-space: nowrap; }
 .ambrose-view-table tr.selected { background-color: #f7f7f7; }
+.ambrose-view-table tr.hover { background-color: #f7f7f7; }
 
 /* Chord view */
 .ambrose-view-chord {}

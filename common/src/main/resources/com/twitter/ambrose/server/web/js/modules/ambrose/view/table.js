@@ -60,7 +60,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
     initTable: function() {
       var self = this;
       var tbody = self.tbody = $('<tbody>');
-      $('<table class="table table-hover ambrose-view-table">'
+      $('<table class="table ambrose-view-table">'
         + '<thead><tr>'
         + '<th>#</th>'
         + '<th>Identifier</th>'
@@ -116,7 +116,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', 'lib/boot
 
       // update mutable row properties
       tr.classed('selected', function(job) {
-        return self.workflow.current.selected == job;
+        return self.workflow.current.selected === job;
+      });
+      tr.classed('hover', function(job) {
+        return self.workflow.current.mouseover === job;
       });
 
       // join the array elements by comma
