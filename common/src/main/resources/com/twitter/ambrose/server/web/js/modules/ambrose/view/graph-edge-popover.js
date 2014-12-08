@@ -19,188 +19,95 @@ limitations under the License.
  * This popover only shows when the user is mouseovered the edge.
  */
 define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, View, JobData) {
-  // EdgePopover ctor
-  var EdgePopover = View.EdgePopover = function(workflow, container, graph) {
-    return new View.EdgePopover.fn.init(workflow, container, graph);
+  // GraphEdgePopover ctor
+  var GraphEdgePopover = View.GraphEdgePopover = function(workflow, graphView) {
+    return new View.GraphEdgePopover.fn.init(workflow, graphView);
   };
 
   /**
-   * EdgePopover prototype.
+   * GraphEdgePopover prototype.
    */
-  EdgePopover.fn = EdgePopover.prototype = {
+  GraphEdgePopover.fn = GraphEdgePopover.prototype = {
     /**
      * Constructor.
      *
-     * @param workflow the Workflow instance to bind to.
-     * @param graphContainer the container for all the graph elements
-     * @param the graph view
+     * @param workflow Workflow instance to bind to.
+     * @param graphView graph view.
      */
-    init: function(workflow, graphContainer, graph) {
+    init: function(workflow, graphView) {
       var self = this;
       var navBar = $('.nav.pull-right');
-      self.container = graphContainer;
+      self.workflow = workflow;
+      self.graphView = graphView;
+      self.container = graphView.container;
       self.selectedEdge = null;
 
-      // Create edge popover after the dag is created.
-      workflow.on('dagCreated', function(event, jobs) {
+      // create edge popovers once graph view is initialized
+      workflow.on('graph.view.initialized', function(event, jobs) {
+        // TODO: Support additional runtimes
         if (jobs && jobs.length > 0 && jobs[0].runtime == 'pig') {
-          // Create settings nav bar only if the job is a pig job.
-          // This will change if more setting items are added.
-          if ($('#ambrose-navbar .settingsDropdown a').length == 0) {
-            self.createSettingsDropdown(navBar);
-            self.addSettingsClickEvents(graph, navBar, workflow);
-          }
-          self.createEdgePopoverForPig(graphContainer);
+          self.createEdgePopoverForPig(self.container);
         }
       });
     },
-
-    /**
-     * Generate the Settings dropdown on demand.
-     */
-    createSettingsDropdown: function(navBar) {
-      var dropDownList = $('<li class="dropdown settingsDropdown">');
-      navBar.prepend(dropDownList);
-      var dropdownToggleEL = $('<a>', { 'class': 'dropdown-toggle', 'ref' : '#', 'data-toggle': 'dropdown'}).appendTo(dropDownList);
-      $('<span>', {'text': 'Settings'}).appendTo(dropdownToggleEL);
-      $('<b>', {'class': 'caret'}).appendTo(dropdownToggleEL);
-
-      var dropDownMenu = $('<ul>', {
-        'class': 'dropdown-menu',
-        'id' : 'settingsDropdown',
-        'role': 'menu',
-        'aria-labelledby':'settingsDropdown'
-      }).appendTo(dropDownList);
-
-      // Add the all the dropdown items.
-      dropDownMenu.html(' <li role="presentation" class="dropdown-header">Edge Scaled By</li>'
-          + '<li><a href="#" class="edgeScaleOption" id="noEdgeScaling">No Edge Scaling</a></li>'
-          + '<li><a href="#" class="edgeScaleOption" id="hdfsBytesWritten">Source HDFS Bytes Written</a></li>'
-          + '<li><a href="#" class="edgeScaleOption" id="reduceOutputRecords">Source Reduce Output Records</a></li>'
-          + '<li><a href="#" class="edgeScaleOption" id="mapInputRecords">Destination Map Input Records</a></li>'
-          + '<li><a href="#" class="edgeScaleOption" id="hdfsBytesRead">Destination HDFS Bytes Read</a></li>');
-    },
-
-    /**
-     * Add click events to settings dropdown.
-     */
-    addSettingsClickEvents : function(graph, navBar, workflow) {
-      // Grey out not selected scaling options, and put a checkmark to mark the selected option.
-      function selectEdgeOption() {
-        navBar.find(".edgeScaleOption").toggleClass("greyText", true);
-        navBar.find(".edgeScaleOption .icon-ok").remove();
-        navBar.find("#" + workflow.rescaleOption).toggleClass("greyText", false);
-        navBar.find("#" + workflow.rescaleOption).prepend('<i class="icon-ok"></i>');
-      }
-
-      // When the popover is created successfully, add click events to it.
-      selectEdgeOption();
-      navBar.find(".edgeScaleOption").each(function () {
-        $(this).click(function(){
-          workflow.rescaleOption = this.id;
-          selectEdgeOption();
-
-          graph.arcValueMax = 0;
-          graph.arcValueMin = 0;
-          graph.rescaleEdges();
-        });
-      });
-    },
-
 
     /**
      * Edge popover for pig scripts.
      */
     createEdgePopoverForPig: function(graphContainer) {
       var self = this;
-      var $self = $(self);
 
       function getContent(edgeObj) {
         // Create the popover body section based on the node.
         var edge = edgeObj.__data__;
-        var targetData = null;
-        var sourceData = null;
-        if (edge) {
-          targetData = edge.target.data;
-          if (edge.target.pseudo) { targetData =  edge.target.targetData; }
-          sourceData = edge.source.data;
-          if (edge.source.pseudo) { sourceData =  edge.source.sourceData; }
-        }
+        var sourceData = edge.source.pseudo ? edge.source.source.data : edge.source.data;
+        var targetData = edge.target.pseudo ? edge.target.target.data : edge.target.data;
+        var defaultContent = 'Counter information not available';
 
-        var defaultContent = $('<div class="ambrose-view-graph-edge-popover-default">')
-          .text('Counter information not available');
-
-        if (!targetData.counterGroupMap && !sourceData.counterGroupMap) {
+        if (!sourceData.counterGroupMap && !targetData.counterGroupMap) {
           return defaultContent;
         }
 
-        var bodyEL = $('<div class="popoverBody">');
-        var counterList = $('<ul>');
+        var body = $('<div class="ambrose-view-graph-popover-body">');
+        var list = $('<dl>').appendTo(body);
+        var itemCount = 0;
 
-        // target node counters
-        if (targetData) {
-          var $targetData = $('<ul class="counterList">');
-
-          if (JobData.getHDFSWrittenFromCounter(targetData)) {
-            var item = $('<li>').appendTo($targetData);
-            $('<span>', { 'class': 'popoverKey', 'text' : 'HDFS Bytes Written: '}).appendTo(item);
-            $('<span>', { 'text': JobData.getHDFSWrittenFromCounter(targetData).commafy() }).appendTo(item);
-          }
-
-          if (JobData.getReduceOutputRecords(targetData)) {
-            var item = $('<li>').appendTo($targetData);
-            $('<span>', { 'class': 'popoverKey', 'text': 'Reduce Output Records: '} ).appendTo(item);
-            $('<span>', { 'text': JobData.getReduceOutputRecords(targetData).commafy() }).appendTo(item);
-          }
-
-          if ($targetData.find('li').length > 0) {
-            $targetData.prepend($('<li>', { 'class': 'counterListTitle', 'text': 'Source Node:' }));
-            $targetData.appendTo(counterList);
-          }
+        function addItem(name, value) {
+          $('<dt>').appendTo(list).text(name);
+          $('<dd>').appendTo(list).text(value);
+          itemCount++;
         }
 
-        // Source Node Counters
         if (sourceData) {
-          var $sourceData = $('<ul class="counterList">');
-
-          if (JobData.getMapInputRecords(sourceData)) {
-            var item = $('<li>').appendTo($sourceData);
-            $('<span>', { 'class': 'popoverKey', 'text' : 'Map Input Records: '} ).appendTo(item);
-            $('<span>', { 'text': JobData.getMapInputRecords(sourceData).commafy() }).appendTo(item);
-          }
-
-          if (JobData.getHDFSReadFromCounter(sourceData)) {
-            var item = $('<li>').appendTo($sourceData);
-            $('<span>', { 'class': 'popoverKey', 'text' : 'HDFS Bytes Read: '} ).appendTo(item);
-            $('<span>', { 'text': JobData.getHDFSReadFromCounter(sourceData).commafy() }).appendTo(item);
-          }
-
-          if ($sourceData.find('li').length > 0) {
-            $sourceData.prepend($('<li>', { 'class': 'counterListTitle', 'text': 'Destination Node:' }));
-            $sourceData.appendTo(counterList);
-          }
+          var hdfsBytesWritten = JobData.getHDFSWrittenFromCounter(sourceData);
+          if (hdfsBytesWritten != null) addItem('HDFS Bytes Written', hdfsBytesWritten.commafy());
+          var reduceOutputRecords = JobData.getReduceOutputRecords(sourceData);
+          if (reduceOutputRecords != null) addItem('Reduce Output Records', reduceOutputRecords.commafy());
         }
 
-        if (counterList.find('.counterList').length > 0) {
-          counterList.appendTo(bodyEL);
-          return bodyEL;
+        if (targetData) {
+          var mapInputRecords = JobData.getMapInputRecords(targetData);
+          if (mapInputRecords != null) addItem('Map Input Records', mapInputRecords.commafy());
+          var hdfsBytesRead = JobData.getHDFSReadFromCounter(targetData);
+          if (hdfsBytesRead != null) addItem('HDFS Bytes Read', hdfsBytesRead.commafy());
         }
 
-        return defaultContent;
+        if (itemCount == 0) return defaultContent;
+        return body;
       }
 
-      graphContainer.find('path.pseudoEdge').each(function(i, edge) {
-        var edge = this;
+      graphContainer.find('path.trigger').each(function(i, edge) {
         var $edge = $(edge);
         var $title;
         $edge.popover({
           // Set the placement to "top", so width of the popover can be accurately measured.
           placement: 'top',
-          container : 'body',
+          container: 'body',
           html: 'true',
           title: function () {
             $title = $('<div class="ambrose-view-graph-popover-title">').text('Counters');
-            var $close = $('<button class="close">').html('&times;')
+            // TODO: Fix edge selection state, events, and close button
+            $('<button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>')
               .appendTo($title)
               .click(function() {
                 $edge.popover('hide');
@@ -208,7 +115,7 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
               });
             return $title;
           },
-          content : function() {
+          content: function() {
             return getContent(edge);
           },
           trigger: 'manual'
@@ -217,16 +124,10 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
           // center of the section to place the popover, we will handle the trigger manually.
 
           // Hide all other edge popover.
-          graphContainer.find('path.pseudoEdge').not(edge).popover('hide');
-
-          // Find the top/left position of the edge and height/width of the edge area.
-          var edgeAreaTop = $edge.offset().top;
-          var edgeAreaLeft = $edge.offset().left;
-          var targetHeight = e.target.getBoundingClientRect().height;
-          var targetWidth = e.target.getBoundingClientRect().width;
+          graphContainer.find('path.trigger').not(edge).popover('hide');
 
           // If the previous selected edge is the same one, hide popover and return.
-          if (self.selectedEdge == edge) {
+          if (self.selectedEdge === edge) {
             $(self.selectedEdge).popover('hide');
             self.selectedEdge = null;
             return;
@@ -243,12 +144,18 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
             popover = popover.parent().parent();
           }
 
+          // Find the top/left position of the edge and height/width of the edge area.
+          var edgeAreaTop = $edge.offset().top;
+          var edgeAreaLeft = $edge.offset().left;
+          var targetHeight = e.target.getBoundingClientRect().height;
+          var targetWidth = e.target.getBoundingClientRect().width;
+
           // Place the popover at the center of the div.
           var top = edgeAreaTop + (targetHeight/2) - popover.height();
           // -50 px to count the height of the nab bar, check if enough space to place it on top.
           if (e.target.getBoundingClientRect().top + (targetHeight/2) -50 < popover.height()) {
-            popover.toggleClass("top", false);
-            popover.toggleClass("bottom", true);
+            popover.removeClass('top');
+            popover.addClass('bottom');
             top = edgeAreaTop + (targetHeight/2);
           }
 
@@ -262,6 +169,6 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
   };
 
   // bind prototype to ctor
-  EdgePopover.fn.init.prototype = EdgePopover.fn;
-  return EdgePopover;
+  GraphEdgePopover.fn.init.prototype = GraphEdgePopover.fn;
+  return GraphEdgePopover;
 });
