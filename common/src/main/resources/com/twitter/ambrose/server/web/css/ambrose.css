@@ -6,6 +6,9 @@ body { position: relative; padding-top: 70px; }
 #ambrose-view-chord {}
 #ambrose-view-graph {}
 
+/* Bootstrap dropdown menu extensions */
+.dropdown-menu a.active { background-color: #eee; }
+
 /* Typography */
 h2 { margin: 1em 0px; }
 
