@@ -77,22 +77,37 @@ define(['lib/jquery'], function($) {
 
   Number.prototype.formatTimestamp = function() {
     var date = new Date(this);
-    var timezoneOffsetHours = date.getTimezoneOffset() / 60;
-    var timezoneSeparator = timezoneOffsetHours >= 0 ? '-' : '+';
-    timezoneOffsetHours = Math.abs(timezoneOffsetHours);
+    return date.getUTCFullYear() + '-'
+      + pad(date.getUTCMonth() + 1) + '-'
+      + pad(date.getUTCDate()) + ' '
+      + pad(date.getUTCHours()) + ':'
+      + pad(date.getUTCMinutes()) + ':'
+      + pad(date.getUTCSeconds())
+      + ' UTC';
+  };
+
+  Number.prototype.formatLocalTimestamp = function() {
+    var date = new Date(this);
+    var timezoneOffset = date.getTimezoneOffset();
+    var timezoneSeparator = timezoneOffset >= 0 ? '-' : '+';
+    timezoneOffset = Math.abs(timezoneOffset);
+    var timezoneOffsetHours = Math.floor(timezoneOffset / 60);
+    var timezoneOffsetMinutes = timezoneOffset % 60;
 
     return date.getFullYear() + '-'
-    + pad(date.getMonth() + 1) + '-'
-    + pad(date.getDate()) + ' '
-    + pad(date.getHours()) + ':'
-    + pad(date.getMinutes()) + ':'
-    + pad(date.getSeconds())
-    + ' UTC' + timezoneSeparator + pad(timezoneOffsetHours);
+      + pad(date.getMonth() + 1) + '-'
+      + pad(date.getDate()) + ' '
+      + pad(date.getHours()) + ':'
+      + pad(date.getMinutes()) + ':'
+      + pad(date.getSeconds())
+      + ' UTC' + timezoneSeparator
+      + pad(timezoneOffsetHours)
+      + pad(timezoneOffsetMinutes);
   };
 
   // core Ambrose object, util methods
   return {
-    parseHRavenWorkflow : function(workflow) {
+    parseHRavenWorkflow: function(workflow) {
       var info = {};
       if (workflow == null || typeof workflow.id !== 'string') return info;
       var splits = workflow.id.split("!");
@@ -104,7 +119,7 @@ define(['lib/jquery'], function($) {
       return info;
     },
 
-    calculateElapsedTime : function(start, end) {
+    calculateElapsedTime: function(start, end) {
       var ms = Number(end) - Number(start);
 
       var d, h, m, s;
