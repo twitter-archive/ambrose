@@ -60,7 +60,7 @@
     <!-- Hive doesn't support Hadoop 0.22 used by the parent project  -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
+      <artifactId>hadoop-common</artifactId>
       <exclusions>
         <exclusion>
           <groupId>commons-daemon</groupId>
