@@ -21,13 +21,13 @@ define(['lib/jquery', 'lib/d3', 'lib/colorbrewer', '../core'], function(
   $, d3, colorbrewer, Ambrose
 ) {
   var pending = d3.rgb(0, 0, 0);
-  var running = d3.rgb(98, 196, 98).brighter();
-  var complete = d3.rgb('#eee');
+  var running = d3.rgb('#5cb85c').brighter();
+  var complete = d3.rgb('#ccc');
   var failed = d3.rgb(196, 98, 98);
-  var selected = d3.rgb(98, 98, 196).brighter();
+  var selected = d3.rgb(98, 98, 196);
   var mouseover = selected.brighter();
   var nodeEdgeDefault = d3.rgb(170, 170, 170);
-  var nodeEdgeScaled = d3.rgb(170, 170, 170).darker();
+  var nodeEdgeScaled = nodeEdgeDefault.darker();
 
   return Ambrose.View = {
     Theme: {

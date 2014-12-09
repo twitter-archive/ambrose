@@ -281,14 +281,16 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
         // reset client failure count
         self.clientFailureCount = 0;
 
+        // trigger event
+        self.trigger('jobPolled', [data]);
+
         // process events
+        var eventsProcessed = 0;
         $.each(data, function(i, event) {
           // validate event data
           var id = event.id;
           var type = event.type;
           var data = event.payload;
-
-          self.trigger('jobPolled', [data]);
 
           if (!id || !type || !data) {
             console.error('Invalid event data:', self, event);
@@ -297,6 +299,13 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
 
           // skip events we've already processed
           if (id <= self.lastEventId) return;
+
+          // skip excess events
+          if (eventsProcessed >= maxEvents) return;
+
+          // update state
+          self.lastEventId = id;
+          eventsProcessed++;
 
           // check for workflow event
           if (type == 'WORKFLOW_PROGRESS') {
@@ -345,7 +354,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
           }
 
           // update state and trigger event
-          self.lastEventId = id;
           self.trigger(type.toLowerCase().camelCase(), [job, event]);
         });
 
@@ -450,8 +458,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       if (prev != null) prev.mouseover = false;
       if (job != null) job.mouseover = true;
       this.current.mouseover = job;
-
-      //console.debug('Job mouse over:', job, prev);
       this.trigger('jobMouseOver', [job, prev]);
       return job;
     },
@@ -473,7 +479,6 @@ define(['lib/jquery', 'lib/uri', './core', './client', './graph'], function(
       if (job === prev) job = null;
       else if (job != null) job.selected = true;
       this.current.selected = job;
-
       this.trigger('jobSelected', [job, prev]);
       return job;
     },

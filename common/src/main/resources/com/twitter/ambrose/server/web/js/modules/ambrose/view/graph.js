@@ -75,37 +75,36 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
      */
     init: function(workflow, container, params) {
       var self = this;
-
-      self.arcValueMax = 0;
-      self.arcValueMin = 0;
-
       self.workflow = workflow;
-
       self.container = container = $(container);
-      self.params = $.extend(true, {
+
+      var nodeRadius = 8;
+
+      self.params = $.extend(true, View.Theme, {
         dimensions: {
           node: {
-            radius: 8,
+            radius: nodeRadius,
             progress: {
-              map: { radius: 12 },
-              reduce: { radius: 16 },
+              map: { radius: nodeRadius + 4 },
+              reduce: { radius: nodeRadius + 8 },
             },
-            magnitude: {
+            metric: {
               radius: {
-                min: 16,
-                max: 128,
+                min: nodeRadius * 2,
+                max: nodeRadius * 16,
               },
             },
           },
           edge: {
+            width: {
+              min: 1,
+              max: nodeRadius * 2,
+            }
           },
         },
-      }, View.Theme, params);
-      self.resetView();
+      }, params);
 
-      // Let the upper and lower bound of the edges be 16px (radius) and 2px.
-      self.edgeMaxWidth = self.params.dimensions.node.radius * 2;
-      self.edgeMinWidth = 2;
+      self.resetView();
 
       // shortcut to dimensions
       var dim = self.params.dimensions;
@@ -122,20 +121,59 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
         }
       };
 
-      // create scale for magnitude
+      // create scale for node metric
       var magDomain = [10, 100, 1000, 10000];
-      var magRadiusMin = dim.node.magnitude.radius.min;
-      var magRadiusMax = dim.node.magnitude.radius.max;
+      var magRadiusMin = dim.node.metric.radius.min;
+      var magRadiusMax = dim.node.metric.radius.max;
       var magRadiusDelta = (magRadiusMax - magRadiusMin) / (magDomain.length + 1);
       var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
-      self.magnitudeScale = d3.scale.threshold().domain(magDomain).range(magRange);
+      self.metricScale = d3.scale.threshold().domain(magDomain).range(magRange);
+
+      // define edge metric functions
+      var edgeMetricFunctions = self.edgeMetricFunctions = {
+        none: {
+          name: 'None',
+          apply: function(sourceData, targetData) { return 0; },
+        },
+        mapInputRecords: {
+          name: 'Map Input Records',
+          heading: 'Target Node',
+          apply: function(sourceData, targetData) {
+            return JobData.getMapInputRecordsFromMetrics(targetData);
+          },
+        },
+        reduceOutputRecords: {
+          name: 'Reduce Output Records',
+          heading: 'Source Node',
+          apply: function(sourceData, targetData) {
+            return JobData.getReduceOutputRecordsFromMetrics(sourceData);
+          },
+        },
+        hdfsBytesRead: {
+          name: 'HDFS Bytes Read',
+          heading: 'Target Node',
+          apply: function(sourceData, targetData) {
+            return JobData.getHDFSReadFromMetrics(targetData);
+          },
+        },
+        hdfsBytesWritten: {
+          name: 'HDFS Bytes Written',
+          heading: 'Source Node',
+          apply: function(sourceData, targetData) {
+            return JobData.getHDFSWrittenFromMetrics(sourceData);
+          },
+        },
+      };
+      self.edgeMetricFunction = edgeMetricFunctions.hdfsBytesWritten;
+      self.installEdgeMetricMenu();
 
       // Ensure we resize appropriately
       $(window).resize(function(e) {
         // Prevent the DAG from flashing when the script div is resized.
-        if (!(e.target && e.target.classList && e.target.classList.contains("ambrose-view-script"))) {
+        // TODO: Bind this callback more intelligently to avoid this hack
+        if (!(e.target && e.target.classList && e.target.classList.contains('ambrose-view-script'))) {
           // Remove the popover before resize, otherwise there will be more than 1 popover.
-          $(".popover").remove();
+          $('.popover').remove();
           self.resetView();
           self.handleJobsLoaded();
           self.rescaleEdges();
@@ -147,43 +185,107 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
         self.handleJobsLoaded();
       });
       workflow.on('jobStarted jobProgress jobComplete jobFailed', function(event, job) {
-        self.handleJobsUpdated([job]);
+        self.handleJobUpdated(job);
       });
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
-        self.handleMouseInteraction($.grep([prev, job], function(j) { return j != null; }));
+        self.handleMouseInteraction(_.reject([prev, job], _.isNull));
       });
     },
 
+    installEdgeMetricMenu: function() {
+      var self = this;
+
+      // create dropdown menu
+      var nav = $('#main-navbar-collapse-right');
+      var item = $('<li class="dropdown">').prependTo(nav);
+      var toggle = $('<a id="edge-metric-button" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">')
+          .appendTo(item)
+          .html('Edge Metric <span class="caret"></span>');
+      var menu = $('<ul id="edge-metric-menu" class="dropdown-menu" role="menu" aria-labelledby="workflow-button">')
+          .appendTo(item);
+
+      // group edge metric functions
+      var edgeMetricFunctionsByHeading = _.groupBy(self.edgeMetricFunctions, function(edgeMetricFunction) {
+        return (edgeMetricFunction.heading == null) ? '' : edgeMetricFunction.heading;
+      });
+
+      // create headings and buttons
+      var buttons = _.chain(edgeMetricFunctionsByHeading)
+          .pairs()
+          .sortBy(function(pair) { return pair[0]; })
+          .map(function(pair) {
+            var heading = pair[0], edgeMetricFunctions = pair[1];
+
+            // create heading
+            if (heading.length > 0) {
+              $('<li role="presentation" class="divider">').appendTo(menu);
+              $('<li role="presentation" class="dropdown-header">').appendTo(menu).text(heading);
+            }
+
+            // create menu items
+            return _.chain(edgeMetricFunctions)
+              .sortBy(function(edgeMetricFunction) { return edgeMetricFunction.name; })
+              .map(function(edgeMetricFunction) {
+                var $button = edgeMetricFunction.button = $('<a href="#" role="menuitem" tabindex="-1">')
+                    .appendTo($('<li role="presentation">').appendTo(menu))
+                    .data('edge-metric-function', edgeMetricFunction)
+                    .text(edgeMetricFunction.name);
+
+                // get dom element from jquery selection
+                return $button.get(0);
+              })
+              .value();
+          })
+          .flatten()
+          .value();
+
+      // add click handlers to buttons
+      var $buttons = $(buttons);
+      $buttons.click(function() {
+        var $button = $(this);
+        $buttons.removeClass('active');
+        $button.addClass('active');
+        self.edgeMetricFunction = $button.data('edge-metric-function');
+        self.rescaleEdges();
+      });
+
+      // set current edge metric function button active
+      self.edgeMetricFunction.button.addClass('active');
+    },
+
     resetView: function() {
+      var self = this;
+
       // initialize dimensions
-      var container = this.container;
-      var dim = this.dimensions = {};
+      var container = self.container;
+      var dim = self.dimensions = {};
       var width = dim.width = container.width();
       var height = dim.height = container.height();
 
-      // create canvas and supporting d3 objects
-      this.svg = d3.select(container.empty().get(0))
+      // define projection
+      var xs = self.xs = d3.interpolate(0, width);
+      var ys = self.ys = d3.interpolate(0, height);
+      self.projection = function(d) { return [xs(d.x), ys(d.y)]; };
+
+      // create canvas and primary groups
+      self.svg = d3.select(container.empty().get(0))
         .append('svg:svg')
         .attr('class', 'ambrose-view-graph')
         .attr('width', width)
         .attr('height', height);
-      var xs = this.xs = d3.interpolate(0, width);
-      var ys = this.ys = d3.interpolate(0, height);
-      this.projection = function(d) { return [xs(d.x), ys(d.y)]; };
     },
 
     handleJobsLoaded: function() {
-      this.arcValueMax = 0;
-      this.arcValueMin = 0;
+      var self = this;
 
       // compute node x,y coords
-      var graph = this.workflow.graph;
+      var graph = self.workflow.graph;
       var groups = graph.topologicalGroups;
       var groupCount = groups.length;
       var groupDelta = 1 / groupCount;
       var groupOffset = groupDelta / 2;
 
-      $.each(groups, function(i, group) {
+      _.each(groups, function(group, i) {
         var x = i * groupDelta + groupOffset;
 
         // determine number of real and pseudo nodes in group
@@ -208,182 +310,48 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
 
         // compute real and pseudo intervals
         var pseudoToRealIntervalRatio = 5.0;
-        var pseudoIntervalDelta =
-          1.0 / (
-            (realIntervals * pseudoToRealIntervalRatio) + pseudoIntervals
-          );
+        var pseudoIntervalDelta = 1.0 / (
+          (realIntervals * pseudoToRealIntervalRatio) + pseudoIntervals
+        );
         var realIntervalDelta = pseudoIntervalDelta * pseudoToRealIntervalRatio;
         var offset = realIntervalDelta / 2.0;
 
         // assign vertical offsets to nodes; create edges
-        $.each(group, function(j, node) {
+        _.each(group, function(node, j) {
           node.x = x;
           node.y = offset;
           // TODO(Andy Schlaikjer): Fix to support mixed ordering of real / pseudo nodes
           offset += isReal(node) ? realIntervalDelta : pseudoIntervalDelta;
           var edges = node.edges = [];
-          $.each(node.parents || [], function(p, parent) {
-            edges.push({ source: node, target: parent });
+          _.each(node.parents || [], function(parent) {
+            edges.push({ source: parent, target: node });
           });
         });
       });
 
-      // this.workflow.scaleOption = 'hdfsBytesWritten2';
-      var graph = this.workflow.graph;
+      // create svg elements
+      var graph = self.workflow.graph;
       var nodes = graph.nodes.concat(graph.pseudoNodes).sort(function(a, b) {
+        // sort nodes by topological group, desc
         return b.topologicalGroupIndex - a.topologicalGroupIndex;
       });
-      var g = this.selectNodeGroups(nodes);
-      this.removeNodeGroups(g);
-      this.createNodeGroups(g);
-      this.updateNodeGroups(g);
+      var g = self.selectNodeGroups(nodes);
+      self.removeNodeGroups(g);
+      self.createNodeGroups(g);
+      self.updateNodeGroups(g);
 
-      // Create popovers
-      this.workflow.trigger('dagCreated', [this.workflow.jobs]);
+      // trigger event
+      // TODO: Trigger on self, not workflow
+      self.workflow.trigger('graph.view.initialized', [self.workflow.jobs]);
     },
 
-    handleJobsUpdated: function(jobs) {
-      var nodes = jobs.map(function(j) { return j.node; });
-
-      // Add all the pseudo node which are ancestors of the updated nodes also to the nodes list.
-      // Recursive function which adds direct ancestor pseudo nodes to nodes array.
-      var addPseudoNodes = function(node) {
-        if (node == null || !node.pseudo) return;
-        nodes.push(node);
-        node.parents.forEach(addPseudoNodes);
-      };
-
-      // Initial nodes are not pseudo, but parents may be a pseudo node.
-      nodes.slice(0).forEach(function(node) {
-        node.parents.forEach(addPseudoNodes);
-      });
-
+    /**
+     * Updates the node associated with the job, then rescales all edges.
+     */
+    handleJobUpdated: function(job) {
+      var nodes = [ job.node ];
       this.updateNodeGroups(this.selectNodeGroups(nodes));
-
-      // Reset to update the width of the previous edges.
       this.rescaleEdges();
-    },
-
-    rescaleEdges : function() {
-      // Rescales the width of the edges based on the counter/metrics we want.
-      function rescaleEdgesWidth(targetData, sourceData, i, rescaleOption) {
-        if (self.arcValueMax == self.arcValueMin && self.arcValueMin != 0) {
-          return self.edgeMinWidth + "px";
-        } else if (rescaleOption === "noEdgeScaling") {
-          return "2px";
-        } else if (rescaleOption === "hdfsBytesWritten"
-            && JobData.getHDFSWrittenFromMetrics(targetData)) {
-          return calculateWidth(JobData.getHDFSWrittenFromMetrics(targetData));
-        } else if (rescaleOption === "reduceOutputRecords"
-            && JobData.getReduceOutputRecordsFromMetrics(targetData)) {
-          return calculateWidth(JobData.getReduceOutputRecordsFromMetrics(targetData));
-        } else if (rescaleOption === "mapInputRecords"
-            && JobData.getMapInputRecordsFromMetrics(sourceData)) {
-          return calculateWidth(JobData.getMapInputRecordsFromMetrics(sourceData));
-        } else if (self.workflow.rescaleOption === "hdfsBytesRead"
-            && JobData.getHDFSReadFromCounter(sourceData)) {
-          return calculateWidth(JobData.getHDFSReadFromCounter(sourceData));
-        }
-        return "1px";
-      }
-
-      function calculateWidth(w) {
-        if (w == 0) { return '1px';}
-        return (self.edgeMinWidth + (self.edgeMaxWidth - self.edgeMinWidth)
-            / (self.arcValueMax - self.arcValueMin) * (w - self.arcValueMin)) + "px"
-      }
-
-      function rescaleEdgesColor(targetData, sourceData, i, rescaleOption) {
-        if (rescaleOption === "noEdgeScaling" && targetData) {
-          return colors.nodeEdgeScaled;
-        } else if (rescaleOption === "hdfsBytesWritten"
-            && JobData.getHDFSWrittenFromMetrics(targetData)) {
-          return colors.nodeEdgeScaled;
-        } else if (self.workflow.rescaleOption === "reduceOutputRecords"
-            && JobData.getReduceOutputRecordsFromMetrics(targetData)) {
-          return colors.nodeEdgeScaled;
-        } else if (self.workflow.rescaleOption === "mapInputRecords"
-            && JobData.getMapInputRecordsFromMetrics(sourceData)) {
-          return colors.nodeEdgeScaled;
-        } else if (self.workflow.rescaleOption === "hdfsBytesRead"
-          && JobData.getHDFSReadFromCounter(sourceData)) {
-          return colors.nodeEdgeScaled;
-        }
-        return colors.nodeEdgeDefault;
-      }
-
-      function setMaxMinArcValue(self, value) {
-        if (value != 0) {
-          if (self.arcValueMax < value) {
-            self.arcValueMax = value;
-          }
-
-          if (self.arcValueMin > value || self.arcValueMin == 0) {
-            self.arcValueMin = value;
-          }
-        }
-      }
-
-      var self = this;
-      var colors = self.params.colors;
-      var duration = 500;
-      var graph = this.workflow.graph;
-      var nodes = graph.nodes.concat(graph.pseudoNodes);
-      var g = this.selectAllNodeGroups(nodes);
-
-      // Find the current max and min for all the available metrics value.
-      g.each(function(node, i) {
-        var data = node.data;
-        // Use target data for output data calculation of an edge.
-        if (node.pseudo) { data =  node.targetData; }
-        if (node.children.length != 0 && self.workflow.rescaleOption === "hdfsBytesWritten"
-            && JobData.getHDFSWrittenFromMetrics(data)) {
-          setMaxMinArcValue(self, JobData.getHDFSWrittenFromMetrics(data));
-        } else if (node.children.length != 0 && self.workflow.rescaleOption === "reduceOutputRecords"
-             && JobData.getReduceOutputRecordsFromMetrics(data)) {
-          setMaxMinArcValue(self, JobData.getReduceOutputRecordsFromMetrics(data));
-        }
-
-        // Use source data for input data calculation of an edge.
-        if (node.pseudo) { data =  node.sourceData; }
-        if (node.parents.length != 0 && self.workflow.rescaleOption === "mapInputRecords"
-            && JobData.getMapInputRecordsFromMetrics(data)) {
-          setMaxMinArcValue(self, JobData.getMapInputRecordsFromMetrics(data));
-        } else if (node.parents.length != 0 && self.workflow.rescaleOption === "hdfsBytesRead"
-            && JobData.getHDFSReadFromCounter(data)) {
-          setMaxMinArcValue(self, JobData.getHDFSReadFromCounter(data));
-        }
-      });
-
-      // Update the stroke width based on the hdfsBytesWritten value.
-      g.each(function(node, i) {
-        d3.select(this).selectAll('path.edge').data(node.edges)
-          .transition().duration(duration)
-          .attr("stroke-width", function(d, i) {
-            var targetData = d.target.data;
-            if (d.target.pseudo) {
-              targetData =  d.target.targetData;
-            }
-
-            var sourceData = d.source.data;
-            if (d.source.pseudo) {
-              sourceData =  d.source.sourceData;
-            }
-            return rescaleEdgesWidth(targetData, sourceData, i, self.workflow.rescaleOption);
-          })
-          .attr("stroke", function(d, i) {
-            var targetData = d.target.data;
-            if (d.target.pseudo) {
-              targetData =  d.target.targetData;
-            }
-
-            var sourceData = d.source.data;
-            if (d.source.pseudo) {
-              sourceData =  d.source.sourceData;
-            }
-            return rescaleEdgesColor(targetData, sourceData, i, self.workflow.rescaleOption);
-          });
-      });
     },
 
     handleMouseInteraction: function(jobs) {
@@ -392,10 +360,6 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
     },
 
     selectNodeGroups: function(nodes) {
-      return this.svg.selectAll('g.node').data(nodes, function(node) { return node.id; });
-    },
-
-    selectAllNodeGroups: function(nodes) {
       return this.svg.selectAll('g').data(nodes, function(node) { return node.id; });
     },
 
@@ -411,14 +375,15 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       var cx = function(d) { return xs(d.x); };
       var cy = function(d) { return ys(d.y); };
       var colors = self.params.colors;
+      var edgeWidthMin = self.params.dimensions.edge.width.min;
+      var edgeWidthMax = self.params.dimensions.edge.width.max;
 
       // create node group elements
-      g = g.enter().append('svg:g')
-        .attr('class', function(node) {
-          return node.pseudo ? 'pseudo' : 'node';
-        });
+      g = g.enter().append('svg:g').attr('class', function(node) {
+        return node.pseudo ? 'pseudo' : 'node';
+      });
 
-      // create out-bound edges from each node
+      // create edges; each node references in-bound edges
       g.each(function(node, i) {
         function calcEdgeControlPoints(edge, i) {
           var p0 = edge.source,
@@ -426,21 +391,22 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
               m = (p0.x + p3.x) / 2,
               p = [p0, {x: m, y: p0.y}, {x: m, y: p3.y}, p3],
               p = p.map(projection);
-          return "M" + p[0] + "C" + p[1] + " " + p[2] + " " + p[3];
+          return 'M' + p[0] + 'C' + p[1] + ' ' + p[2] + ' ' + p[3];
         };
 
+        // visible edge
         d3.select(this).selectAll('path.edge').data(node.edges).enter()
           .append('svg:path').attr('class', 'edge')
-          .attr("stroke-width", "1px")
-          .attr("stroke", colors.nodeEdgeDefault)
+          .attr('stroke-width', edgeWidthMin)
           .attr('d', function(edge, i) {
             return calcEdgeControlPoints(edge, i);
           });
 
-        d3.select(this).selectAll('path.pseudoEdge').data(node.edges).enter()
-          .append('svg:path').attr('class', 'pseudoEdge')
-          .attr("stroke-width", self.edgeMaxWidth)
-          .attr("stroke", "transparent")
+        // invisible edge for mouse interaction
+        d3.select(this).selectAll('path.trigger').data(node.edges).enter()
+          .append('svg:path').attr('class', 'trigger')
+          .attr('stroke-width', edgeWidthMax)
+          .attr('stroke', 'transparent')
           .attr('d', function(edge, i) {
             return calcEdgeControlPoints(edge, i);
           });
@@ -449,11 +415,9 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       // filter down to real nodes
       var real = g.filter(isReal);
 
-      // create translucent circle depicting relative size of each node
+      // create translucent circle depicting node metric
       real.append('svg:circle')
-        .attr('class', function(node) {
-          return 'magnitude ' + node.id;
-        })
+        .attr('class', 'metric')
         .attr('cx', cx)
         .attr('cy', cy);
 
@@ -470,7 +434,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
 
       // create smaller circle and bind event handlers
       real.append('svg:circle')
-        .attr('class', 'anchor')
+        .attr('class', 'trigger')
         .attr('data-node-id', function(node, i) {
           return node.id;
         })
@@ -497,6 +461,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
           };
         };
       }
+
       // initiate transition
       t = g.transition().duration(duration);
 
@@ -504,51 +469,50 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       self.updateNodeGroupsFill(t);
 
       // update map, reduce progress arcs
-      t.selectAll('g.node path.map').attrTween("d", getArcTween(progress.map, self.arc.progress.map));
-      t.selectAll('g.node path.reduce').attrTween("d", getArcTween(progress.reduce, self.arc.progress.reduce));
+      t.selectAll('g.node path.map').attrTween('d', getArcTween(progress.map, self.arc.progress.map));
+      t.selectAll('g.node path.reduce').attrTween('d', getArcTween(progress.reduce, self.arc.progress.reduce));
 
-      // update magnitude radius
-      t.selectAll('g.node circle.magnitude')
-        .attr('r', function(node) {
-          var radius = 0;
-          if (node && node.data && node.data.mapReduceJobState) {
-            // compute current radius
-            var jobState = node.data.mapReduceJobState;
-            var totalTasks = jobState.totalMappers + jobState.totalReducers;
-            radius = self.magnitudeScale(totalTasks);
+      // update metric radius
+      t.selectAll('g.node circle.metric').attr('r', function(node) {
+        var radius = 0;
+        if (node && node.data && node.data.mapReduceJobState) {
+          // compute current radius
+          var jobState = node.data.mapReduceJobState;
+          var totalTasks = jobState.totalMappers + jobState.totalReducers;
+          radius = self.metricScale(totalTasks);
 
-            // fetch previous radius
-            var circle = $(this);
-            var radiusPrev = circle.attr('r') || 0;
-            var radiusDelta = radius - radiusPrev;
-            if (radiusDelta != 0) {
-              // radius changed; remove all tics immediately
-              var $group = circle.parent();
-              $group.find('circle.tic').remove();
-              var group = d3.select($group[0]);
+          // fetch previous radius
+          var circle = $(this);
+          var radiusPrev = circle.attr('r') || 0;
+          var radiusDelta = radius - radiusPrev;
+          if (radiusDelta != 0) {
+            // radius changed; remove all tics immediately
+            var $group = circle.parent();
+            $group.find('circle.tic').remove();
+            var group = d3.select($group[0]);
 
-              // add all tics
-              var cx = circle.attr('cx');
-              var cy = circle.attr('cy');
-              var factor = totalTasks;
-              while (factor >= 10) {
-                var radiusTic = self.magnitudeScale(factor);
-                var tic = group.insert('svg:circle', 'g.progress')
+            // add all tics
+            var cx = circle.attr('cx');
+            var cy = circle.attr('cy');
+            var factor = totalTasks;
+            while (factor >= 10) {
+              var radiusTic = self.metricScale(factor);
+              var tic = group.insert('svg:circle', 'g.progress')
                   .attr('class', 'tic')
                   .attr('cx', cx).attr('cy', cy)
                   .attr('r', radiusTic);
-                if (radiusTic > radiusPrev) {
-                  // new tic; animate opacity
-                  tic.attr('opacity', 0)
-                    .transition().delay(duration).delay(500)
-                    .attr('opacity', 1);
-                }
-                factor /= 10;
+              if (radiusTic > radiusPrev) {
+                // new tic; animate opacity
+                tic.attr('opacity', 0)
+                  .transition().delay(duration).delay(500)
+                  .attr('opacity', 1);
               }
+              factor /= 10;
             }
           }
-          return radius;
-        });
+        }
+        return radius;
+      });
     },
 
     updateNodeGroupsFill: function(g) {
@@ -565,7 +529,57 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
         return colors[status.toLowerCase()] || colors.pending;
       }
 
-      g.selectAll('g.node circle.anchor').attr('fill', fill);
+      g.selectAll('g.node circle.trigger').attr('fill', fill);
+    },
+
+    /**
+     * Computes edge metric min, max, then updates all edge widths.
+     */
+    rescaleEdges: function() {
+      var self = this;
+      var graph = this.workflow.graph;
+
+      // compute edge metric min and max
+      var edgeMetricMin = Number.MAX_VALUE;
+      var edgeMetricMax = Number.MIN_VALUE;
+      _.each(graph.nodes, function(source) {
+        _.each(source.children, function(target) {
+          var metric = self.edgeMetricFunction.apply(source.data, target.data);
+          if (metric == null) return;
+          if (edgeMetricMin > metric) edgeMetricMin = metric;
+          if (edgeMetricMax < metric) edgeMetricMax = metric;
+        });
+      });
+
+      // define interpolation from edge metric to width
+      var edgeWidthMin = self.params.dimensions.edge.width.min;
+      var edgeWidthMax = self.params.dimensions.edge.width.max;
+      var edgeMetricDelta = edgeMetricMax - edgeMetricMin;
+      var getWidth = null;
+      if (edgeMetricDelta == 0) {
+        getWidth = function(metric) { return edgeWidthMin; };
+      } else {
+        var edgeWidthDelta = edgeWidthMax - edgeWidthMin;
+        var edgeWidthMetricQuotient = edgeWidthDelta / edgeMetricDelta;
+        getWidth = function(metric) {
+          if (metric == null || metric == 0) return edgeWidthMin;
+          return edgeWidthMin + edgeWidthMetricQuotient * (metric - edgeMetricMin);
+        }
+      }
+
+      // update stroke width of edges
+      var duration = 500;
+      var nodes = graph.nodes.concat(graph.pseudoNodes);
+      var g = self.selectNodeGroups(nodes);
+      g.each(function(node, i) {
+        d3.select(this).selectAll('path.edge').data(node.edges)
+          .transition().duration(duration)
+          .attr('stroke-width', function(d, i) {
+            var sourceData = d.source.pseudo ? d.source.source.data : d.source.data;
+            var targetData = d.target.pseudo ? d.target.target.data : d.target.data;
+            return getWidth(self.edgeMetricFunction.apply(sourceData, targetData)) + 'px';
+          });
+      });
     },
   };
 

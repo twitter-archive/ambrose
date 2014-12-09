@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Data workflow visualization and monitoring">
     <meta name="author" content="Twitter">
-    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="css/ambrose.css" rel="stylesheet">
     <link href="css/jquery-ui.css" rel="stylesheet">
 
@@ -23,39 +24,34 @@
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="ico/apple-touch-icon-72-precomposed.png">
     <link rel="apple-touch-icon-precomposed" href="ico/apple-touch-icon-57-precomposed.png">
   </head>
-
   <body>
+
     <!-- navbar -->
-    <div class="navbar navbar-inverse navbar-fixed-top" id="ambrose-navbar">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+    <nav id="ambrose-navbar" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Ambrose</a>
-          <div class="nav-collapse collapse">
-            <ul class="nav">
-              <li><a href="dashboard.html">Dashboard</a></li>
-              <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                  Workflow
-                  <b class="caret"></b>
-                </a>
-                <ul id="workflow-dropdown" class="dropdown-menu">
-                  <!-- workflow actions inserted here -->
-                </ul>
-              </li>
-            </ul>
-
-            <ul class="nav pull-right">
-              <li><a target="_blank" href="https://github.com/twitter/ambrose">About</a></li>
-            </ul>
-          </div>
+          <a class="navbar-brand" href="#">Ambrose</a>
+        </div>
+        <div id="main-navbar-collapse" class="collapse navbar-collapse">
+          <ul id="main-navbar-collapse-left" class="nav navbar-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li class="dropdown active">
+              <a id="workflow-button" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" role="button" aria-expanded="false">Workflow <span class="caret"></span></a>
+              <ul id="workflow-menu" class="dropdown-menu" role="menu" aria-labelledby="workflow-button"></ul>
+            </li>
+          </ul>
+          <ul id="main-navbar-collapse-right" class="nav navbar-nav navbar-right">
+            <li><a target="_blank" href="https://github.com/twitter/ambrose">About</a></li>
+          </ul>
         </div>
       </div>
-    </div>
+    </nav>
 
     <div class="container-fluid">
       <div class="row-fluid">
@@ -74,7 +70,7 @@
 
       <hr>
       <footer>
-        <p>&copy; Twitter 2013</p>
+        <p>&copy; Twitter 2014</p>
       </footer>
     </div> <!-- /container-fluid -->
 
