@@ -54,7 +54,7 @@
     <!-- hadoop -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
+      <artifactId>hadoop-core</artifactId>
     </dependency>
   </dependencies>
 
