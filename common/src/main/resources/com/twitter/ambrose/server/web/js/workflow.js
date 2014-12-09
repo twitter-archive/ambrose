@@ -11,22 +11,18 @@ require([
     // initialize workflow and views
     console.info('Creating default workflow');
     var workflow = Ambrose.Workflow();
-    var $graphContainer = $('#ambrose-view-graph');
-    // Rescale the edges based on the option chosen, default option.
-    workflow.rescaleOption = "hdfsBytesWritten";
-
     var title = Ambrose.View.Title(workflow, $('#ambrose-view-title'));
     var progressBar = Ambrose.View.ProgressBar(workflow, $('#ambrose-view-progress-bar'));
-    var graph = Ambrose.View.Graph(workflow, $graphContainer);
+    var graph = Ambrose.View.Graph(workflow, $('#ambrose-view-graph'));
+    var graphNodePopover = Ambrose.View.GraphNodePopover(workflow, graph);
+    var graphEdgePopover = Ambrose.View.GraphEdgePopover(workflow, graph);
     var table = Ambrose.View.Table(workflow, $('#ambrose-view-table'));
-    var nodePopover = Ambrose.View.NodePopover(workflow, $graphContainer);
-    var edgePopover = Ambrose.View.EdgePopover(workflow, $graphContainer, graph);
     var script = Ambrose.View.Script(workflow);
 
     // install workflow actions
-    var workflowDropdown = $('#workflow-dropdown');
+    var workflowMenu = $('#workflow-menu');
     var playbackAction = $('<a href="#">')
-      .appendTo($('<li>').appendTo(workflowDropdown));
+      .appendTo($('<li>').prependTo(workflowMenu));
 
     // load jobs and poll for events
     if (params.replay) {

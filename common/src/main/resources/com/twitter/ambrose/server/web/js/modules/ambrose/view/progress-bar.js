@@ -37,7 +37,12 @@ define(['lib/jquery', '../core', './core'], function($, Ambrose, View) {
       container = $(container).empty().addClass('ambrose-view-progress-bar');
       var number = $('<div class="number">').appendTo(container).text('0%');
       var progress = $('<div class="progress">').appendTo(container);
-      var bar = $('<div class="bar">').appendTo(progress).css('width', '0');
+      var bar = $('<div class="progress-bar" role="progressbar">')
+          .appendTo(progress)
+          .attr('aria-valuemin', '0')
+          .attr('aria-valuemax', '100')
+          .attr('aria-valuenow', '0')
+          .css('width', '0');
       workflow.on('workflowProgress', function(event, data) {
         var text = data + '%';
         bar.css('width', text);

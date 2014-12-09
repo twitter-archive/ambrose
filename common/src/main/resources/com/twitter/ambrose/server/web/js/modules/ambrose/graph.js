@@ -36,8 +36,8 @@ define(['lib/jquery', './core'], function($, Ambrose) {
     });
 
     // initialize edges
-    $.each(nodes, function(i, node) {
-      var parentIds = self.getParentIds(node.data);
+    $.each(nodes, function(i, child) {
+      var parentIds = self.getParentIds(child.data);
       if (!parentIds) return;
       $.each(parentIds, function(parentIndex, parentId) {
         var parent = nodesById[parentId];
@@ -45,14 +45,16 @@ define(['lib/jquery', './core'], function($, Ambrose) {
           console.warn('No node with id "' + parentId + '" exists:', self);
           return;
         }
-        self.addEdge(node, parent);
+        self.addEdge(child, parent);
       });
     });
   };
 
   /**
-   * Creates pseudo nodes along an edge from child to parent, one for each
-   * topological group the edge crosses.
+   * Creates "pseudo" nodes along an edge from child to parent, one for each topological group the
+   * original edge crosses. Pseudo nodes are used for visual layout of graph edges, but are
+   * otherwise not rendered. Concrete parent node P and child node C separated by one or more pseudo
+   * nodes can be accessed via "source" and "target" properties of the pseudo nodes, respectively.
    */
   var _createPseudoNodes = function(child, parent) {
     var cg = child.topologicalGroupIndex;
@@ -65,20 +67,20 @@ define(['lib/jquery', './core'], function($, Ambrose) {
     var nodesById = graph.nodesById;
     var groups = graph.topologicalGroups;
 
-    // remove child to parent edge
+    // remove existing edge
     graph.removeEdge(child, parent);
 
     // for each intermediate topological group
     var prev = child;
     for (var g = cg - 1; g > pg; g--) {
-      // create pseudo node
+      // create (parent) pseudo node
       var node = graph.addNode({
         pseudo: true,
-        id: child.id + ':' + parent.id + ':' + g,
+        id: parent.id + ':' + child.id + ':' + g,
+        source: parent,
+        target: child,
         topologicalIndex: -1, // not generally useful
         topologicalGroupIndex: g,
-        targetData: parent.data,
-        sourceData: child.data
       });
 
       // add pseudo node to group
@@ -137,23 +139,23 @@ define(['lib/jquery', './core'], function($, Ambrose) {
     },
 
     /**
-     * Adds a directed edge to the graph.
+     * Adds an edge to the graph.
      */
-    addEdge: function(from, to) {
-      from.parents.push(to);
-      from.parentsById[to.id] = to;
-      to.children.push(from);
-      to.childrenById[from.id] = from;
+    addEdge: function(child, parent) {
+      child.parents.push(parent);
+      child.parentsById[parent.id] = parent;
+      parent.children.push(child);
+      parent.childrenById[child.id] = child;
     },
 
     /**
-     * Removes a directed edge from the graph.
+     * Removes an edge from the graph.
      */
-    removeEdge: function(from, to) {
-      from.parents.remove(to);
-      delete from.parentsById[to.id];
-      to.children.remove(from);
-      delete to.childrenById[from.id];
+    removeEdge: function(child, parent) {
+      child.parents.remove(parent);
+      delete child.parentsById[parent.id];
+      parent.children.remove(child);
+      delete parent.childrenById[child.id];
     },
 
     /**
@@ -225,9 +227,9 @@ define(['lib/jquery', './core'], function($, Ambrose) {
      * edge from C to P would be split such that C links to CP and CP to P.
      */
     addPseudoNodes: function() {
-      this.pseudoNodes = [];
       var graph = this;
-      var groups = this.topologicalGroups;
+      graph.pseudoNodes = [];
+      var groups = graph.topologicalGroups;
       for (var g = 2; g < groups.length; g++) {
         var group = groups[g];
         $.each(group, function(i, node) {
@@ -269,11 +271,8 @@ define(['lib/jquery', './core'], function($, Ambrose) {
       $.each(nodes, function(i, node) {
         var c = getIndex(node);
         $.each(node.parents, function(i, parent) {
-          while (parent.pseudo) parent = parent.parents[0];
+          if (parent.pseudo) parent = parent.source;
           var p = getIndex(parent);
-          if (p == null) {
-            console.log('p is null');
-          }
           matrix[c][p]++;
         });
       });
