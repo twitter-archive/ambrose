@@ -16,19 +16,19 @@ limitations under the License.
 package com.twitter.ambrose.scalding
 
 import cascading.flow.Flow
-import com.twitter.ambrose.cascading.AmbroseCascadingNotifier
+import com.twitter.ambrose.cascading.{EmbeddedAmbroseCascadingNotifier, AmbroseCascadingNotifier}
 import com.twitter.scalding.Job
-import org.apache.hadoop.mapreduce.JobContext
 
-
-/** To enable embedded ambrose server in your scalding job, just add this trait to it.
- *  Then, while the job is running, open http://localhost:8080 with your browser.
- *  @see com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier for details on
- * configuring the port etc.
+/**
+ * To enable the embedded ambrose server in your scalding job, just add this trait to it. Then,
+ * while the job is running, open http://localhost:8080/ with your browser.
+ *
+ * @see com.twitter.ambrose.cascading.EmbeddedAmbroseCascadingNotifier
  */
 trait AmbroseAdapter extends Job {
 
-  @transient val ambroseListener: Option[AmbroseCascadingNotifier] = None
+  @transient val ambroseListener: Option[AmbroseCascadingNotifier] =
+    Some(EmbeddedAmbroseCascadingNotifier)
 
   override def buildFlow: Flow[_] = {
     val flow = super.buildFlow

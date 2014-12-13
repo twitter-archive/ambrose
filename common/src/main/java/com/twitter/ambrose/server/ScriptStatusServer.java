@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Light weight application server that serves both the JSON API and the Ambrose web pages powered
  * from the JSON. The port defaults to {@value #PORT_DEFAULT} but can be overridden with the {@value
- * #PORT_PARAM} system property. For a random port to be used, set {@value #PORT_PARAM} to zero or
+ * #PORT_PARAM} system property. To bind to a random port, set {@value #PORT_PARAM} to zero or
  * {@value #PORT_RANDOM}.
  * <p/>
  * The JSON API supports the following URIs:
