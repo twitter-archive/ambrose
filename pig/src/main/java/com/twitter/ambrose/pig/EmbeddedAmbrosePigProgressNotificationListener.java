@@ -17,8 +17,7 @@ package com.twitter.ambrose.pig;
 
 import java.io.IOException;
 
-import org.apache.pig.tools.pigstats.PigStatsUtil;
-
+import com.twitter.ambrose.model.Job;
 import com.twitter.ambrose.server.ScriptStatusServer;
 import com.twitter.ambrose.service.impl.InMemoryStatsService;
 
@@ -48,12 +47,12 @@ import com.twitter.ambrose.service.impl.InMemoryStatsService;
 public class EmbeddedAmbrosePigProgressNotificationListener
     extends AmbrosePigProgressNotificationListener {
   private static final String POST_SCRIPT_SLEEP_SECS_PARAM = "ambrose.post.script.sleep.seconds";
-  private InMemoryStatsService service;
+  private InMemoryStatsService<Job> service;
   private ScriptStatusServer server;
 
   public EmbeddedAmbrosePigProgressNotificationListener() {
-    super(new InMemoryStatsService());
-    this.service = (InMemoryStatsService) getStatsWriteService();
+    super(new InMemoryStatsService<Job>());
+    this.service = (InMemoryStatsService<Job>) getStatsWriteService();
     this.server = new ScriptStatusServer(service, service);
     this.server.start();
   }
@@ -69,12 +68,6 @@ public class EmbeddedAmbrosePigProgressNotificationListener
 
     try {
       int sleepTimeSeconds = Integer.parseInt(sleepTime);
-      // if sleep time is long, display stats so users watching std out can tell things are done.
-      // if sleep time is short though, don't bother, since they'll get displayed by Pig after the
-      // sleep.
-      if (sleepTimeSeconds > 10) {
-        PigStatsUtil.displayStatistics();
-      }
 
       log.info("Job complete but sleeping for " + sleepTimeSeconds
           + " seconds to keep the PigStats REST server running. Hit ctrl-c to exit.");

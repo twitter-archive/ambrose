@@ -18,7 +18,7 @@
 #
 # - Inserts our custom pig build into the classpath
 # - Adds Ambrose to the classpath
-# - Starts Pig with the PigStatsDataVizCollector
+# - Starts Pig with embedded Ambrose PPNL
 #
 
 function log() { echo "$@" >&2; }
@@ -27,7 +27,7 @@ function die() { log "$@"; exit 1; }
 # configure args
 AMBROSE_PIG_BIN="${AMBROSE_PIG_BIN:-pig}"
 AMBROSE_HOME="${AMBROSE_HOME:-$(cd $(dirname "$0")/..; pwd -P)}"
-AMBROSE_PORT="${AMBROSE_PORT:-8080}"
+AMBROSE_PORT="${AMBROSE_PORT:-random}"
 AMBROSE_TIMEOUT="${AMBROSE_TIMEOUT:-600}" # 10 min
 
 # test for presence of pig command
