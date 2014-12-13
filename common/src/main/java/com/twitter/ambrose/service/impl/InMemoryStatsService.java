@@ -61,7 +61,7 @@ import com.twitter.ambrose.util.JSONUtil;
  *   </ul>
  * </pre>
  */
-public class InMemoryStatsService implements StatsReadService, StatsWriteService<Job>,
+public class InMemoryStatsService<T extends Job> implements StatsReadService<T>, StatsWriteService<T>,
     WorkflowIndexReadService {
   private static final Logger LOG = LoggerFactory.getLogger(InMemoryStatsService.class);
   private static final String DUMP_WORKFLOW_FILE_PARAM = "ambrose.write.dag.file";
@@ -71,7 +71,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   private final PaginatedList<WorkflowSummary> summaries =
       new PaginatedList<WorkflowSummary>(ImmutableList.of(summary));
   private boolean jobFailed = false;
-  private Map<String, DAGNode<Job>> dagNodeNameMap = Maps.newHashMap();
+  private Map<String, DAGNode<T>> dagNodeNameMap = Maps.newHashMap();
   private SortedMap<Integer, Event> eventMap = new ConcurrentSkipListMap<Integer, Event>();
   private Writer workflowWriter;
   private Writer eventsWriter;
@@ -100,7 +100,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
 
   @Override
   public synchronized void sendDagNodeNameMap(String workflowId,
-      Map<String, DAGNode<Job>> dagNodeNameMap) throws IOException {
+      Map<String, DAGNode<T>> dagNodeNameMap) throws IOException {
     this.summary.setId(workflowId);
     this.summary.setStatus(WorkflowSummary.Status.RUNNING);
     this.summary.setProgress(0);
@@ -133,7 +133,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
   }
 
   @Override
-  public synchronized Map<String, DAGNode<Job>> getDagNodeNameMap(String workflowId) {
+  public synchronized Map<String, DAGNode<T>> getDagNodeNameMap(String workflowId) {
     return dagNodeNameMap;
   }
 
@@ -155,7 +155,7 @@ public class InMemoryStatsService implements StatsReadService, StatsWriteService
     return summaries;
   }
 
-  private void writeJsonDagNodenameMapToDisk(Map<String, DAGNode<Job>> dagNodeNameMap)
+  private void writeJsonDagNodenameMapToDisk(Map<String, DAGNode<T>> dagNodeNameMap)
       throws IOException {
     if (workflowWriter != null && dagNodeNameMap != null) {
       JSONUtil.writeJson(workflowWriter, dagNodeNameMap.values());
