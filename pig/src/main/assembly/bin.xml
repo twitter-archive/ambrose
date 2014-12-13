@@ -18,21 +18,30 @@
         <outputDirectory>lib</outputDirectory>
         <unpack>false</unpack>
         <dependencySets>
+          <!-- pull in most libs w/o transitive deps -->
           <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <includes>
+              <include>com.fasterxml.jackson.core:jackson-annotations</include>
+              <include>com.fasterxml.jackson.core:jackson-core</include>
+              <include>com.fasterxml.jackson.core:jackson-databind</include>
+              <include>org.apache.pig:pig</include>
+              <include>org.mortbay.jetty:jetty-util</include>
+              <include>org.mortbay.jetty:jetty</include>
+              <include>org.mortbay.jetty:servlet-api</include>
+              <include>org.mortbay.jetty:servlet-api</include>
               <include>org.slf4j:slf4j-api</include>
               <include>org.slf4j:slf4j-simple</include>
-              <include>com.google.guava:guava</include>
-              <include>com.fasterxml.jackson.core:jackson-core</include>
-              <include>com.fasterxml.jackson.core:jackson-annotations</include>
-              <include>com.fasterxml.jackson.core:jackson-databind</include>
-              <include>org.mortbay.jetty:jetty</include>
-              <include>org.mortbay.jetty:jetty-util</include>
-              <include>org.mortbay.jetty:servlet-api</include>
-              <include>org.apache.pig:pig</include>
             </includes>
             <useTransitiveDependencies>false</useTransitiveDependencies>
+          </dependencySet>
+          <!-- pull in some libs w/ transitive deps -->
+          <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+              <include>org.javassist:javassist</include>
+              <include>org.reflections:reflections</include>
+            </includes>
           </dependencySet>
         </dependencySets>
       </binaries>
