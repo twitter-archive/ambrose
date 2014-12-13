@@ -93,7 +93,7 @@ public class EmbeddedAmbroseCascadingNotifier extends AmbroseCascadingNotifier {
       // is set, still sleep for 10 seconds just to let the client finish it's polling, since it
       // doesn't stop until it get all the job complete events.
       LOG.info(String.format(
-          "Job complete but sleeping for %s seconds to keep the CascadingStats REST server running.\nHit ctrl-c to exit.",
+          "Job complete but sleeping for %s seconds to keep the embedded Ambrose server running. Hit ctrl-c to exit.",
           sleepTimeSeconds
       ));
       Thread.sleep(sleepTimeSeconds * 1000);
