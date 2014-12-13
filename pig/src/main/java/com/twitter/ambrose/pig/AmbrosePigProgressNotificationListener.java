@@ -34,6 +34,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.pig.backend.hadoop.datastorage.ConfigurationUtil;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.MapReduceOper;
+import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.plans.MROperPlan;
 import org.apache.pig.impl.plan.OperatorKey;
 import org.apache.pig.impl.plan.OperatorPlan;
 import org.apache.pig.tools.pigstats.JobStats;
@@ -107,13 +108,23 @@ public class AmbrosePigProgressNotificationListener implements PigProgressNotifi
   /**
    * Initialize this class with an instance of StatsWriteService to push stats to.
    *
-   * @param statsWriteService
+   * @param statsWriteService service to which stats collected from PPNL callbacks are written.
    */
   public AmbrosePigProgressNotificationListener(StatsWriteService statsWriteService) {
     this.statsWriteService = statsWriteService;
   }
 
   protected StatsWriteService getStatsWriteService() { return statsWriteService; }
+
+  /**
+   * Support Pig 12 PPNL API. Remove this once Pig 12 support is no longer needed.
+   *
+   * @param scriptId script identifier.
+   * @param plan MR operator plan.
+   */
+  public void initialPlanNotification(String scriptId, MROperPlan plan) {
+    initialPlanNotification(scriptId, (OperatorPlan<?>) plan);
+  }
 
   /**
    * Called after the job DAG has been created, but before any jobs are fired.
