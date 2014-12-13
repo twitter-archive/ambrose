@@ -15,24 +15,27 @@ limitations under the License.
  */
 package com.twitter.ambrose.pig;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
+import org.apache.pig.tools.pigstats.mapreduce.MRJobStats;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJob;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
  * Subclass of MapReduceJob used to hold initialization logic and Pig-specific bindings for a Job.
@@ -74,25 +77,47 @@ public class PigJob extends MapReduceJob {
     this.outputInfoList = outputInfoList(stats.getOutputs());
 
     // job metrics
-    Map<String, Number> metrics = new HashMap<String, Number>();
-    metrics.put("avgMapTime", stats.getAvgMapTime());
-    metrics.put("avgReduceTime", stats.getAvgREduceTime());
-    metrics.put("bytesWritten", stats.getBytesWritten());
+    Map<String, Number> metrics = Maps.newHashMap();
+    metrics.put("hdfsBytesRead", stats.getHdfsBytesRead());
     metrics.put("hdfsBytesWritten", stats.getHdfsBytesWritten());
-    metrics.put("mapInputRecords", stats.getMapInputRecords());
-    metrics.put("mapOutputRecords", stats.getMapOutputRecords());
-    metrics.put("maxMapTime", stats.getMaxMapTime());
-    metrics.put("maxReduceTime", stats.getMaxReduceTime());
-    metrics.put("minMapTime", stats.getMinMapTime());
-    metrics.put("minReduceTime", stats.getMinReduceTime());
-    metrics.put("numberMaps", stats.getNumberMaps());
-    metrics.put("numberReduces", stats.getNumberReduces());
-    metrics.put("proactiveSpillCountObjects", stats.getProactiveSpillCountObjects());
-    metrics.put("proactiveSpillCountRecs", stats.getProactiveSpillCountRecs());
+    metrics.put("bytesWritten", stats.getBytesWritten());
     metrics.put("recordWritten", stats.getRecordWrittern());
-    metrics.put("reduceInputRecords", stats.getReduceInputRecords());
-    metrics.put("reduceOutputRecords", stats.getReduceOutputRecords());
-    metrics.put("SMMSpillCount", stats.getSMMSpillCount());
+    if (stats instanceof MRJobStats) {
+      MRJobStats mrStats = (MRJobStats) stats;
+      metrics.put("avgMapTime", mrStats.getAvgMapTime());
+
+      // internal pig seems to have fixed typo in OSS pig method name; avoid NoSuchMethodException
+      // TODO: Remove this once internal pig is replaced w/ OSS pig
+      Number avgReduceTime = null;
+      try {
+        Method method = mrStats.getClass().getMethod("getAvgReduceTime");
+        avgReduceTime = (Number) method.invoke(mrStats);
+      } catch (NoSuchMethodException e) {
+        // assume we're dealing with OSS pig; ignore
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException("Failed to invoke MRJobStats.getAvgReduceTime", e);
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException("Failed to invoke MRJobStats.getAvgReduceTime", e);
+      }
+      if (avgReduceTime == null) {
+        avgReduceTime = mrStats.getAvgREduceTime();
+      }
+      metrics.put("avgReduceTime", avgReduceTime);
+
+      metrics.put("mapInputRecords", mrStats.getMapInputRecords());
+      metrics.put("mapOutputRecords", mrStats.getMapOutputRecords());
+      metrics.put("maxMapTime", mrStats.getMaxMapTime());
+      metrics.put("maxReduceTime", mrStats.getMaxReduceTime());
+      metrics.put("minMapTime", mrStats.getMinMapTime());
+      metrics.put("minReduceTime", mrStats.getMinReduceTime());
+      metrics.put("numberMaps", mrStats.getNumberMaps());
+      metrics.put("numberReduces", mrStats.getNumberReduces());
+      metrics.put("proactiveSpillCountObjects", mrStats.getProactiveSpillCountObjects());
+      metrics.put("proactiveSpillCountRecs", mrStats.getProactiveSpillCountRecs());
+      metrics.put("reduceInputRecords", mrStats.getReduceInputRecords());
+      metrics.put("reduceOutputRecords", mrStats.getReduceOutputRecords());
+      metrics.put("SMMSpillCount", mrStats.getSMMSpillCount());
+    }
 
     setMetrics(metrics);
   }
