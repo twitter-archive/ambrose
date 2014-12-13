@@ -28,7 +28,7 @@ import com.twitter.scalding.Job
 trait AmbroseAdapter extends Job {
 
   @transient val ambroseListener: Option[AmbroseCascadingNotifier] =
-    Some(EmbeddedAmbroseCascadingNotifier)
+    Some(new EmbeddedAmbroseCascadingNotifier())
 
   override def buildFlow: Flow[_] = {
     val flow = super.buildFlow

@@ -39,7 +39,8 @@ import org.apache.commons.logging.LogFactory;
  * flow.complete();
  * </pre>
  *
- * @see com.twitter.ambrose.server.ScriptStatusServer ScriptStatusServer for more options.
+ * @see com.twitter.ambrose.service.impl.InMemoryStatsService
+ * @see com.twitter.ambrose.server.ScriptStatusServer
  */
 public class EmbeddedAmbroseCascadingNotifier extends AmbroseCascadingNotifier {
 
