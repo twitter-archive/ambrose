@@ -252,12 +252,6 @@
         <version>${cascading.version}</version>
         <scope>provided</scope>
       </dependency>
-      <dependency>
-        <groupId>cascading</groupId>
-        <artifactId>cascading-xml</artifactId>
-        <version>${cascading.version}</version>
-        <scope>provided</scope>
-      </dependency>
 
       <!-- scalding -->
       <dependency>
