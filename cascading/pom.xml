@@ -60,10 +60,6 @@
       <groupId>cascading</groupId>
       <artifactId>cascading-hadoop</artifactId>
     </dependency>
-    <dependency>
-      <groupId>cascading</groupId>
-      <artifactId>cascading-xml</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
