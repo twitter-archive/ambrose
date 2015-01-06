@@ -1,12 +1,12 @@
 package com.twitter.ambrose.model.hadoop;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.TIPStatus;
 import org.apache.hadoop.mapred.TaskReport;
-
-import java.io.IOException;
 
 /**
  * Container that holds state of a MapReduce job
@@ -21,19 +21,20 @@ public class MapReduceJobState {
   private float reduceProgress;
   private long jobStartTime;
   private long jobLastUpdateTime;
-
   private int totalMappers;
   private int finishedMappersCount;
-
   private int totalReducers;
   private int finishedReducersCount;
 
   @JsonCreator
-  public MapReduceJobState() { }
+  public MapReduceJobState() {
+  }
 
-  public MapReduceJobState(RunningJob runningJob,
-                           TaskReport[] mapTaskReport,
-                           TaskReport[] reduceTaskReport) throws IOException {
+  public MapReduceJobState(
+      RunningJob runningJob,
+      TaskReport[] mapTaskReport,
+      TaskReport[] reduceTaskReport
+  ) throws IOException {
     jobId = runningJob.getID().toString();
     jobName = runningJob.getJobName();
     trackingURL = runningJob.getTrackingURL();
@@ -41,7 +42,6 @@ public class MapReduceJobState {
     isSuccessful = runningJob.isSuccessful();
     mapProgress = runningJob.mapProgress();
     reduceProgress = runningJob.reduceProgress();
-
     totalMappers = mapTaskReport.length;
     totalReducers = reduceTaskReport.length;
 
@@ -57,7 +57,9 @@ public class MapReduceJobState {
     }
 
     for (TaskReport report : reduceTaskReport) {
-      if (jobLastUpdateTime < report.getFinishTime()) { jobLastUpdateTime = report.getFinishTime(); }
+      if (jobLastUpdateTime < report.getFinishTime()) {
+        jobLastUpdateTime = report.getFinishTime();
+      }
 
       TIPStatus status = report.getCurrentStatus();
       if (status != TIPStatus.PENDING && status != TIPStatus.RUNNING) {
