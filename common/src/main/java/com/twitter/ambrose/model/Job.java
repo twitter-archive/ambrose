@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Objects;
+
 import com.twitter.ambrose.util.JSONUtil;
 
 /**
@@ -36,32 +37,50 @@ import com.twitter.ambrose.util.JSONUtil;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "runtime")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value=com.twitter.ambrose.model.Job.class, name="default")
+    @JsonSubTypes.Type(value = com.twitter.ambrose.model.Job.class, name = "default")
 })
 public class Job {
   private String id;
   private Properties configuration;
   private Map<String, Number> metrics;
 
-  protected Job() { }
+  protected Job() {
+  }
 
   @JsonCreator
-  public Job(@JsonProperty("id") String id,
+  public Job(
+      @JsonProperty("id") String id,
       @JsonProperty("configuration") Properties configuration,
-      @JsonProperty("metrics") Map<String, Number> metrics) {
+      @JsonProperty("metrics") Map<String, Number> metrics
+  ) {
     this.id = id;
     this.metrics = metrics;
     this.configuration = configuration;
   }
 
-  public String getId() { return id; }
-  public void setId(String id) { this.id = id; }
+  public String getId() {
+    return id;
+  }
 
-  public Properties getConfiguration() { return configuration; }
-  public void setConfiguration(Properties configuration) { this.configuration = configuration; }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-  public Map<String, Number> getMetrics() { return metrics; }
-  protected void setMetrics(Map<String, Number> metrics) { this.metrics = metrics; }
+  public Properties getConfiguration() {
+    return configuration;
+  }
+
+  public void setConfiguration(Properties configuration) {
+    this.configuration = configuration;
+  }
+
+  public Map<String, Number> getMetrics() {
+    return metrics;
+  }
+
+  protected void setMetrics(Map<String, Number> metrics) {
+    this.metrics = metrics;
+  }
 
   @Override
   public int hashCode() {
@@ -90,6 +109,7 @@ public class Job {
   }
 
   public static Job fromJson(String json) throws IOException {
-    return JSONUtil.toObject(json, new TypeReference<Job>() { });
+    return JSONUtil.toObject(json, new TypeReference<Job>() {
+    });
   }
 }
