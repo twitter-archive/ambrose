@@ -1,4 +1,4 @@
-package com.twitter.ambrose.model;
+package com.twitter.ambrose.pig;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -13,10 +13,12 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.ambrose.pig.PigJob;
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
 
 /**
- * Unit tests for {@link com.twitter.ambrose.model.PigJobTest}.
+ * Unit tests for {@link PigJobTest}.
  */
 public class PigJobTest {
   PigJob pigJob;
@@ -27,16 +29,15 @@ public class PigJobTest {
     properties.setProperty("someprop", "propvalue");
     String[] aliases = new String[] { "alias1" };
     String[] features = new String[] { "feature1" };
-    Map<String, Number> m = new HashMap<String, Number>();
-    m.put("somemetric", 45);
 
     pigJob = new PigJob();
     pigJob.setAliases(aliases);
     pigJob.setFeatures(features);
     pigJob.setConfiguration(properties);
-    pigJob.setMetrics(m);
+    Map<String, Number> m = pigJob.getMetrics();
+    m.put("somemetric", 45);
   }
-  
+
   @Test
   public void testPigJobRoundTrip() throws IOException {
     doTestRoundTrip(pigJob);
