@@ -27,10 +27,10 @@ import com.twitter.ambrose.service.StatsWriteService;
 
 public final class AmbroseUtils {
 
-  private AmbroseUtils() {}
-  
   private static Log log = LogFactory.getLog(AmbroseUtils.class);
-  
+
+  private AmbroseUtils() {}
+
   /**
    * Handle and ignore any IOException while sending DagNodeNameMap to statsWriteService
    * @param statsWriteService to send DagNodeNameMap to
@@ -58,7 +58,7 @@ public final class AmbroseUtils {
       log.error("Couldn't send event to StatsWriteService", e);
     }
   }
-  
+
   /**
    * Send workflow progress event
    * @param statsWriteService
@@ -70,5 +70,4 @@ public final class AmbroseUtils {
     eventData.put(Event.WorkflowProgressField.workflowProgress, Integer.toString(progress));
     pushEvent(statsWriteService, scriptId, new Event.WorkflowProgressEvent(eventData));
   }
-
 }

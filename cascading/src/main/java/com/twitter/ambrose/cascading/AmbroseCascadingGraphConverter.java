@@ -15,102 +15,101 @@ limitations under the License.
 */
 package com.twitter.ambrose.cascading;
 
-import cascading.flow.planner.BaseFlowStep;
-import com.twitter.ambrose.model.DAGNode;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Job;
+
+import cascading.flow.planner.BaseFlowStep;
+
 /**
- * This class is responsible for converting the SimpleDirectedGraph object used 
- * to represent a flow into a map of DagNodes
+ * This class is responsible for converting the SimpleDirectedGraph object used to represent a flow
+ * into a map of DagNodes
  *
  * @author Ahmed Eshra
  */
 public class AmbroseCascadingGraphConverter {
 
-  /* Input list of cascading flow steps to be generated to Ambrose DAGNode */
-  protected SimpleDirectedGraph jobsGraph;
-  /* Output Map of the generated DAGNode and their names */
-  protected Map<String, DAGNode<CascadingJob>> dagNamesMap;
+  private final SimpleDirectedGraph jobsGraph;
+  private final Map<String, DAGNode<CascadingJob>> dagNamesMap;
 
-  /*EmbeddedAmbroseCascadingProgressNotificationListener
-   * Constractor of AmbroseCascadingGraphConvertor
+  /**
+   * Constructs instance of the graph converter.
    *
-   * @param graph FlowStepGraph (which implement SimpleDirectedGraph)
-   * @param nodesMap Map of DAGNodes to be sent to ambrose
+   * @param graph input list of cascading flow steps.
    */
-  public AmbroseCascadingGraphConverter(SimpleDirectedGraph graph, Map<String, DAGNode<CascadingJob>> nodesMap) {
+  public AmbroseCascadingGraphConverter(
+      SimpleDirectedGraph graph,
+      Map<String, DAGNode<CascadingJob>> dagNamesMap
+  ) {
     this.jobsGraph = graph;
-    this.dagNamesMap = nodesMap;
+    this.dagNamesMap = dagNamesMap;
   }
 
-  /*
-   * Convert the flowStep that generated from cascading to a Map of DAGNode and its name
-   * to be used to build Ambrose Graph
-   *
+  /**
+   * Converts the flowStep that generated from cascading to a Map of DAGNode and its name to be used
+   * to build Ambrose Graph.
    */
   public void convert() {
-    //  Returns a set of the nodes contained in this graph.
-    Set vetices = jobsGraph.vertexSet();
+    // returns a set of the nodes contained in this graph
+    Set vertices = jobsGraph.vertexSet();
 
-    for (Object flowStep : vetices) {
-      BaseFlowStep baseFlowStep = (BaseFlowStep) flowStep;
-      String nodeName = baseFlowStep.getName();
-      String[] features = getNodeFeatures(baseFlowStep.getGraph());
-      // create a new DAGNode of this flowStep
+    // create ambrose nodes
+    for (Object vertex : vertices) {
+      BaseFlowStep step = (BaseFlowStep) vertex;
       CascadingJob job = new CascadingJob();
-      job.setFeatures(features);
-      DAGNode newNode = new DAGNode(nodeName, job);
-      // Add the new node to the Map of <nodeName, DAGNodes>
-      dagNamesMap.put(nodeName, newNode);
+      job.setFeatures(getNodeFeatures(step));
+      String name = step.getName();
+      DAGNode<CascadingJob> node = new DAGNode<CascadingJob>(name, job);
+      dagNamesMap.put(name, node);
     }
 
-    // Loop again to set the successors for each node after nodes are created.
-    for (Object flowStep : vetices) {
-      String nodeName = ((BaseFlowStep) flowStep).getName();
-      //set the successors of this node using getNodeSuccessors method
-      ((DAGNode) dagNamesMap.get(nodeName)).setSuccessors(getNodeSuccessors(flowStep));
+    // loop again to set the successors for each node after nodes are created
+    for (Object vertex : vertices) {
+      BaseFlowStep step = (BaseFlowStep) vertex;
+      String name = step.getName();
+      DAGNode<CascadingJob> node = dagNamesMap.get(name);
+      node.setSuccessors(getNodeSuccessors(vertex));
     }
   }
 
-  /*
-   * Return the features for each node, which are the names of mapper and reducer jobs
-   * for each node.
+  /**
+   * Retrieves array of simple class names of nodes within a particular flow step.
    *
-   * @param graph inner jobs graph for each node in the main graph.
-   *
-   * @return a list of inner jobs names which defined the parent job features
+   * @param step step in main flow.
+   * @return list step's graph's vertex names.
    */
-  protected String[] getNodeFeatures(SimpleDirectedGraph graph) {
-    Set vertices = graph.vertexSet();
-    String[] returnedFeatures = new String[vertices.size()];
+  protected String[] getNodeFeatures(BaseFlowStep step) {
+    SimpleDirectedGraph graph = step.getGraph();
+    Object[] vertices = graph.vertexSet().toArray();
+    String[] returnedFeatures = new String[vertices.length];
     for (int i = 0; i < returnedFeatures.length; i++) {
-      returnedFeatures[i] = vertices.toArray()[i].getClass().getSimpleName();
+      returnedFeatures[i] = vertices[i].getClass().getSimpleName();
     }
     return returnedFeatures;
   }
 
-  /*
-   * Return a Collection of successor nodes of a certain flowStep
+  /**
+   * Return a Collection of successor nodes of a certain vertex.
    *
-   * @param flowStep the step or node its successors nodes will be returned
-   *
+   * @param vertex the step or node its successors nodes will be returned.
    * @return collection of successor DAGNodes for each node.
    */
-  protected Collection<DAGNode> getNodeSuccessors(Object flowStep) {
-    Collection<DAGNode> nodeSuccessors = new HashSet<DAGNode>();
-    // Graphs, used to get the successor nodes using
-    // successorListOf(DirectedGraph, vertex) method
-    List successorNodes = Graphs.successorListOf(jobsGraph, flowStep);
-
+  protected Collection<DAGNode<? extends Job>> getNodeSuccessors(Object vertex) {
+    Collection<DAGNode<? extends Job>> nodeSuccessors = Sets.newHashSet();
+    List successorNodes = Graphs.successorListOf(jobsGraph, vertex);
     for (Object node : successorNodes) {
-      String nodeName = ((BaseFlowStep) node).getName();
-      nodeSuccessors.add(dagNamesMap.get(nodeName));
+      BaseFlowStep step = (BaseFlowStep) node;
+      String name = step.getName();
+      nodeSuccessors.add(dagNamesMap.get(name));
     }
     return nodeSuccessors;
   }

@@ -54,8 +54,8 @@ public class Job {
       @JsonProperty("metrics") Map<String, Number> metrics
   ) {
     this.id = id;
-    this.metrics = metrics;
     this.configuration = configuration;
+    this.metrics = metrics;
   }
 
   public String getId() {
@@ -78,7 +78,7 @@ public class Job {
     return metrics;
   }
 
-  protected void setMetrics(Map<String, Number> metrics) {
+  public void setMetrics(Map<String, Number> metrics) {
     this.metrics = metrics;
   }
 

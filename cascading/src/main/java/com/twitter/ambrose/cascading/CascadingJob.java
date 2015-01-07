@@ -16,31 +16,30 @@ limitations under the License.
 
 package com.twitter.ambrose.cascading;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapred.Counters;
-import org.apache.hadoop.mapred.Counters.Counter;
 
-import cascading.stats.hadoop.HadoopStepStats;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.twitter.ambrose.model.hadoop.CounterGroup;
 import com.twitter.ambrose.model.hadoop.MapReduceJob;
 
+import cascading.stats.hadoop.HadoopStepStats;
+
 /**
- * Subclass of MapReduceJob used to hold initialization logic and Cascading-specific bindings for a Job.
- * It represents FlowStepJob and all related job metrics will be captured using HadoopStepStats class
+ * Subclass of MapReduceJob used to hold initialization logic and Cascading-specific bindings for a
+ * Job. It represents FlowStepJob and all related job metrics will be captured using HadoopStepStats
+ * class.
+ *
  * @author Ahmed Mohsen
  */
 @JsonTypeName("cascading")
 public class CascadingJob extends MapReduceJob {
 
-  protected static Log LOG = LogFactory.getLog(CascadingJob.class);
+  private static Log LOG = LogFactory.getLog(CascadingJob.class);
 
   private String[] features = {};
 
@@ -48,11 +47,16 @@ public class CascadingJob extends MapReduceJob {
     super();
   }
 
-  public CascadingJob(@JsonProperty("features") String[] features) {
+  public CascadingJob(
+      @JsonProperty("features") String[] features
+  ) {
+    super();
     this.features = features;
   }
 
-  public String[] getFeatures() { return features; }
+  public String[] getFeatures() {
+    return features;
+  }
 
   public void setFeatures(String[] features) {
     this.features = features;
@@ -60,69 +64,13 @@ public class CascadingJob extends MapReduceJob {
 
   @JsonIgnore
   public void setJobStats(HadoopStepStats stats) {
-    Map<String, Long> counterNameToValue = counterGroupInfoMapHelper(stats);
-
-    // job metrics
-    int totalMappers = stats.getNumMapTasks();
-    int totalReducers = stats.getNumReduceTasks();
-    Map<String, Number> metrics = new HashMap<String, Number>();
-    metrics.put("numberMaps", totalMappers);
-    metrics.put("numberReduces", totalReducers);
-    metrics.put("avgMapTime",
-        getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_MAPS, totalMappers));
-    metrics.put("avgReduceTime",
-        getAvgCounterValue(counterNameToValue, MetricsCounter.SLOTS_MILLIS_REDUCES, totalReducers));
-    metrics.put("bytesWritten",
-        getCounterValue(counterNameToValue, MetricsCounter.FILE_BYTES_WRITTEN));
-    metrics.put("hdfsBytesWritten",
-        getCounterValue(counterNameToValue, MetricsCounter.HDFS_BYTES_WRITTEN));
-    metrics.put("mapInputRecords",
-        getCounterValue(counterNameToValue, MetricsCounter.MAP_INPUT_RECORDS));
-    metrics.put("mapOutputRecords",
-        getCounterValue(counterNameToValue, MetricsCounter.MAP_OUTPUT_RECORDS));
-    metrics.put("proactiveSpillCountRecs",
-        getCounterValue(counterNameToValue, MetricsCounter.SPILLED_RECORDS));
-    metrics.put("reduceInputRecords",
-        getCounterValue(counterNameToValue, MetricsCounter.REDUCE_INPUT_RECORDS));
-    metrics.put("reduceOutputRecords",
-        getCounterValue(counterNameToValue, MetricsCounter.REDUCE_OUTPUT_RECORDS));
-    setMetrics(metrics);
-  }
-
-  /**
-   * helper method for counter group map retrieval
-   * @param  HadoopStepStats
-   * @return a map of counter name to counter value
-   */
-  private Map<String,Long> counterGroupInfoMapHelper(HadoopStepStats stats){
     Counters counters = new Counters();
-    Map<String, Long> counterNameToValue = new HashMap<String, Long>();
-    for (String groupName : stats.getCounterGroups()) {  //retreiving groups
-      for (String counterName : stats.getCountersFor(groupName)) { //retreiving counters in that group
+    for (String groupName : stats.getCounterGroups()) {
+      for (String counterName : stats.getCountersFor(groupName)) {
         Long counterValue = stats.getCounterValue(groupName, counterName);
-        counterNameToValue.put(groupName+"::"+counterName, counterValue);
-
-        //creating counter
-        Counter counter = counters.findCounter(groupName, counterName);
-        counter.setValue(counterValue);
+        counters.findCounter(groupName, counterName).setValue(counterValue);
       }
     }
-    setCounterGroupMap(CounterGroup.counterGroupInfoMap(counters));
-    return counterNameToValue;
-  }
-
-  private Double getCounterValue(Map<String, Long> counterNameToValue, MetricsCounter hjc) {
-    String[] keys = MetricsCounter.get(hjc);
-    if(counterNameToValue.get(keys[1]) == null)
-      return Double.valueOf(0.0d);
-    return (counterNameToValue.get(keys[0]) == null) ? counterNameToValue.get(keys[1]).doubleValue()
-        : counterNameToValue.get(keys[0]).doubleValue();
-  }
-
-  private Double getAvgCounterValue(Map<String, Long> counterNameToValue, MetricsCounter hjc, int divisor) {
-    if (divisor == 0) {
-      return Double.valueOf(0.0d);
-    }
-    return getCounterValue(counterNameToValue, hjc) / Double.valueOf((double)divisor);
+    setCounterGroupMap(CounterGroup.counterGroupsByName(counters));
   }
 }

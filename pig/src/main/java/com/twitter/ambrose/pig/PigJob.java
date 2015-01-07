@@ -17,7 +17,6 @@ package com.twitter.ambrose.pig;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +24,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.pig.tools.pigstats.InputStats;
 import org.apache.pig.tools.pigstats.JobStats;
 import org.apache.pig.tools.pigstats.OutputStats;
@@ -47,8 +45,6 @@ import com.twitter.ambrose.model.hadoop.MapReduceJob;
  */
 @JsonTypeName("pig")
 public class PigJob extends MapReduceJob {
-  protected static Log LOG = LogFactory.getLog(PigJob.class);
-
   private String[] aliases = {};
   private String[] features = {};
   private List<InputInfo> inputInfoList;
@@ -59,10 +55,12 @@ public class PigJob extends MapReduceJob {
   }
 
   @JsonCreator
-  public PigJob(@JsonProperty("aliases") String[] aliases,
-    @JsonProperty("features") String[] features,
-    @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
-    @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList) {
+  public PigJob(
+      @JsonProperty("aliases") String[] aliases,
+      @JsonProperty("features") String[] features,
+      @JsonProperty("inputInfoList") List<InputInfo> inputInfoList,
+      @JsonProperty("outputInfoList") List<OutputInfo> outputInfoList
+  ) {
     super();
     this.aliases = aliases;
     this.features = features;
@@ -72,7 +70,6 @@ public class PigJob extends MapReduceJob {
 
   @JsonIgnore
   public void setJobStats(JobStats stats) {
-    setCounterGroupMap(CounterGroup.counterGroupInfoMap(stats.getHadoopCounters()));
     this.inputInfoList = inputInfoList(stats.getInputs());
     this.outputInfoList = outputInfoList(stats.getOutputs());
 
@@ -84,6 +81,9 @@ public class PigJob extends MapReduceJob {
     metrics.put("recordWritten", stats.getRecordWrittern());
     if (stats instanceof MRJobStats) {
       MRJobStats mrStats = (MRJobStats) stats;
+
+      setCounterGroupMap(CounterGroup.counterGroupsByName(mrStats.getHadoopCounters()));
+
       metrics.put("avgMapTime", mrStats.getAvgMapTime());
 
       // internal pig seems to have fixed typo in OSS pig method name; avoid NoSuchMethodException
@@ -122,21 +122,35 @@ public class PigJob extends MapReduceJob {
     setMetrics(metrics);
   }
 
-  public String[] getAliases() { return aliases; }
+  public String[] getAliases() {
+    return aliases;
+  }
 
   public void setAliases(String[] aliases) {
     this.aliases = aliases;
   }
 
-  public String[] getFeatures() { return features; }
+  public String[] getFeatures() {
+    return features;
+  }
 
   public void setFeatures(String[] features) {
     this.features = features;
   }
 
+  public List<InputInfo> getInputInfoList() {
+    return inputInfoList;
+  }
+
+  public List<OutputInfo> getOutputInfoList() {
+    return outputInfoList;
+  }
+
   private static List<InputInfo> inputInfoList(List<InputStats> inputStatsList) {
-    List<InputInfo> inputInfoList = new ArrayList<InputInfo>();
-    if (inputStatsList == null) { return inputInfoList; }
+    List<InputInfo> inputInfoList = Lists.newArrayList();
+    if (inputStatsList == null) {
+      return inputInfoList;
+    }
 
     for (InputStats inputStats : inputStatsList) {
       inputInfoList.add(new PigInputInfo(inputStats));
@@ -146,8 +160,10 @@ public class PigJob extends MapReduceJob {
   }
 
   private static List<OutputInfo> outputInfoList(List<OutputStats> outputStatsList) {
-    List<OutputInfo> outputInfoList = new ArrayList<OutputInfo>();
-    if (outputStatsList == null) { return outputInfoList; }
+    List<OutputInfo> outputInfoList = Lists.newArrayList();
+    if (outputStatsList == null) {
+      return outputInfoList;
+    }
 
     for (OutputStats outputStats : outputStatsList) {
       outputInfoList.add(new PigOutputInfo(outputStats));

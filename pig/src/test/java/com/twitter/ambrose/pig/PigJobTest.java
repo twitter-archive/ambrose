@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,8 +36,9 @@ public class PigJobTest {
     pigJob.setAliases(aliases);
     pigJob.setFeatures(features);
     pigJob.setConfiguration(properties);
-    Map<String, Number> m = pigJob.getMetrics();
+    Map<String, Number> m = Maps.newHashMap();
     m.put("somemetric", 45);
+    pigJob.setMetrics(m);
   }
 
   @Test
@@ -79,7 +82,7 @@ public class PigJobTest {
                    "  \"timestamp\" : 1373560988033\n" +
                    "}";
     Event event = Event.fromJson(json);
-    PigJob job = ((DAGNode<PigJob>)event.getPayload()).getJob();
+    PigJob job = ((DAGNode<PigJob>) event.getPayload()).getJob();
     assertEquals("job_local_0001", job.getId());
     assertArrayEquals(new String[] {"A", "AA", "B", "C"}, job.getAliases());
     assertArrayEquals(new String[] {"GROUP_BY", "COMBINER", "MAP_PARTIALAGG"}, job.getFeatures());

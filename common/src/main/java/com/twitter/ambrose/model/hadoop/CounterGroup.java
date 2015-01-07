@@ -35,6 +35,23 @@ import org.apache.hadoop.mapred.Counters.Counter;
 @SuppressWarnings("deprecation")
 public class CounterGroup {
 
+  /**
+   * Constructs map of counter groups by name from Hadoop Counters instance.
+   *
+   * @param counters counters.
+   * @return map of counter groups by name.
+   */
+  public static Map<String, CounterGroup> counterGroupsByName(Counters counters) {
+    Map<String, CounterGroup> counterGroupsByName = Maps.newHashMap();
+    if (counters != null) {
+      for (Counters.Group group : counters) {
+        CounterGroup counterGroup = new CounterGroup(group);
+        counterGroupsByName.put(counterGroup.getGroupName(), counterGroup);
+      }
+    }
+    return counterGroupsByName;
+  }
+
   private final String groupName;
   private final String groupDisplayName;
   private final Map<String, CounterInfo> counterInfoMap;
@@ -78,53 +95,4 @@ public class CounterGroup {
     return counterInfoMap == null ? null : counterInfoMap.get(name);
   }
 
-  public static Map<String, CounterGroup> counterGroupInfoMap(Counters counters) {
-    Map<String, CounterGroup> counterGroupInfoMap = Maps.newHashMap();
-    if (counters != null) {
-      for (Counters.Group group : counters) {
-        CounterGroup counterGroup = new CounterGroup(group);
-        counterGroupInfoMap.put(counterGroup.getGroupName(), counterGroup);
-      }
-    }
-    return counterGroupInfoMap;
-  }
-
-  /**
-   * CounterInfo holds the name, displayName and value of a given counter. A counter group contains
-   * multiple of these.
-   */
-  public static class CounterInfo {
-    private final String name;
-    private final String displayName;
-    private final long value;
-
-    public CounterInfo(Counter counter) {
-      this.name = counter.getName();
-      this.displayName = counter.getDisplayName();
-      this.value = counter.getValue();
-    }
-
-    @JsonCreator
-    public CounterInfo(
-        @JsonProperty("name") String name,
-        @JsonProperty("displayName") String displayName,
-        @JsonProperty("value") long value
-    ) {
-      this.name = name;
-      this.displayName = displayName;
-      this.value = value;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getDisplayName() {
-      return displayName;
-    }
-
-    public long getValue() {
-      return value;
-    }
-  }
 }

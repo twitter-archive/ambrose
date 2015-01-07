@@ -17,19 +17,21 @@ package com.twitter.ambrose.model.hadoop;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.collect.Maps;
+
 import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.util.JSONUtil;
 
 /**
- * Subclass of Job used to hold state information of a mapreduce job.
- * Encapsulates all information related to a run of a mapreduce job specifically
- * progress status of running job and default counters reported by the mapreduce framework.
- * 
- * @author amokashi
+ * Subclass of Job used to hold state information of a Hadoop map-reduce job. Encapsulates all
+ * information related to a run of a MR job, including progress, status, and default counters
+ * reported by Hadoop.
  *
+ * @author amokashi
  */
 @JsonTypeName("mapred")
 public class MapReduceJob extends Job {
@@ -42,26 +44,80 @@ public class MapReduceJob extends Job {
 
   @JsonCreator
   public MapReduceJob(
-    @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
-    @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap) {
+      @JsonProperty("mapReduceJobState") MapReduceJobState mapReduceJobState,
+      @JsonProperty("counterGroupMap") Map<String, CounterGroup> counterGroupMap
+  ) {
     super();
     this.mapReduceJobState = mapReduceJobState;
     this.counterGroupMap = counterGroupMap;
   }
 
-  public MapReduceJobState getMapReduceJobState() { return mapReduceJobState; }
+  public MapReduceJobState getMapReduceJobState() {
+    return mapReduceJobState;
+  }
 
   public void setMapReduceJobState(MapReduceJobState mapReduceJobState) {
     this.mapReduceJobState = mapReduceJobState;
+    updateMetrics();
   }
 
-  public Map<String, CounterGroup> getCounterGroupMap() { return counterGroupMap; }
-
-  public CounterGroup getCounterGroupInfo(String name) {
-    return counterGroupMap == null ? null : counterGroupMap.get(name);
+  public Map<String, CounterGroup> getCounterGroupMap() {
+    return counterGroupMap;
   }
 
   public void setCounterGroupMap(Map<String, CounterGroup> counterGroupMap) {
     this.counterGroupMap = counterGroupMap;
+    updateMetrics();
+  }
+
+  @Nullable
+  public CounterGroup getCounterGroup(String name) {
+    return counterGroupMap == null ? null : counterGroupMap.get(name);
+  }
+
+  @Nullable
+  public Long getCounterValue(CounterId counterId) {
+    CounterGroup counterGroup = null;
+    for (String name : counterId.counterGroupId.groupNames) {
+      counterGroup = getCounterGroup(name);
+      if (counterGroup != null) {
+        break;
+      }
+    }
+    if (counterGroup != null) {
+      CounterInfo counterInfo = counterGroup.getCounterInfo(counterId.name());
+      if (counterInfo != null) {
+        return counterInfo.getValue();
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Initializes metrics values from data contained within mapreduce jobstate and counter group map.
+   */
+  protected void updateMetrics() {
+    Map<String, Number> metrics = getMetrics();
+    if (metrics == null) {
+      metrics = Maps.newHashMap();
+      setMetrics(metrics);
+    }
+
+    if (mapReduceJobState != null) {
+      int totalMappers = mapReduceJobState.getTotalMappers();
+      metrics.put("MAP_TASK_COUNT", totalMappers);
+
+      int totalReducers = mapReduceJobState.getTotalReducers();
+      metrics.put("REDUCE_TASK_COUNT", totalReducers);
+    }
+
+    if (counterGroupMap != null) {
+      for (CounterId counterId : CounterId.values()) {
+        Long value = getCounterValue(counterId);
+        if (value != null) {
+          getMetrics().put(counterId.name(), value);
+        }
+      }
+    }
   }
 }

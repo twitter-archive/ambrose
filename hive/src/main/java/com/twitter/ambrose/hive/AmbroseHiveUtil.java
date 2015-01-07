@@ -31,9 +31,9 @@ import com.twitter.ambrose.model.hadoop.CounterGroup;
 
 /**
  * Utility for Ambrose-Hive related operations
- * 
+ *
  * @author Lorand Bendig <lbendig@gmail.com>
- * 
+ *
  */
 public class AmbroseHiveUtil {
 
@@ -46,7 +46,7 @@ public class AmbroseHiveUtil {
 
   /**
    * Constructs the jobTracker url based on the jobId.
-   * 
+   *
    * @param jobID
    * @param conf
    * @return
@@ -77,23 +77,24 @@ public class AmbroseHiveUtil {
   }
 
   /**
-   * Constructs Countergroups from job runtime statistics
-   * 
-   * @param counterNameToValue
-   * @return
+   * Constructs counter groups from job runtime statistics. Hive mangles Hadoop Counter data,
+   * forming counter names with format "$groupName::$counterName".
+   *
+   * @param counterNameToValue mangled hadoop counters from hive.
+   * @return counter groups by name.
    */
   public static Map<String, CounterGroup> counterGroupInfoMap(Map<String, Double> counterNameToValue) {
-
     Counters counters = new Counters();
     for (Map.Entry<String, ? extends Number> entry : counterNameToValue.entrySet()) {
-
-      String[] cNames = entry.getKey().split("::");
+      String key = entry.getKey();
+      Number value = entry.getValue();
+      String[] cNames = key.split("::");
       String groupName = cNames[0];
       String counterName = cNames[1];
       Counter counter = counters.findCounter(groupName, counterName);
-      counter.setValue(entry.getValue().longValue());
+      counter.setValue(value.longValue());
     }
-    return CounterGroup.counterGroupInfoMap(counters);
+    return CounterGroup.counterGroupsByName(counters);
   }
 
   public static String asDisplayId(String queryId, String jobIDStr, String nodeId) {
@@ -111,7 +112,7 @@ public class AmbroseHiveUtil {
   /**
    * Returns the nodeId of the given running job <br>
    * Example: Stage-1_[queryId]
-   * 
+   *
    * @param conf
    * @param runningJob
    * @return
@@ -122,7 +123,7 @@ public class AmbroseHiveUtil {
 
   /**
    * Retrieves the nodeId from the Hive SQL command <br>
-   * 
+   *
    * @param conf
    * @param jobName
    * @return
@@ -138,7 +139,7 @@ public class AmbroseHiveUtil {
   /**
    * Returns the Hive query id which identifies the current workflow <br>
    * Format: hive_[queryId]
-   * 
+   *
    * @param conf
    * @return
    */
@@ -148,7 +149,7 @@ public class AmbroseHiveUtil {
 
   /**
    * Gets the temporary directory of the given job
-   * 
+   *
    * @param conf
    * @param isLocal true to resolve local temporary directory
    * @return
@@ -158,13 +159,13 @@ public class AmbroseHiveUtil {
     if (fsName.endsWith("/")) {
       fsName = fsName.substring(0, fsName.length() - 1);
     }
-    return fsName + HiveConf.getVar(conf, 
+    return fsName + HiveConf.getVar(conf,
         (isLocal ? ConfVars.LOCALSCRATCHDIR : ConfVars.SCRATCHDIR), "");
   }
 
   /**
    * Gets (non-accessible) field of a class
-   * 
+   *
    * @param clazz
    * @param fieldName
    * @return
@@ -178,7 +179,7 @@ public class AmbroseHiveUtil {
 
   /**
    * Compares two float values
-   * 
+   *
    * @param f1
    * @param f2
    * @return true if f1 and f2 are equal

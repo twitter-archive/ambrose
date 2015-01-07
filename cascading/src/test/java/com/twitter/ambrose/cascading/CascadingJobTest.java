@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,8 +43,9 @@ public class CascadingJobTest {
     cascadingJob = new CascadingJob();
     cascadingJob.setFeatures(features);
     cascadingJob.setConfiguration(properties);
-    Map<String, Number> m = cascadingJob.getMetrics();
+    Map<String, Number> m = Maps.newHashMap();
     m.put("somemetric", 45);
+    cascadingJob.setMetrics(m);
   }
 
   @Test

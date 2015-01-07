@@ -67,7 +67,7 @@ public class MapReduceJobState {
       }
     }
 
-    // If not all the reducers are finished.
+    // if not all the reducers are finished
     if (finishedReducersCount != reduceTaskReport.length || jobLastUpdateTime == 0) {
       jobLastUpdateTime = System.currentTimeMillis();
     }
