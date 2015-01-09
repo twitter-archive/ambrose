@@ -79,7 +79,7 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
         }
 
         if (sourceData) {
-          var hdfsBytesWritten = JobData.getHDFSWrittenFromCounter(sourceData);
+          var hdfsBytesWritten = JobData.getHdfsBytesWritten(sourceData);
           if (hdfsBytesWritten != null) addItem('HDFS Bytes Written', hdfsBytesWritten.commafy());
           var reduceOutputRecords = JobData.getReduceOutputRecords(sourceData);
           if (reduceOutputRecords != null) addItem('Reduce Output Records', reduceOutputRecords.commafy());
@@ -88,7 +88,7 @@ define(['lib/jquery', '../core', './core', '../job-data'], function($, Ambrose, 
         if (targetData) {
           var mapInputRecords = JobData.getMapInputRecords(targetData);
           if (mapInputRecords != null) addItem('Map Input Records', mapInputRecords.commafy());
-          var hdfsBytesRead = JobData.getHDFSReadFromCounter(targetData);
+          var hdfsBytesRead = JobData.getHdfsBytesRead(targetData);
           if (hdfsBytesRead != null) addItem('HDFS Bytes Read', hdfsBytesRead.commafy());
         }
 

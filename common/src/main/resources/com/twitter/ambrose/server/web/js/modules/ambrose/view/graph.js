@@ -17,8 +17,16 @@ limitations under the License.
 /**
  * This module defines the Graph view which generates horizontal DAG view of Workflow jobs.
  */
-define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-data', 'lib/bootstrap'], function(
-  $, _, d3, Ambrose, View, JobData
+define([
+  'lib/jquery',
+  'lib/underscore',
+  'lib/uri',
+  'lib/d3',
+  '../core',
+  './core',
+  '../job-data'
+], function(
+  $, _, URI, d3, Ambrose, View, JobData
 ) {
   // utility functions
   function isPseudo(node) { return node.pseudo; }
@@ -129,8 +137,10 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       var magRange = _.range(magRadiusMin, magRadiusMax, magRadiusDelta);
       self.metricScale = d3.scale.threshold().domain(magDomain).range(magRange);
 
+      // TODO: Create node metric functions, menu
+
       // define edge metric functions
-      var edgeMetricFunctions = self.edgeMetricFunctions = {
+      self.edgeMetricFunctions = {
         none: {
           name: 'None',
           apply: function(sourceData, targetData) { return 0; },
@@ -139,32 +149,40 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
           name: 'Map Input Records',
           heading: 'Target Node',
           apply: function(sourceData, targetData) {
-            return JobData.getMapInputRecordsFromMetrics(targetData);
+            return JobData.getMapInputRecords(targetData);
           },
         },
         reduceOutputRecords: {
           name: 'Reduce Output Records',
           heading: 'Source Node',
           apply: function(sourceData, targetData) {
-            return JobData.getReduceOutputRecordsFromMetrics(sourceData);
+            return JobData.getReduceOutputRecords(sourceData);
           },
         },
         hdfsBytesRead: {
           name: 'HDFS Bytes Read',
           heading: 'Target Node',
           apply: function(sourceData, targetData) {
-            return JobData.getHDFSReadFromMetrics(targetData);
+            return JobData.getHdfsBytesRead(targetData);
           },
         },
         hdfsBytesWritten: {
           name: 'HDFS Bytes Written',
           heading: 'Source Node',
           apply: function(sourceData, targetData) {
-            return JobData.getHDFSWrittenFromMetrics(sourceData);
+            return JobData.getHdfsBytesWritten(sourceData);
+          },
+        },
+        fileBytesWritten: {
+          name: 'File Bytes Written',
+          heading: 'Source Node',
+          apply: function(sourceData, targetData) {
+            return JobData.getFileBytesWritten(sourceData);
           },
         },
       };
-      self.edgeMetricFunction = edgeMetricFunctions.hdfsBytesWritten;
+
+      // install edge metric dropdown menu
       self.installEdgeMetricMenu();
 
       // Ensure we resize appropriately
@@ -190,6 +208,25 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
       workflow.on('jobSelected jobMouseOver', function(event, job, prev) {
         self.handleMouseInteraction(_.reject([prev, job], _.isNull));
       });
+    },
+
+    getEdgeMetricFunction: function() {
+      var f = this.edgeMetricFunction;
+      if (f == null) {
+        var name = localStorage.getItem('ambrose.view.graph.edgeMetricFunction.name');
+        if (name == null) {
+          f = this.edgeMetricFunctions.fileBytesWritten;
+        } else {
+          f = _.find(this.edgeMetricFunctions, function(f) { return f.name == name; });
+        }
+      }
+      return f;
+    },
+
+    setEdgeMetricFunction: function(f) {
+      if (f == null) f = this.edgeMetricFunctions.fileBytesWritten;
+      localStorage.setItem('ambrose.view.graph.edgeMetricFunction.name', f.name);
+      this.edgeMetricFunction = f;
     },
 
     installEdgeMetricMenu: function() {
@@ -245,12 +282,12 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
         var $button = $(this);
         $buttons.removeClass('active');
         $button.addClass('active');
-        self.edgeMetricFunction = $button.data('edge-metric-function');
+        self.setEdgeMetricFunction($button.data('edge-metric-function'));
         self.rescaleEdges();
       });
 
       // set current edge metric function button active
-      self.edgeMetricFunction.button.addClass('active');
+      self.getEdgeMetricFunction().button.addClass('active');
     },
 
     resetView: function() {
@@ -538,13 +575,14 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
     rescaleEdges: function() {
       var self = this;
       var graph = this.workflow.graph;
+      var edgeMetricFunction = self.getEdgeMetricFunction();
 
       // compute edge metric min and max
       var edgeMetricMin = Number.MAX_VALUE;
       var edgeMetricMax = Number.MIN_VALUE;
       _.each(graph.nodes, function(source) {
         _.each(source.children, function(target) {
-          var metric = self.edgeMetricFunction.apply(source.data, target.data);
+          var metric = edgeMetricFunction.apply(source.data, target.data);
           if (metric == null) return;
           if (edgeMetricMin > metric) edgeMetricMin = metric;
           if (edgeMetricMax < metric) edgeMetricMax = metric;
@@ -577,7 +615,7 @@ define(['lib/jquery', 'lib/underscore', 'lib/d3', '../core', './core', '../job-d
           .attr('stroke-width', function(d, i) {
             var sourceData = d.source.pseudo ? d.source.source.data : d.source.data;
             var targetData = d.target.pseudo ? d.target.target.data : d.target.data;
-            return getWidth(self.edgeMetricFunction.apply(sourceData, targetData)) + 'px';
+            return getWidth(edgeMetricFunction.apply(sourceData, targetData)) + 'px';
           });
       });
     },
