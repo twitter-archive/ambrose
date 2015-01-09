@@ -17,78 +17,60 @@ limitations under the License.
 /**
  * This module defines a util class used to get the metrics and counter for a job.
  */
-define(['lib/jquery'], function($) {
-  // core Ambrose object, util methods
+define(['lib/jquery', 'ambrose/PathExpression'], function($, PathExpression) {
+
+  function path(s) {
+    return PathExpression(s, { elementSeparator: '/' });
+  }
+
+  function counter(p, s) {
+    return path('counterGroupMap/' + p + '/counterInfoMap/' + s + '/value');
+  }
+
+  function jobCounter(s) {
+    return counter('(org.apache.hadoop.mapreduce.JobCounter|org.apache.hadoop.mapred.JobInProgress$Counter)', s);
+  }
+
+  function taskCounter(s) {
+    return counter('(org.apache.hadoop.mapreduce.TaskCounter|org.apache.hadoop.mapred.Task$Counter)', s);
+  }
+
+  function fileSystemCounter(s) {
+    return counter('(org.apache.hadoop.mapreduce.FileSystemCounter|FileSystemCounters)', s);
+  }
+
+  var mapInputRecordsCounter = taskCounter('MAP_INPUT_RECORDS');
+  var reduceOutputRecordsCounter = taskCounter('REDUCE_OUTPUT_RECORDS');
+  var fileBytesReadCounter = fileSystemCounter('FILE_BYTES_READ');
+  var fileBytesWrittenCounter = fileSystemCounter('FILE_BYTES_WRITTEN');
+  var hdfsBytesReadCounter = fileSystemCounter('HDFS_BYTES_READ');
+  var hdfsBytesWrittenCounter = fileSystemCounter('HDFS_BYTES_WRITTEN');
+
+  // JobData module
   return {
-    getHDFSReadFromCounter: function(data) {
-      if (data && data.counterGroupMap && data.counterGroupMap.FileSystemCounters
-          && data.counterGroupMap.FileSystemCounters.counterInfoMap
-          && data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ
-          && data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value) {
-        return data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_READ.value;
-      }
-      return null;
+    getFileBytesRead: function(data) {
+      return fileBytesReadCounter.value(data);
     },
 
-    getHDFSWrittenFromCounter: function(data) {
-      if (data && data.counterGroupMap
-          && data.counterGroupMap.FileSystemCounters
-          && data.counterGroupMap.FileSystemCounters.counterInfoMap
-          && data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN
-          && data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN.value) {
-        return data.counterGroupMap.FileSystemCounters.counterInfoMap.HDFS_BYTES_WRITTEN.value;
-      }
-      return null;
+    getFileBytesWritten: function(data) {
+      return fileBytesWrittenCounter.value(data);
+    },
+
+    getHdfsBytesRead: function(data) {
+      return hdfsBytesReadCounter.value(data);
+    },
+
+    getHdfsBytesWritten: function(data) {
+      return hdfsBytesWrittenCounter.value(data);
     },
 
     getMapInputRecords: function(data) {
-      if (data && data.counterGroupMap
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"]
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value) {
-        return data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.MAP_INPUT_RECORDS.value;
-      }
-      return null;
+      return mapInputRecordsCounter.value(data);
     },
 
     getReduceOutputRecords: function(data) {
-      if (data && data.counterGroupMap
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"]
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS
-          && data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value) {
-        return data.counterGroupMap["org.apache.hadoop.mapred.Task$Counter"].counterInfoMap.REDUCE_OUTPUT_RECORDS.value;
-      }
-      return null;
-    },
-
-    getHDFSReadFromMetrics: function(data) {
-      if (data && data.metrics && data.metrics.hdfsBytesRead) {
-        return data.metrics.hdfsBytesRead;
-      }
-      return null;
-    },
-
-    getHDFSWrittenFromMetrics: function(data) {
-      if (data && data.metrics && data.metrics.hdfsBytesWritten) {
-        return data.metrics.hdfsBytesWritten;
-      }
-      return null;
-    },
-
-    getMapInputRecordsFromMetrics: function(data) {
-      if (data && data.metrics && data.metrics.mapInputRecords) {
-        return data.metrics.mapInputRecords;
-      }
-      return null;
-    },
-
-    getReduceOutputRecordsFromMetrics: function(data) {
-      if (data && data.metrics && data.metrics.reduceOutputRecords) {
-        return data.metrics.reduceOutputRecords;
-      }
-      return null;
+      return reduceOutputRecordsCounter.value(data);
     },
   };
+
 });

@@ -14,22 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
  */
 
-package com.twitter.ambrose.model;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+package com.twitter.ambrose.cascading;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import com.google.common.collect.Maps;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.twitter.ambrose.model.Job;
-import com.twitter.ambrose.cascading.CascadingJob;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CascadingJobTest {
   CascadingJob cascadingJob;
@@ -39,20 +39,20 @@ public class CascadingJobTest {
     Properties properties = new Properties();
     properties.setProperty("someprop", "propvalue");
     String[] features = new String[] { "feature1" };
-    Map<String, Number> m = new HashMap<String, Number>();
-    m.put("somemetric", 45);
 
     cascadingJob = new CascadingJob();
     cascadingJob.setFeatures(features);
     cascadingJob.setConfiguration(properties);
+    Map<String, Number> m = Maps.newHashMap();
+    m.put("somemetric", 45);
     cascadingJob.setMetrics(m);
   }
-  
+
   @Test
   public void testPigJobRoundTrip() throws IOException {
     doTestRoundTrip(cascadingJob);
   }
-  
+
   private void doTestRoundTrip(CascadingJob expected) throws IOException {
     String asJson = expected.toJson();
     Job asJobAgain = Job.fromJson(asJson);

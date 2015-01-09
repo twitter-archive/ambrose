@@ -1,7 +1,12 @@
 requirejs.config(REQUIREJS_CONFIG);
 
 require([
-  'lib/jquery', 'lib/uri', 'ambrose', 'lib/bootstrap'
+  // primary libraries and modules
+  'lib/jquery',
+  'lib/uri',
+  'ambrose',
+  // auxiliary libraries
+  'lib/bootstrap'
 ], function($, URI, Ambrose) {
   $(document).ready(function() {
     // parse uri params
@@ -37,5 +42,4 @@ require([
       workflow.jumpToEnd();
     }
   });
-
 });

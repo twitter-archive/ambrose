@@ -1,4 +1,4 @@
-package com.twitter.ambrose.model;
+package com.twitter.ambrose.pig;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -10,13 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import com.google.common.collect.Maps;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import com.twitter.ambrose.pig.PigJob;
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
 
 /**
- * Unit tests for {@link com.twitter.ambrose.model.PigJobTest}.
+ * Unit tests for {@link PigJobTest}.
  */
 public class PigJobTest {
   PigJob pigJob;
@@ -27,16 +31,16 @@ public class PigJobTest {
     properties.setProperty("someprop", "propvalue");
     String[] aliases = new String[] { "alias1" };
     String[] features = new String[] { "feature1" };
-    Map<String, Number> m = new HashMap<String, Number>();
-    m.put("somemetric", 45);
 
     pigJob = new PigJob();
     pigJob.setAliases(aliases);
     pigJob.setFeatures(features);
     pigJob.setConfiguration(properties);
+    Map<String, Number> m = Maps.newHashMap();
+    m.put("somemetric", 45);
     pigJob.setMetrics(m);
   }
-  
+
   @Test
   public void testPigJobRoundTrip() throws IOException {
     doTestRoundTrip(pigJob);
@@ -78,7 +82,7 @@ public class PigJobTest {
                    "  \"timestamp\" : 1373560988033\n" +
                    "}";
     Event event = Event.fromJson(json);
-    PigJob job = ((DAGNode<PigJob>)event.getPayload()).getJob();
+    PigJob job = ((DAGNode<PigJob>) event.getPayload()).getJob();
     assertEquals("job_local_0001", job.getId());
     assertArrayEquals(new String[] {"A", "AA", "B", "C"}, job.getAliases());
     assertArrayEquals(new String[] {"GROUP_BY", "COMBINER", "MAP_PARTIALAGG"}, job.getFeatures());

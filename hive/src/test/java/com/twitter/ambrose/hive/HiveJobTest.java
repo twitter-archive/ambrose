@@ -13,25 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package com.twitter.ambrose.model;
+package com.twitter.ambrose.hive;
+
+import java.io.IOException;
+import java.util.Map;
+
+import com.google.common.collect.Maps;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.twitter.ambrose.model.DAGNode;
+import com.twitter.ambrose.model.Event;
+import com.twitter.ambrose.model.Job;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.common.collect.Maps;
-import com.twitter.ambrose.hive.HiveJob;
-
 /**
- * Unit tests for {@link com.twitter.ambrose.model.HiveJobTest}.
+ * Unit tests for {@link HiveJobTest}.
  */
 public class HiveJobTest {
 
@@ -41,11 +43,10 @@ public class HiveJobTest {
   public void setUp() throws Exception {
     Map<String, Number> metrics = Maps.newHashMapWithExpectedSize(1);
     metrics.put("somemetric", 6);
-    Properties properties = new Properties();
-    properties.setProperty("someprop", "propvalue");
     String[] aliases = new String[] { "alias1" };
     String[] features = new String[] { "feature1" };
     hiveJob = new HiveJob(aliases, features);
+    hiveJob.setMetrics(metrics);
   }
 
   @Test
@@ -71,7 +72,7 @@ public class HiveJobTest {
 
   @Test
   public void testFromJson() throws IOException {
-    String json = 
+    String json =
       "{" +
       "  \"type\" : \"JOB_STARTED\"," +
       "  \"payload\" : {" +
@@ -102,8 +103,8 @@ public class HiveJobTest {
     @SuppressWarnings("unchecked")
     HiveJob job = ((DAGNode<HiveJob>) event.getPayload()).getJob();
     assertEquals("job_201307231015_0004 (Stage-1, query-id: ...22c4ea289895)", job.getId());
-    assertArrayEquals(new String[] { "src" }, job.getAliases());
-    assertArrayEquals(new String[] { "SELECT", "FILTER" }, job.getFeatures());
+    assertArrayEquals(new String[]{"src"}, job.getAliases());
+    assertArrayEquals(new String[]{"SELECT", "FILTER"}, job.getFeatures());
     assertNotNull(job.getMetrics());
     assertEquals(123, job.getMetrics().get("somemetric"));
   }

@@ -18,12 +18,15 @@ limitations under the License.
  * Main entry point. Depends on all built-in modules and returns core Ambrose object.
  */
 define([
+  // core module extended by sibling modules
   'ambrose/core',
-  'ambrose/graph',
+  // sibling modules
   'ambrose/client',
   'ambrose/dashboard',
-  'ambrose/workflow',
+  'ambrose/graph',
+  'ambrose/PathExpression',
   'ambrose/view',
+  'ambrose/workflow',
 ], function(Ambrose) {
-  return Ambrose;
+  return window.Ambrose = Ambrose;
 });
