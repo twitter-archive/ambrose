@@ -214,17 +214,18 @@ define([
       var f = this.edgeMetricFunction;
       if (f == null) {
         var name = localStorage.getItem('ambrose.view.graph.edgeMetricFunction.name');
-        if (name == null) {
+        if (name != null) {
+          f = _.find(this.edgeMetricFunctions, function (f) { return f.name == name; });
+        }
+        if (f == null) {
           f = this.edgeMetricFunctions.fileBytesWritten;
-        } else {
-          f = _.find(this.edgeMetricFunctions, function(f) { return f.name == name; });
+          this.setEdgeMetricFunction(f);
         }
       }
       return f;
     },
 
     setEdgeMetricFunction: function(f) {
-      if (f == null) f = this.edgeMetricFunctions.fileBytesWritten;
       localStorage.setItem('ambrose.view.graph.edgeMetricFunction.name', f.name);
       this.edgeMetricFunction = f;
     },
