@@ -14,6 +14,9 @@
  limitations under the License.
  */
 
+/**
+ * PathExpression is a utility for defining complex accessors for deeply nested fields of Objects.
+ */
 define(['lib/jquery', './core'], function($, Ambrose) {
   var defaultControlChars = {
     escape: '\\',
@@ -24,6 +27,8 @@ define(['lib/jquery', './core'], function($, Ambrose) {
   };
 
   function highlight(s, i) {
+    var c = (0 <= i && i < s.length) ? s[i] : ' ';
+
     if (i < 0) i = 0;
     if (i > s.length) i = s.length;
 
@@ -32,7 +37,7 @@ define(['lib/jquery', './core'], function($, Ambrose) {
     if (b < 0) b = 0;
     if (e > s.length) e = s.length;
 
-    return s.slice(b, i) + '[' + s[i] + ']' + s.slice(i + 1, e);
+    return s.slice(b, i) + '[' + c + ']' + s.slice(i + 1, e);
   }
 
   /**
