@@ -1,4 +1,5 @@
 *.iml
+*.ipr
 *.iws
 *.log
 *.releaseBackup
