@@ -70,13 +70,13 @@ public class ScriptStatusServer implements Runnable {
    */
   public static final String PORT_PARAM = "ambrose.port";
   /**
-   * Default port on which to bind HTTP server.
-   */
-  public static final String PORT_DEFAULT = "8080";
-  /**
    * Value of {@link #PORT_PARAM} used to signal a random port should be used.
    */
   public static final String PORT_RANDOM = "random";
+  /**
+   * Default port on which to bind HTTP server.
+   */
+  public static final String PORT_DEFAULT = PORT_RANDOM;
   private static final Logger LOG = LoggerFactory.getLogger(ScriptStatusServer.class);
   private final WorkflowIndexReadService workflowIndexReadService;
   private final StatsReadService<Job> statsReadService;
