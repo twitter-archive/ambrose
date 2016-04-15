@@ -3,6 +3,7 @@
 *.iws
 *.log
 *.releaseBackup
+*.swp
 .classpath
 .idea
 .project
