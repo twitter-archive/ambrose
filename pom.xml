@@ -478,5 +478,6 @@
     <module>cascading</module>
     <module>cascading3</module>
     <module>scalding</module>
+    <module>scalding_cascading3</module>
   </modules>
 </project>
