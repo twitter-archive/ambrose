@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.twitter.ambrose</groupId>
+    <artifactId>ambrose</artifactId>
+    <version>0.4.3-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <artifactId>ambrose-scalding_cascading3</artifactId>
+  <name>Ambrose Scalding for Cascading3</name>
+
+  <repositories>
+    <repository>
+      <id>conjars.org</id>
+      <url>http://conjars.org/repo</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- ambrose -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>ambrose-cascading3</artifactId>
+    </dependency>
+
+    <!-- scala -->
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-compiler</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+    </dependency>
+
+    <!-- scalding -->
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>scalding-core_2.10</artifactId>
+    </dependency>
+
+    <!-- hadoop -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <!-- compile scala -->
+      <plugin>
+        <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId>
+      </plugin>
+
+      <!-- compile java -->
+      <plugin>
+	<artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
