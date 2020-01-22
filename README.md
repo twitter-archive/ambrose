@@ -1,3 +1,6 @@
+# Status
+This project is no longer maintained. 
+
 # Ambrose [![Build Status](https://secure.travis-ci.org/twitter/ambrose.png)](http://travis-ci.org/twitter/ambrose)
 
 Twitter Ambrose is a platform for visualization and real-time monitoring of MapReduce data workflows.
